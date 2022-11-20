@@ -26,5 +26,12 @@
     "prettier": "2.7.1",
     "prisma": "4.6.1",
     "tailwindcss": "3.2.4"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "prettier --check",
+      "eslint"
+    ],
+    "*.{css,json,md}": "prettier --check"
   }
 }
