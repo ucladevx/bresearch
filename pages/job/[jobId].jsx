@@ -22,7 +22,7 @@ export async function getStaticProps(context) {
 }
 
 export async function getStaticPaths() {
-  // TODO: change prisma query. Only select needed rows and column(s)
+  // TODO: change prisma query. Only select needed column(s)
   const jobs = await prisma.job.findMany();
 
   const paths = jobs.map((job) => ({

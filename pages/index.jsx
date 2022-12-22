@@ -17,7 +17,7 @@ function Home(props) {
 }
 
 export async function getStaticProps() {
-  // TODO: change prisma query using findUnique and context. Only select needed columns
+  // TODO: change prisma query. Only select needed columns
   const jobs = (await prisma.job.findMany({ include: { lab: true } })).map((job) => ({
     ...job,
     created: JSON.parse(JSON.stringify(job.created)),
