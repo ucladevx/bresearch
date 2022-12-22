@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName String       @db.VarChar(80)
+  lastName  String       @db.VarChar(80)
+  email     String       @unique @db.VarChar(100)
+  jobs      LabeledJob[]
+}
+
+model Researcher {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName String @db.VarChar(80)
+  lastName  String @db.VarChar(80)
+  email     String @unique @db.VarChar(100)
+  jobs      Job[]
+  labs      Lab[]
+}
+
+model Lab {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String       @db.VarChar(50)
+  slug        String       @unique @db.VarChar(50)
+  description String
+  jobs        Job[]
+  researchers Researcher[]
+}
+
+model Job {
+  id          Int          @id @default(autoincrement())
+  created     DateTime     @default(now())
+  closingDate DateTime? // maybe
+  closed      Boolean
+  title       String       @db.VarChar(50)
+  description String
+  posters     Researcher[]
+  lab         Lab          @relation(fields: [labId], references: [id])
+  labId       String       @db.Uuid
+  applicants  LabeledJob[]
+}
+
+enum JobStatus {
+  HIDDEN
+  INTERESTED
+  IN_PROGRESS
+  APPLIED
+  IN_REVIEW
+  WITHDRAWN
+  ACCEPTED
+  REJECTED
+}
+
+model LabeledJob {
+  job         Job       @relation(fields: [jobId], references: [id])
+  jobId       Int
+  applicant   Student   @relation(fields: [applicantId], references: [id])
+  applicantId String    @db.Uuid
+  // applied     Boolean
+  status      JobStatus
+
+  @@id([jobId, applicantId])
+}
