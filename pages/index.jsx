@@ -8,8 +8,9 @@ function Home(props) {
     <div>
       {props.jobs.map((job) => (
         <ul key={job.id}>
-          <li>Job: {job.title}</li>
-          <li></li>
+          <li>{job.title}</li>
+          <li>Job Description: {job.description}</li>
+          <li>Lab Name: {job.lab.name}</li>
         </ul>
       ))}
     </div>
