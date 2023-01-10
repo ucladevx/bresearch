@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 function Home(props) {
-  // TODO: Display Job title, description, Lab name
   return (
     <div>
       {props.jobs.map((job) => (
@@ -18,11 +17,18 @@ function Home(props) {
 }
 
 export async function getStaticProps() {
-  // TODO: change prisma query. Only select needed columns
-  const jobs = (await prisma.job.findMany({ include: { lab: true } })).map((job) => ({
-    ...job,
-    created: JSON.parse(JSON.stringify(job.created)),
-  }));
+  const jobs = await prisma.job.findMany({
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      lab: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 
   return {
     props: { jobs },
