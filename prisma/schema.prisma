@@ -11,17 +11,17 @@ datasource db {
 }
 
 enum Department {
-  Engineering
-  Humanities
-  LifeSciences
-  PhysicalSciences
-  SocialSciences
+  ENGINEERING
+  HUMANITIES
+  LIFE_SCIENCES
+  PHYSICAL_SCIENCES
+  SOCIAL_SCIENCES
 }
 
 enum CareerGoal {
-  PreMed
-  PreLaw
-  PreGradSchool
+  PRE_MED
+  PRE_LAW
+  PRE_GRAD_SCHOOL
 }
 
 model Student {
@@ -56,10 +56,10 @@ model Lab {
 }
 
 enum Duration {
-  Quarterly
-  Summer
-  AcademicYear
-  YearRound
+  QUARTERLY
+  SUMMER
+  ACADEMIC_YEAR
+  YEAR_ROUND
 }
 
 model Job {
@@ -70,8 +70,8 @@ model Job {
   title       String       @db.VarChar(50)
   description String
   posters     Researcher[]
-  lab         Lab          @relation(fields: [labId], references: [id])
-  labId       String       @db.Uuid
+  lab         Lab?         @relation(fields: [labId], references: [id])
+  labId       String?      @db.Uuid
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
