@@ -22,7 +22,7 @@ async function main() {
       description: 'test job description',
       labId: lab.id,
       paid: true,
-      duration: 'Quarterly',
+      duration: 'QUARTERLY',
       weeklyHours: 10,
       credit: true,
     },
