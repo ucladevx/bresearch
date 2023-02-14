@@ -17,7 +17,13 @@ export async function getStaticProps(context) {
   const job = await prisma.job.findFirst({ include: { posters: true, lab: true } });
   // console.log({ job });
   return {
-    props: { job: { ...job, created: JSON.parse(JSON.stringify(job.created)) } },
+    props: {
+      job: {
+        ...job,
+        created: JSON.parse(JSON.stringify(job.created)),
+        closingDate: JSON.parse(JSON.stringify(job.closingDate)),
+      },
+    },
   };
 }
 
