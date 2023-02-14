@@ -24,3 +24,15 @@ Assuming we want to use a database called `bresearchdev` we create it by logging
 ### Environment Variables
 
 Create a `.env` (`.env.production` should contain the production AWS url). Set `DATABASE_URL="postgresql://postgres:<YOUR PASSWORD HERE>@localhost:5432/bresearchdev?schema=public"`. Prisma should now be able to seed data using `npx prisma db seed` and `npx prisma studio` should reflect those changes.
+
+### Adding Prisma
+
+Run the following command in the same directory as your `package.json` to migrate your current prisma schema to the database.
+
+```bash
+npx prisma migrate dev --name <migration name>
+```
+
+#### Tracking Migrations
+
+Make sure to track your migration files with `git`
