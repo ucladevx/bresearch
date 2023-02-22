@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import Job from './job/[jobId]';
 
 const prisma = new PrismaClient();
 
@@ -6,11 +7,7 @@ function Home(props) {
   return (
     <div>
       {props.jobs.map((job) => (
-        <ul key={job.id}>
-          <li>{job.title}</li>
-          <li>Job Description: {job.description}</li>
-          {job.lab && <li>Lab Name: {job.lab.name}</li>}
-        </ul>
+        <Job job={job} key={job.id} />
       ))}
     </div>
   );
