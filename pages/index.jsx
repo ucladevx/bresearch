@@ -1,17 +1,18 @@
 import { PrismaClient } from '@prisma/client';
+import JobsPage from './SearchComponents/JobsPage';
 
 const prisma = new PrismaClient();
-
 function Home(props) {
   return (
     <div>
-      {props.jobs.map((job) => (
+      <JobsPage jobs={props.jobs} />
+      {/* {props.jobs.map((displayedJobs) => (
         <ul key={job.id}>
           <li>{job.title}</li>
           <li>Job Description: {job.description}</li>
           {job.lab && <li>Lab Name: {job.lab.name}</li>}
         </ul>
-      ))}
+      ))} */}
     </div>
   );
 }
