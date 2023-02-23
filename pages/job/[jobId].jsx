@@ -26,7 +26,7 @@ const JobWrapper = (props) => {
   const careerGoals = job.careerGoals;
 
   return (
-    <div className="w-10/12 min-h-screen">
+    <div className="w-10/12 pb-8 min-h-screen bg-pink-200">
       <JobHeading job={props.job} />
       <JobTagNav>
         {Array.isArray(departments) && departments.length > 0 ? (
@@ -38,7 +38,7 @@ const JobWrapper = (props) => {
         {careerGoals && <JobTagItem>{careerGoals}</JobTagItem>}
       </JobTagNav>
 
-      <JobHero description={props.job.description} />
+      <JobHero job={job} />
     </div>
   );
 };
@@ -67,9 +67,9 @@ const JobHeading = (props) => {
 const JobTagNav = ({ children }) => {
   // TODO: displays department, duration, location; tags.
   return (
-    <div className="block px-3 py-2 bg-white text-black">
+    <div className="w-11/12 my-3 mx-auto px-3 py-2 bg-white text-black">
       <nav className="py-4 px-6 text-sm font-medium">
-        <ul className="flex space-x-3">{children}</ul>
+        <ul className="flex flex-row flex-wrap space-x-3">{children}</ul>
       </nav>
     </div>
   );
@@ -81,7 +81,10 @@ const JobTagItem = ({ href, children = null }) => {
   }
   return (
     <li>
-      <a href={href} className={`block px-3 py-2 rounded-md bg-violet-500 hover:bg-violet-600`}>
+      <a
+        href={href}
+        className={`block px-3 py-2 my-1 my rounded-md bg-violet-500 hover:bg-violet-600`}
+      >
         {children}
       </a>
     </li>
@@ -89,9 +92,20 @@ const JobTagItem = ({ href, children = null }) => {
 };
 
 const JobHero = (props) => {
+  const { job } = props;
   return (
-    <div className="p-6 w-full mx-auto bg-green-300 shadow-md flex items-center space-x-4">
-      {props.description}
+    <div className="w-11/12 mx-auto p-6 w-full min-h-max mx-auto bg-green-300 shadow-md flex text-left text-black items-center space-x-4">
+      <JobDescription description={job.description} />
+    </div>
+  );
+};
+
+const JobDescription = (props) => {
+  const { description } = props;
+  return (
+    <div className="">
+      <p className="text-md font-medium text-slate-500 mb-1.5">Description</p>
+      <p className="text-sm font-light leading-normal">{description}</p>
     </div>
   );
 };
