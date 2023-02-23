@@ -16,6 +16,7 @@ function Home(props) {
 export async function getStaticProps() {
   const jobs = await prisma.job.findMany({
     select: {
+      created: true,
       id: true,
       title: true,
       description: true,
@@ -30,8 +31,13 @@ export async function getStaticProps() {
     },
   });
 
+  const jobsWithDateString = jobs.map((job) => ({
+    ...job,
+    created: job.created.toISOString(),
+  }));
+
   return {
-    props: { jobs },
+    props: { jobs: jobsWithDateString },
   };
 }
 
