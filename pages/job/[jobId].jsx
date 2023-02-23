@@ -22,19 +22,21 @@ const JobWrapper = (props) => {
       }
       return acc;
     }, []);
+  const duration = job.duration;
+  const careerGoals = job.careerGoals;
 
   return (
     <div className="w-10/12 min-h-screen">
       <JobHeading job={props.job} />
-      {Array.isArray(departments) && departments.length > 0 ? (
-        <JobTagNav>
-          {departments.map((department, index) => (
-            <JobTagItem key={index}>{department}</JobTagItem>
-          ))}
-        </JobTagNav>
-      ) : (
-        <JobTagNav>No departments found</JobTagNav>
-      )}
+      <JobTagNav>
+        {Array.isArray(departments) && departments.length > 0 ? (
+          departments.map((department, index) => <JobTagItem key={index}>{department}</JobTagItem>)
+        ) : (
+          <JobTagNav>No departments found</JobTagNav>
+        )}
+        {duration && <JobTagItem>{duration}</JobTagItem>}
+        {careerGoals && <JobTagItem>{careerGoals}</JobTagItem>}
+      </JobTagNav>
 
       <JobHero description={props.job.description} />
     </div>

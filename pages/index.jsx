@@ -24,6 +24,9 @@ export async function getStaticProps() {
           name: true,
         },
       },
+      departments: true,
+      duration: true,
+      careerGoals: true,
     },
   });
 
