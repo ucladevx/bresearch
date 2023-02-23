@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client';
+import { DateTime } from 'luxon';
 const prisma = new PrismaClient();
 
 function Job(props) {
   // TODO: Display Job title, description, created Date, Lab name
   return (
-    <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-black shadow-md flex flex-col items-center space-x-4">
+    <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-gray-200 shadow-md flex flex-col items-center space-x-4">
       <JobWrapper job={props.job} />
+      <ActionMenu />
     </div>
   );
 }
@@ -26,7 +28,7 @@ const JobWrapper = (props) => {
   const careerGoals = job.careerGoals;
 
   return (
-    <div className="w-10/12 pb-8 min-h-screen bg-pink-200">
+    <div className="w-10/12 pb-8 min-h-screen bg-gray-300">
       <JobHeading job={props.job} />
       <JobTagNav>
         {Array.isArray(departments) && departments.length > 0 ? (
@@ -44,6 +46,13 @@ const JobWrapper = (props) => {
 };
 
 const JobHeading = (props) => {
+  const { job } = props;
+
+  // compute the age of the post (rounded up, calculated in days)
+  const currentTime = DateTime.local().toUTC();
+  const postedTime = DateTime.fromISO(job.created).toUTC();
+  const postAge = Math.ceil(currentTime.diff(postedTime).as('days'));
+
   return (
     <div className="p-6 w-full mx-auto bg-white border border-gray-400 shadow-md flex text-left items-center space-x-4">
       <div className="shrink-0">
@@ -58,16 +67,15 @@ const JobHeading = (props) => {
         <div className="text-sm font-light text-black my-0.5">
           {props.job.lab && props.job.lab.name}
         </div>
-        <p className="text-xs text-slate-500 my-1">Posted about 69 hours ago</p>
+        <p className="text-xs text-slate-500 my-1">Posted {postAge} days ago</p>
       </div>
     </div>
   );
 };
 
 const JobTagNav = ({ children }) => {
-  // TODO: displays department, duration, location; tags.
   return (
-    <div className="w-11/12 my-3 mx-auto px-3 py-2 bg-white text-black">
+    <div className="w-11/12 my-3 mx-auto px-3 py-2 bg-white rounded-lg text-black">
       <nav className="py-4 px-6 text-sm font-medium">
         <ul className="flex flex-row flex-wrap space-x-3">{children}</ul>
       </nav>
@@ -75,6 +83,7 @@ const JobTagNav = ({ children }) => {
   );
 };
 
+// TODO: when jobs sorted by group is setup, add href to each tag
 const JobTagItem = ({ href, children = null }) => {
   if (!children) {
     return null;
@@ -94,7 +103,7 @@ const JobTagItem = ({ href, children = null }) => {
 const JobHero = (props) => {
   const { job } = props;
   return (
-    <div className="w-11/12 mx-auto p-6 w-full min-h-max mx-auto bg-green-300 shadow-md flex text-left text-black items-center space-x-4">
+    <div className="w-11/12 mx-auto p-6 w-full min-h-max mx-auto bg-white rounded-lg shadow-md flex text-left text-black items-center space-x-4">
       <JobDescription description={job.description} />
     </div>
   );
@@ -110,6 +119,24 @@ const JobDescription = (props) => {
   );
 };
 
+const ActionMenu = ({ href }) => {
+  return (
+    <div class="fixed w-5/12 bottom-0 z-50">
+      <div class="bg-white border border-gray-300 rounded-lg shadow-lg">
+        <div class="p-4">
+          <div class="flex justify-center space-x-4">
+            <button class="w-3/12 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded mr-2">
+              Save
+            </button>
+            <button class="w-3/12 bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 export async function getStaticProps(context) {
   // TODO: change prisma query using findUnique and context. Only select needed columns
   const job = await prisma.job.findFirst({ include: { posters: true, lab: true } });
