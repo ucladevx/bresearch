@@ -11,9 +11,31 @@ function Job(props) {
 }
 
 const JobWrapper = (props) => {
+  const { job } = props;
+  // extracts unique departments from `job.departments`
+  const departments =
+    job &&
+    job.departments &&
+    job.departments.reduce((acc, curr) => {
+      if (acc.indexOf(curr) === -1) {
+        acc.push(curr);
+      }
+      return acc;
+    }, []);
+
   return (
     <div className="w-10/12 min-h-screen">
       <JobHeading job={props.job} />
+      {Array.isArray(departments) && departments.length > 0 ? (
+        <JobTagNav>
+          {departments.map((department, index) => (
+            <JobTagItem key={index}>{department}</JobTagItem>
+          ))}
+        </JobTagNav>
+      ) : (
+        <JobTagNav>No departments found</JobTagNav>
+      )}
+
       <JobHero description={props.job.description} />
     </div>
   );
@@ -21,7 +43,7 @@ const JobWrapper = (props) => {
 
 const JobHeading = (props) => {
   return (
-    <div className="p-6 w-full mx-auto bg-white rounded-xl shadow-md flex text-left items-center space-x-4">
+    <div className="p-6 w-full mx-auto bg-white border border-gray-400 shadow-md flex text-left items-center space-x-4">
       <div className="shrink-0">
         <img
           className="h-16 w-16 mx-1 bg-black"
@@ -40,9 +62,33 @@ const JobHeading = (props) => {
   );
 };
 
+const JobTagNav = ({ children }) => {
+  // TODO: displays department, duration, location; tags.
+  return (
+    <div className="block px-3 py-2 bg-white text-black">
+      <nav className="py-4 px-6 text-sm font-medium">
+        <ul className="flex space-x-3">{children}</ul>
+      </nav>
+    </div>
+  );
+};
+
+const JobTagItem = ({ href, children = null }) => {
+  if (!children) {
+    return null;
+  }
+  return (
+    <li>
+      <a href={href} className={`block px-3 py-2 rounded-md bg-violet-500 hover:bg-violet-600`}>
+        {children}
+      </a>
+    </li>
+  );
+};
+
 const JobHero = (props) => {
   return (
-    <div className="p-6 w-full mx-auto bg-green-300 rounded-xl shadow-md flex items-center space-x-4">
+    <div className="p-6 w-full mx-auto bg-green-300 shadow-md flex items-center space-x-4">
       {props.description}
     </div>
   );
