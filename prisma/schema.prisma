@@ -28,6 +28,7 @@ model Student {
   departments   Department[]
   // majors        Major[]
   // minors        Minor[]
+  labs          Lab[]
 }
 
 model Researcher {
@@ -40,12 +41,13 @@ model Researcher {
 }
 
 model Lab {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String       @db.VarChar(50)
-  slug        String       @unique @db.VarChar(50)
-  description String
-  jobs        Job[]
-  researchers Researcher[]
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String       @db.VarChar(50)
+  slug             String       @unique @db.VarChar(50)
+  description      String
+  jobs             Job[]
+  adminStudents    Student[]
+  adminResearchers Researcher[]
 }
 
 enum Duration {
