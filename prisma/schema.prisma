@@ -65,8 +65,8 @@ model Job {
   title       String       @db.VarChar(50)
   description String
   posters     Researcher[]
-  lab         Lab?         @relation(fields: [labId], references: [id])
-  labId       String?      @db.Uuid
+  lab         Lab          @relation(fields: [labId], references: [id])
+  labId       String       @db.Uuid
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
