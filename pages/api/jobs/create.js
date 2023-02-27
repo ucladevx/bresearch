@@ -28,8 +28,8 @@ const getServerSession = async (..._) => ({
 
 class JobCreationRoute extends ApiRoute {
   /**
-   *
-   * @param {import('next').NextApiRequest} req
+   * job creation endpoint
+   * @param {import('next').NextApiRequest} req see above example request body
    * @param {import('next').NextApiResponse} res
    * @param {import('prisma/prisma-client').PrismaClient} prisma
    * @returns
@@ -69,9 +69,8 @@ class JobCreationRoute extends ApiRoute {
 
       res.json(result);
     } catch (e) {
-      switch (
-        e.name // check for Node.js errors (data integrity, etc)
-      ) {
+      // check for Node.js errors (data integrity, etc)
+      switch (e.name) {
         case 'RangeError':
           return res.status(400).json({ message: 'Invalid closing date' });
         default: // exceptions
