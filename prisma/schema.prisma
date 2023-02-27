@@ -18,12 +18,6 @@ enum Department {
   SOCIAL_SCIENCES
 }
 
-enum CareerGoal {
-  PRE_MED
-  PRE_LAW
-  PRE_GRAD_SCHOOL
-}
-
 model Student {
   id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName     String       @db.VarChar(80)
@@ -31,10 +25,10 @@ model Student {
   lastName      String       @db.VarChar(80)
   email         String       @unique @db.VarChar(100)
   jobs          LabeledJob[]
-  careerGoals   CareerGoal[]
   departments   Department[]
   // majors        Major[]
   // minors        Minor[]
+  labs          Lab[]
 }
 
 model Researcher {
@@ -47,12 +41,13 @@ model Researcher {
 }
 
 model Lab {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String       @db.VarChar(50)
-  slug        String       @unique @db.VarChar(50)
-  description String
-  jobs        Job[]
-  researchers Researcher[]
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String       @db.VarChar(50)
+  slug             String       @unique @db.VarChar(50)
+  description      String
+  jobs             Job[]
+  adminStudents    Student[]
+  adminResearchers Researcher[]
 }
 
 enum Duration {
@@ -70,13 +65,12 @@ model Job {
   title       String       @db.VarChar(50)
   description String
   posters     Researcher[]
-  lab         Lab?         @relation(fields: [labId], references: [id])
-  labId       String?      @db.Uuid
+  lab         Lab          @relation(fields: [labId], references: [id])
+  labId       String       @db.Uuid
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
   departments Department[]
-  careerGoals CareerGoal[]
   weeklyHours Int
   credit      Boolean
 }
