@@ -1,6 +1,7 @@
 import { Prisma } from 'prisma/prisma-client';
 
 import ApiRoute from '@lib/ApiRoute';
+import BaseError, { MaximumSizeExceededError } from '@lib/Errors';
 
 // temporary session mock
 const getServerSession = async (..._) => ({
@@ -35,6 +36,8 @@ class JobCreationRoute extends ApiRoute {
    * @returns
    */
   async post(req, res, prisma) {
+    const maxDescriptionLength = 15_000;
+    const maxWeeklyHours = 24 * 7;
     const session = await getServerSession(req, res);
     const {
       closingDate,
@@ -49,10 +52,20 @@ class JobCreationRoute extends ApiRoute {
     } = req.body;
 
     try {
+      if (description.length > maxDescriptionLength)
+        throw new MaximumSizeExceededError(
+          `description field exceeds ${maxDescriptionLength} character limit`
+        );
+      if (weeklyHours > maxWeeklyHours)
+        throw new MaximumSizeExceededError(
+          `weekly hours field exceeds ${maxWeeklyHours} maximum hours per week`
+        );
+      const closeDate = new Date(closingDate);
+
       const result = await prisma.job.create({
         data: {
-          closingDate: new Date(closingDate),
-          closed: false, // this can be changed, but as far as I know the default behavior would be to open
+          closingDate: closeDate,
+          closed: closeDate < new Date(),
           title,
           description,
           lab: { connect: { id: labId } },
@@ -61,7 +74,7 @@ class JobCreationRoute extends ApiRoute {
           },
           paid,
           duration,
-          departments,
+          departments: [...new Set(departments)],
           weeklyHours,
           credit,
         },
@@ -78,8 +91,11 @@ class JobCreationRoute extends ApiRoute {
             res.status(500).json({ message: e.meta });
           } else if (e instanceof Prisma.PrismaClientValidationError) {
             res.status(400).json({ message: 'Invalid data format' });
+          } else if (e instanceof BaseError) {
+            res.status(400).json({ message: e.message });
+          } else {
+            res.status(500);
           }
-          console.error(e);
       }
     } finally {
       res.end();
