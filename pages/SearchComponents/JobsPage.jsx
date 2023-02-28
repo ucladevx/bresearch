@@ -1,25 +1,30 @@
 import React from 'react';
 import JobsList from './JobsList';
 import { useState } from 'react';
-import SearchJobForm from './SearchJobForm';
+import CheckBox from './CheckBox';
 
 const JobsPage = ({ jobs }) => {
-  //  creating states https://www.youtube.com/watch?app=desktop&v=EMVtmld5fVk min 15
-  const [sideBarFormState, setsideBarFormState] = useState({
-    jobDept: [],
-  });
-  const [searchForm, setsearchForm] = useState('');
-  const [displayedJobs, setdisplayedJobs] = useState(jobs);
+  const Department = [
+    'ENGINEERING',
+    'HUMANITIES',
+    'LIFE_SCIENCES',
+    'PHYSICAL_SCIENCES',
+    'SOCIAL_SCIENCES',
+  ];
+
+  const [checkedDepartments, setcheckedDepartments] = useState(new Set());
+  // const [displayedJobs, setdisplayedJobs] = useState(jobs);
 
   return (
-    <>
-      <SearchJobForm
-        searchForm={searchForm}
-        setsearchForm={setsearchForm}
-        setdisplayedJobs={setdisplayedJobs}
+    <div class="bg-white">
+      <CheckBox
+        checkedDepartments={checkedDepartments}
+        setcheckedDepartments={setcheckedDepartments}
+        Department={Department}
       />
-      <JobsList jobs={displayedJobs} />
-    </>
+
+      <JobsList jobs={jobs} checkedDepartments={checkedDepartments} />
+    </div>
   );
 };
 
