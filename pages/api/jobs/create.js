@@ -3,15 +3,8 @@ import { Prisma } from 'prisma/prisma-client';
 import ApiRoute from '@lib/ApiRoute';
 import BaseError, { MaximumSizeExceededError } from '@lib/Errors';
 
-// temporary session mock
-const getServerSession = async (..._) => ({
-  user: {
-    name: 'John Doe',
-    email: 'johndoe@g.ucla.edu',
-    image: null,
-  },
-  expires: new Date(new Date().getDate() + 1).toISOString(),
-});
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]';
 
 /* example POST request body
 {
@@ -38,7 +31,11 @@ class JobCreationRoute extends ApiRoute {
   async post(req, res, prisma) {
     const maxDescriptionLength = 15_000;
     const maxWeeklyHours = 24 * 7;
-    const session = await getServerSession(req, res);
+    const session = await getServerSession(req, res, authOptions);
+    if (!session) {
+      res.status(401).json({ message: 'Not logged in' });
+      return;
+    }
     const {
       closingDate,
       title,
