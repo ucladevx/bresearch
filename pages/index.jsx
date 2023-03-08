@@ -1,18 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import JobsPage from './SearchComponents/JobsPage';
-
+import HomePage from './HomePage';
 const prisma = new PrismaClient();
 function Home(props) {
   return (
-    <div>
-      <JobsPage jobs={props.jobs} />
-      {/* {props.jobs.map((displayedJobs) => (
-        <ul key={job.id}>
-          <li>{job.title}</li>
-          <li>Job Description: {job.description}</li>
-          {job.lab && <li>Lab Name: {job.lab.name}</li>}
-        </ul>
-      ))} */}
+    <div class="h-screen">
+      <HomePage jobs={props.jobs} />
     </div>
   );
 }
@@ -28,6 +20,8 @@ export async function getStaticProps() {
           name: true,
         },
       },
+      departments: true,
+      duration: true,
     },
   });
 

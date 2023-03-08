@@ -2,6 +2,7 @@ import React from 'react';
 
 const JobsList = ({ jobs, checkedDepartments }) => {
   console.log('checkeddepartments', checkedDepartments);
+  console.log('Type', typeof jobs);
   let filteredJobs = jobs.filter((job) =>
     job.departments.some((department) => checkedDepartments.has(department))
   );
@@ -9,11 +10,11 @@ const JobsList = ({ jobs, checkedDepartments }) => {
   if (filteredJobs.length === 0) filteredJobs = jobs;
 
   return (
-    <div>
-      <div class="text-black underline bold bg-green-600 p-4 m-4">Jobs Available:</div>
+    <div class="bg-teal-500">
+      <div class="text-black underline bold bg-teal-600 p-4">Jobs Available:</div>
       {filteredJobs.map((job, index) => {
         return (
-          <div class="hover:bg-green-300 rounded p-4 m-4 text-black" key={index}>
+          <div class="hover:bg-teal-600 rounded m-4 p-4 text-black" key={index}>
             <ul key={job.id}>
               <li>{job.title}</li>
               <li>Job Description: {job.description}</li>
