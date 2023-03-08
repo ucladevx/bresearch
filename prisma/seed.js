@@ -28,6 +28,16 @@ async function main() {
     },
     update: {},
   });
+
+  const researcherA = await prisma.researcher.upsert({
+    where: { email: 'johndoe@g.ucla.edu' },
+    create: {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'johndoe@g.ucla.edu',
+    },
+    update: {},
+  });
 }
 
 main()
