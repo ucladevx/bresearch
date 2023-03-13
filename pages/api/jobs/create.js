@@ -86,4 +86,4 @@ class JobCreationRoute extends ApiRoute {
   }
 }
 
-export default new JobCreationRoute().as_handler();
+export default new JobCreationRoute({ protect: { post: true } }).as_handler();
