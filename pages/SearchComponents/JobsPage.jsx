@@ -2,7 +2,6 @@ import React from 'react';
 import JobsList from './JobsList';
 import { useState } from 'react';
 import CheckBox from './CheckBox';
-import CheckBoxLists from './CheckBoxLists';
 
 const JobsPage = ({ jobs }) => {
   const Department = [
@@ -14,18 +13,19 @@ const JobsPage = ({ jobs }) => {
   ];
   const Duration = ['QUARTERLY', 'SUMMER', 'ACADEMIC_YEAR', 'YEAR_ROUND'];
 
-  const [checkedDepartments, setcheckedDepartments] = useState(new Set());
+  const [allCheckedBoxes, setallCheckedBoxes] = useState(new Set());
 
   return (
     <div class="bg-teal-100 p-10">
       <div class="bg-teal-300 p-4">
         <CheckBox
-          checkedDepartments={checkedDepartments}
-          setcheckedDepartments={setcheckedDepartments}
+          allCheckedBoxes={allCheckedBoxes}
+          setallCheckedBoxes={setallCheckedBoxes}
           Department={Department}
+          Duration={Duration}
         />
       </div>
-      <JobsList jobs={jobs} checkedDepartments={checkedDepartments} />
+      <JobsList jobs={jobs} allCheckedBoxes={allCheckedBoxes} />
     </div>
   );
 };

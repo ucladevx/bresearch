@@ -1,12 +1,19 @@
 import React from 'react';
 
-const JobsList = ({ jobs, checkedDepartments }) => {
-  console.log('checkeddepartments', checkedDepartments);
-  console.log('Type', typeof jobs);
-  let filteredJobs = jobs.filter((job) =>
-    job.departments.some((department) => checkedDepartments.has(department))
-  );
+const JobsList = ({ jobs, allCheckedBoxes }) => {
+  console.log('checkedfilters', allCheckedBoxes);
+
+  // let filteredJobs = jobs.filter((job) =>
+  //   job.departments.some((department) => allCheckedBoxes.has(department))
+  // );
+
+  let filteredJobs = jobs.filter((job) => {
+    return (
+      job.departments.some((item) => allCheckedBoxes.has(item)) || allCheckedBoxes.has(job.duration)
+    );
+  });
   console.log(filteredJobs);
+
   if (filteredJobs.length === 0) filteredJobs = jobs;
 
   return (
@@ -20,6 +27,7 @@ const JobsList = ({ jobs, checkedDepartments }) => {
               <li>Job Description: {job.description}</li>
               <li>Lab Name: {job.lab.name}</li>
               <li>Job Department: {job.departments}</li>
+              <li>Job Duration: {job.duration}</li>
             </ul>
           </div>
         );
