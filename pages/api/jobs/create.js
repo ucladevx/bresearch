@@ -8,7 +8,6 @@ import ApiRoute from '@lib/ApiRoute';
     "closingDate": "2023-03-18T23:28:19.179Z",
     "title": "my first job post",
     "description": "description for my first job post",
-    "labId": "d6ded724-b13b-47e1-b8e1-64ecc8808948",
     "paid": false,
     "duration": "QUARTERLY",
     "departments": [
@@ -35,17 +34,8 @@ class JobCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const {
-        closingDate,
-        title,
-        description,
-        labId,
-        paid,
-        duration,
-        departments,
-        weeklyHours,
-        credit,
-      } = value;
+      const { closingDate, title, description, paid, duration, departments, weeklyHours, credit } =
+        value;
 
       const closeDate = new Date(closingDate);
 
@@ -55,7 +45,6 @@ class JobCreationRoute extends ApiRoute {
           closed: closeDate < new Date(),
           title,
           description,
-          lab: { connect: { id: labId } },
           posters: {
             connect: [{ email: req.session.user.email }],
           },
@@ -67,6 +56,7 @@ class JobCreationRoute extends ApiRoute {
         },
       });
 
+      await res.revalidate(`/job/${result.id}`);
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
