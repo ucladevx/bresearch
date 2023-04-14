@@ -19,6 +19,9 @@ import ApiRoute from '@lib/ApiRoute';
 */
 
 class JobCreationRoute extends ApiRoute {
+  async get(req, res, prisma) {
+    res.send(req.session);
+  }
   /**
    * job creation endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
@@ -76,4 +79,4 @@ class JobCreationRoute extends ApiRoute {
   }
 }
 
-export default new JobCreationRoute({ protect: { post: true } }).as_handler();
+export default new JobCreationRoute().as_handler();
