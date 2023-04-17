@@ -3,7 +3,7 @@ import HomePage from './HomePage';
 const prisma = new PrismaClient();
 function Home(props) {
   return (
-    <div class="h-screen">
+    <div>
       <HomePage jobs={props.jobs} />
     </div>
   );
