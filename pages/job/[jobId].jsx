@@ -139,16 +139,11 @@ export async function getStaticProps(context) {
       id: true,
       title: true,
       description: true,
-      lab: {
-        select: {
-          name: true,
-        },
-      },
       departments: true,
       duration: true,
       careerGoals: true,
     },
-    include: { posters: true, lab: true },
+    where: { id: parseInt(context.params.jobId, 10) },
   });
   // console.log({ job });
   return {
@@ -156,7 +151,7 @@ export async function getStaticProps(context) {
       job: {
         ...job,
         created: JSON.parse(JSON.stringify(job.created)),
-        closingDate: JSON.parse(JSON.stringify(job.closingDate)),
+        ...(job.closingDate && { closingDate: JSON.parse(JSON.stringify(job.closingDate)) }),
       },
     },
   };
@@ -165,12 +160,23 @@ export async function getStaticProps(context) {
 export async function getStaticPaths() {
   // TODO: change prisma query. Only select needed column(s)
   // returns array containing jobId
-  const jobs = await prisma.job.findMany();
+  const jobs = await prisma.job.findMany({
+    where: {
+      closed: false,
+      closingDate: {
+        lt: new Date(),
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
 
   const paths = jobs.map((job) => ({
     params: { jobId: job.id.toString(10) },
   }));
 
+  console.log(jobs);
   return { paths, fallback: false };
 }
 
