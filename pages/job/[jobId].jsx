@@ -1,11 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { DateTime } from 'luxon';
 const prisma = new PrismaClient();
 
 function Job(props) {
   // TODO: Display Job title, description, created Date, Lab name
   return (
-    <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-gray-200 shadow-md flex flex-col items-center space-x-4">
+    <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-blue-500 shadow-md flex flex-col items-center space-x-4">
       <JobWrapper job={props.job} />
       <ActionMenu />
     </div>
@@ -28,7 +27,7 @@ const JobWrapper = (props) => {
   const careerGoals = job.careerGoals;
 
   return (
-    <div className="w-10/12 pb-8 min-h-screen bg-gray-300">
+    <div className="w-10/12 pb-8 min-h-screen bg-blue-500">
       <JobHeading job={props.job} />
       <JobTagNav>
         {Array.isArray(departments) && departments.length > 0 ? (
@@ -48,11 +47,6 @@ const JobWrapper = (props) => {
 const JobHeading = (props) => {
   const { job } = props;
 
-  // compute the age of the post (rounded up, calculated in days)
-  const currentTime = DateTime.local().toUTC();
-  const postedTime = DateTime.fromISO(job.created).toUTC();
-  const postAge = Math.ceil(currentTime.diff(postedTime).as('days'));
-
   return (
     <div className="p-6 w-full mx-auto bg-white border border-gray-400 shadow-md flex text-left items-center space-x-4">
       <div className="shrink-0">
@@ -67,7 +61,6 @@ const JobHeading = (props) => {
         <div className="text-sm font-light text-black my-0.5">
           {props.job.lab && props.job.lab.name}
         </div>
-        <p className="text-xs text-slate-500 my-1">Posted {postAge} days ago</p>
       </div>
     </div>
   );
