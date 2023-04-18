@@ -31,7 +31,7 @@ _You can double check your current databases using `\l`_
 
 ### Environment Variables
 
-Create a `.env` (`.env.production` should contain the production AWS url). Set `DATABASE_URL="<YOUR POSTGRES USERNAME>://postgres:<YOUR PASSWORD HERE>@localhost:5432/bresearchdev?schema=public"`
+Create a `.env` (`.env.production` should contain the production AWS url). Set `DATABASE_URL=postgresql://<YOUR POSTGRES USERNAME>:<YOUR PASSWORD HERE>@localhost:5432/bresearchdev?schema=public"`
 
 ### Adding Prisma
 

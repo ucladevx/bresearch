@@ -121,14 +121,14 @@ const JobDescription = (props) => {
 
 const ActionMenu = ({ href }) => {
   return (
-    <div class="fixed w-5/12 bottom-0 z-50">
-      <div class="bg-white border border-gray-300 rounded-lg shadow-lg">
-        <div class="p-4">
-          <div class="flex justify-center space-x-4">
-            <button class="w-3/12 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded mr-2">
+    <div className="fixed w-5/12 bottom-0 z-50">
+      <div className="bg-white border border-gray-300 rounded-lg shadow-lg">
+        <div className="p-4">
+          <div className="flex justify-center space-x-4">
+            <button className="w-3/12 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded mr-2">
               Save
             </button>
-            <button class="w-3/12 bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+            <button className="w-3/12 bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
               Apply
             </button>
           </div>
@@ -137,9 +137,26 @@ const ActionMenu = ({ href }) => {
     </div>
   );
 };
+
 export async function getStaticProps(context) {
   // TODO: change prisma query using findUnique and context. Only select needed columns
-  const job = await prisma.job.findFirst({ include: { posters: true, lab: true } });
+  const job = await prisma.job.findFirst({
+    select: {
+      created: true,
+      id: true,
+      title: true,
+      description: true,
+      lab: {
+        select: {
+          name: true,
+        },
+      },
+      departments: true,
+      duration: true,
+      careerGoals: true,
+    },
+    include: { posters: true, lab: true },
+  });
   // console.log({ job });
   return {
     props: {
@@ -154,6 +171,7 @@ export async function getStaticProps(context) {
 
 export async function getStaticPaths() {
   // TODO: change prisma query. Only select needed column(s)
+  // returns array containing jobId
   const jobs = await prisma.job.findMany();
 
   const paths = jobs.map((job) => ({
