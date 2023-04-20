@@ -145,15 +145,8 @@ export async function getStaticProps(context) {
 }
 
 export async function getStaticPaths() {
-  // TODO: change prisma query. Only select needed column(s)
   // returns array containing jobId
   const jobs = await prisma.job.findMany({
-    where: {
-      closed: false,
-      closingDate: {
-        lt: new Date(),
-      },
-    },
     select: {
       id: true,
     },
@@ -163,7 +156,6 @@ export async function getStaticPaths() {
     params: { jobId: job.id.toString(10) },
   }));
 
-  console.log(jobs);
   return { paths, fallback: false };
 }
 
