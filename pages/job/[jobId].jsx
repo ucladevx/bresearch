@@ -119,8 +119,7 @@ const ActionMenu = ({ href }) => {
 };
 
 export async function getStaticProps(context) {
-  // TODO: change prisma query using findUnique and context. Only select needed columns
-  const job = await prisma.job.findFirst({
+  const job = await prisma.job.findUnique({
     select: {
       created: true,
       id: true,
@@ -129,6 +128,7 @@ export async function getStaticProps(context) {
       departments: true,
       duration: true,
       careerGoals: true,
+      closingDate: true,
     },
     where: { id: parseInt(context.params.jobId, 10) },
   });
