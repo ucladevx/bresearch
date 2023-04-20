@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 function Job(props) {
-  // TODO: Display Job title, description, created Date, Lab name
   return (
     <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-blue-500 shadow-md flex flex-col items-center space-x-4">
       <JobWrapper job={props.job} />
@@ -13,30 +12,21 @@ function Job(props) {
 
 const JobWrapper = (props) => {
   const { job } = props;
-  // extracts unique departments from `job.departments`
-  const departments =
-    job &&
-    job.departments &&
-    job.departments.reduce((acc, curr) => {
-      if (acc.indexOf(curr) === -1) {
-        acc.push(curr);
-      }
-      return acc;
-    }, []);
-  const duration = job.duration;
-  const careerGoals = job.careerGoals;
+  const { departments, duration, careerGoals } = job;
 
   return (
     <div className="w-10/12 pb-8 min-h-screen bg-blue-500">
-      <JobHeading job={props.job} />
+      <JobHeading job={job} />
       <JobTagNav>
-        {Array.isArray(departments) && departments.length > 0 ? (
-          departments.map((department, index) => <JobTagItem key={index}>{department}</JobTagItem>)
+        {departments.length > 0 ? (
+          departments.map((department) => <JobTagItem key={department}>{department}</JobTagItem>)
         ) : (
           <JobTagNav>No departments found</JobTagNav>
         )}
-        {duration && <JobTagItem>{duration}</JobTagItem>}
-        {careerGoals && <JobTagItem>{careerGoals}</JobTagItem>}
+        {<JobTagItem>{duration}</JobTagItem>}
+        {careerGoals.map((careerGoal) => (
+          <JobTagItem key={careerGoal}>{careerGoal}</JobTagItem>
+        ))}
       </JobTagNav>
 
       <JobHero job={job} />
@@ -57,10 +47,7 @@ const JobHeading = (props) => {
         />
       </div>
       <div>
-        <div className="text-base font-medium text-black my-0.5">{props.job.title}</div>
-        <div className="text-sm font-light text-black my-0.5">
-          {props.job.lab && props.job.lab.name}
-        </div>
+        <div className="text-base font-medium text-black my-0.5">{job.title}</div>
       </div>
     </div>
   );
@@ -96,7 +83,7 @@ const JobTagItem = ({ href, children = null }) => {
 const JobHero = (props) => {
   const { job } = props;
   return (
-    <div className="w-11/12 mx-auto p-6 w-full min-h-max mx-auto bg-white rounded-lg shadow-md flex text-left text-black items-center space-x-4">
+    <div className="w-11/12 mx-auto p-6 w-full min-h-max bg-white rounded-lg shadow-md flex text-left text-black items-center space-x-4">
       <JobDescription description={job.description} />
     </div>
   );
