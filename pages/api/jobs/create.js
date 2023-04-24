@@ -19,9 +19,6 @@ import ApiRoute from '@lib/ApiRoute';
 */
 
 class JobCreationRoute extends ApiRoute {
-  async get(req, res, prisma) {
-    res.send(req.session);
-  }
   /**
    * job creation endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
@@ -37,9 +34,18 @@ class JobCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const { closingDate, title, description, paid, duration, departments, weeklyHours, credit } =
-        value;
+      const {
+        closingDate,
+        title = '',
+        description = '',
+        paid,
+        duration,
+        departments,
+        weeklyHours,
+        credit,
+      } = value;
 
+      // TODO: what if closingDate is not passed in request body
       const closeDate = new Date(closingDate);
 
       const result = await prisma.job.create({
@@ -60,6 +66,8 @@ class JobCreationRoute extends ApiRoute {
       });
 
       await res.revalidate(`/job/${result.id}`);
+      await res.revalidate('');
+
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
