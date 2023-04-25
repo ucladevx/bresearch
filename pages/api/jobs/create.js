@@ -34,24 +34,19 @@ class JobCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const {
-        closingDate,
-        title = '',
-        description = '',
-        paid,
-        duration,
-        departments,
-        weeklyHours,
-        credit,
-      } = value;
+      const { closingDate, title, description, paid, duration, departments, weeklyHours, credit } =
+        value;
 
       // TODO: what if closingDate is not passed in request body
-      const closeDate = new Date(closingDate);
+      let closeDate = null;
+      if (closingDate) {
+        closeDate = new Date(closingDate);
+      }
 
       const result = await prisma.job.create({
         data: {
           closingDate: closeDate,
-          closed: closeDate < new Date(),
+          closed: closeDate ? closeDate < new Date() : false,
           title,
           description,
           posters: {
