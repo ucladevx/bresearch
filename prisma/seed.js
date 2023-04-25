@@ -3,16 +3,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  const lab = await prisma.lab.upsert({
-    where: { slug: '12345678' },
-    create: {
-      name: 'my lab',
-      slug: '12345678',
-      description: 'lab description',
-    },
-    update: {},
-  });
-
   const job = await prisma.job.upsert({
     where: { id: 1 },
     create: {
@@ -20,7 +10,6 @@ async function main() {
       closed: false,
       title: 'test job',
       description: 'test job description',
-      labId: lab.id,
       paid: true,
       duration: 'QUARTERLY',
       weeklyHours: 10,
