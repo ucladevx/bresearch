@@ -73,12 +73,13 @@ enum JobStatus {
 }
 
 model LabeledJob {
-  job         Job       @relation(fields: [jobId], references: [id])
-  jobId       Int
-  applicant   Student   @relation(fields: [applicantId], references: [id])
-  applicantId String    @db.Uuid
-  // applied     Boolean
-  status      JobStatus
+  job            Job       @relation(fields: [jobId], references: [id])
+  jobId          Int
+  applicant      Student   @relation(fields: [applicantEmail], references: [email])
+  applicantEmail String    @db.VarChar(100)
+  lastUpdated    DateTime  @default(now())
+  status         JobStatus
+  bookmarked     Boolean   @default(false)
 
-  @@id([jobId, applicantId])
+  @@id([jobId, applicantEmail])
 }
