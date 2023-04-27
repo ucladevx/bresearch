@@ -28,7 +28,6 @@ model Student {
   departments   Department[]
   // majors        Major[]
   // minors        Minor[]
-  labs          Lab[]
 }
 
 model Researcher {
@@ -37,17 +36,6 @@ model Researcher {
   lastName  String @db.VarChar(80)
   email     String @unique @db.VarChar(100)
   jobs      Job[]
-  labs      Lab[]
-}
-
-model Lab {
-  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String       @db.VarChar(50)
-  slug             String       @unique @db.VarChar(50)
-  description      String
-  jobs             Job[]
-  adminStudents    Student[]
-  adminResearchers Researcher[]
 }
 
 enum Duration {
@@ -55,6 +43,12 @@ enum Duration {
   SUMMER
   ACADEMIC_YEAR
   YEAR_ROUND
+}
+
+enum Location {
+  ON_CAMPUS
+  OFF_CAMPUS
+  REMOTE
 }
 
 model Job {
@@ -65,14 +59,13 @@ model Job {
   title       String       @db.VarChar(50)
   description String
   posters     Researcher[]
-  lab         Lab          @relation(fields: [labId], references: [id])
-  labId       String       @db.Uuid
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
   departments Department[]
   weeklyHours Int
   credit      Boolean
+  location    Location
 }
 
 enum JobStatus {

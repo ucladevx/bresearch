@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client';
+// const prisma = new PrismaClient();
 import HomePage from './HomePage';
-const prisma = new PrismaClient();
+import prisma from '@lib/prisma';
+
 function Home(props) {
   return (
     <div>
