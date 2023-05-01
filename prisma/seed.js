@@ -14,6 +14,7 @@ async function main() {
       duration: 'QUARTERLY',
       weeklyHours: 10,
       credit: true,
+      location: 'ON_CAMPUS',
     },
     update: {},
   });

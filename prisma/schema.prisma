@@ -45,6 +45,12 @@ enum Duration {
   YEAR_ROUND
 }
 
+enum Location {
+  ON_CAMPUS
+  OFF_CAMPUS
+  REMOTE
+}
+
 model Job {
   id          Int          @id @default(autoincrement())
   created     DateTime     @default(now())
@@ -59,6 +65,7 @@ model Job {
   departments Department[]
   weeklyHours Int
   credit      Boolean
+  location    Location
 }
 
 enum JobStatus {
