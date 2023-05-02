@@ -53,7 +53,7 @@ async function main() {
       jobId: job.id,
       applicantEmail: studentA.email,
       bookmarked: true,
-      status: 'INTERESTED',
+      status: 'SAVED',
     },
     update: {},
   });
