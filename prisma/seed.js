@@ -28,6 +28,35 @@ async function main() {
     },
     update: {},
   });
+
+  const studentA = await prisma.student.upsert({
+    where: {
+      email: 'janedoe@g.ucla.edu', // or your email here for debug purposes
+    },
+    create: {
+      firstName: 'Jane',
+      preferredName: 'Jane',
+      lastName: 'Doe',
+      email: 'janedoe@g.ucla.edu',
+    },
+    update: {},
+  });
+
+  const trackedJob = await prisma.labeledJob.upsert({
+    where: {
+      jobId_applicantEmail: {
+        jobId: job.id,
+        applicantEmail: studentA.email,
+      },
+    },
+    create: {
+      jobId: job.id,
+      applicantEmail: studentA.email,
+      bookmarked: true,
+      status: 'INTERESTED',
+    },
+    update: {},
+  });
 }
 
 main()

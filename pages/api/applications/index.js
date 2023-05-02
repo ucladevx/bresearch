@@ -3,19 +3,17 @@ import { Prisma } from 'prisma/prisma-client';
 import { isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
 
-/* example POST request body
-{
-    "closingDate": "2023-03-18T23:28:19.179Z",
-    "title": "my first job post",
-    "description": "description for my first job post",
-    "paid": false,
-    "duration": "QUARTERLY",
-    "departments": [
-        "ENGINEERING"
-    ],
-    "weeklyHours": 30,
-    "credit": true
-}
+/* example GET response
+[
+  {
+    "status": "INTERESTED",
+    "bookmarked": true,
+    "job": {
+      "id": 1,
+      "title": "test job"
+    }
+  }
+]
 */
 
 class ApplicationsRoute extends ApiRoute {
@@ -34,7 +32,7 @@ class ApplicationsRoute extends ApiRoute {
         },
         select: {
           status: true,
-          // bookmarked: true,
+          bookmarked: true,
           job: {
             select: {
               id: true,
