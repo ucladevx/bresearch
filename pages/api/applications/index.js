@@ -18,9 +18,9 @@ import ApiRoute from '@lib/ApiRoute';
 
 class ApplicationsRoute extends ApiRoute {
   /**
-   * job creation endpoint
-   * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
-   * @param {import('next').NextApiResponse} res
+   * applications fetch endpoint
+   * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req
+   * @param {import('next').NextApiResponse} res see above example response
    * @param {import('prisma/prisma-client').PrismaClient} prisma
    * @returns
    */
