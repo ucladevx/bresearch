@@ -7,7 +7,6 @@ function Home(props) {
         <ul key={job.id}>
           <li>{job.title}</li>
           <li>Job Description: {job.description}</li>
-          {job.lab && <li>Lab Name: {job.lab.name}</li>}
         </ul>
       ))}
     </div>
@@ -20,11 +19,6 @@ export async function getStaticProps() {
       id: true,
       title: true,
       description: true,
-      lab: {
-        select: {
-          name: true,
-        },
-      },
     },
   });
 
