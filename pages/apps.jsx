@@ -7,10 +7,10 @@ const AppCard = (props) => {
   return (
     <Link href={`/job/${apps.id}`}>
       <ul
-        className={'w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4'}
+        className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
         key={apps.id}
       >
-        <li>{apps.title}</li>
+        <li>{apps.job.title}</li>
         <li>{'Placeholder Date'}</li>
       </ul>
     </Link>
@@ -35,7 +35,8 @@ const AppWrapper = (props) => {
 //Saved vs applied jobs
 export default function Apps() {
   const [apps, setApps] = useState([]);
-
+  const [appliedApps, setAppliedApps] = useState([]);
+  const [savedApps, setSavedApps] = useState([]);
   useEffect(() => {
     fetch('/api/applications', {
       method: 'GET',
@@ -44,18 +45,24 @@ export default function Apps() {
       },
     })
       .then((response) => response.json())
-      .then((data) => setApps(data))
+      .then((data) => {
+        setApps(data);
+        setAppliedApps(
+          apps.filter((job) => {
+            return job.status == 'APPLIED';
+          })
+        );
+        setSavedApps(
+          apps.filter((job) => {
+            return job.status == 'SAVED';
+          })
+        );
+      })
       .catch((error) => {
         console.log(error);
       });
-  }, []);
-
-  let appliedApps = apps.filter((job) => {
-    return job.status == 'APPLIED';
-  });
-  let savedApps = apps.filter((job) => {
-    return job.status == 'SAVED';
-  });
+    //Reloading apps necessary?
+  }, [apps]);
 
   return (
     <div className="bg-neutral-100">
@@ -66,7 +73,7 @@ export default function Apps() {
       <div
         style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
       >
-        <div className=" grid grid-cols-2 h-4/6 w-11/12 gap-x-42 justify-items-center">
+        <div className="grid grid-cols-2 h-4/6 w-11/12 gap-x-42 justify-items-center">
           <AppWrapper apps={savedApps} type={'Saved'} />
           <AppWrapper apps={appliedApps} type={'Applied'} />
         </div>
