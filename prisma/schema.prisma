@@ -18,6 +18,21 @@ enum Department {
   SOCIAL_SCIENCES
 }
 
+// https://admission.ucla.edu/apply/majors
+enum Major {
+  COGNITIVE_SCIENCE
+  COMPUTER_SCIENCE
+}
+
+// https://admission.ucla.edu/apply/minors
+enum Minor {
+  LINGUISTICS
+}
+
+enum Pronouns {
+  NOT_LISTED
+}
+
 model Student {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName      String          @db.VarChar(80)
@@ -27,18 +42,27 @@ model Student {
   jobs           LabeledJob[]
   departments    Department[]
   studentProfile StudentProfile?
-  // majors        Major[]
-  // minors        Minor[]
 }
 
 model StudentProfile {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  student    Student  @relation(fields: [studentId], references: [id])
-  studentId  String   @unique @db.Uuid
-  skills     String[] @db.VarChar(60)
-  experience String   @db.VarChar(1000)
-  coursework String   @db.VarChar(800)
-  links      String[] @db.VarChar(200)
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student        Student  @relation(fields: [studentId], references: [id])
+  studentId      String   @unique @db.Uuid
+  pronouns       Pronouns
+  preferredEmail String?  @db.VarChar(100)
+  phoneNumber    String?  @db.VarChar(30)
+  bio            String   @db.VarChar(500)
+  major          Major
+  secondMajor    Major?
+  minor          Minor?
+  secondMinor    Minor?
+  graduationDate String   @db.VarChar(12)
+  gpa            String   @db.VarChar(5)
+  majorGpa       String   @db.VarChar(5)
+  skills         String[] @db.VarChar(60)
+  experience     String?  @db.VarChar(1000)
+  coursework     String?  @db.VarChar(800)
+  links          String[] @db.VarChar(200)
   // resume
 }
 
