@@ -12,6 +12,8 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@headlessui/react": "1.7.14",
+    "@heroicons/react": "2.0.18",
     "@prisma/client": "4.6.1",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.3",
