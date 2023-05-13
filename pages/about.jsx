@@ -1,7 +1,5 @@
 import React from 'react';
-// // import "./Home.css";
 import Image from 'next/image';
-// import Head from 'next/head';
 
 function LandingPage() {
   return (
@@ -13,23 +11,25 @@ function LandingPage() {
       {/* First Section */}
       <main>
         <section>
-          <div className="image-and-text">
-            <div className="text-container">
-              <h1 className="header-text">
+          <div className="flex items-center">
+            <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
+              <h1 className="mt-4 mb-4 text-left">
                 Countless Research Opportunities,
                 <br />
                 All In One Place
               </h1>
-              <p className="para-text">
+              <p className="mt-4 mb-4 text-left">
                 bResearch is a new web app that connects ucla
                 <br />
                 students to research opportunities, completely free for
                 <br />
                 everyone.
               </p>
-              <button className="signUp-btn">Sign Up</button>
+              <button className="mt-24 ml-28 w-28 bg-blue-500 text-white py-4 px-0 text-lg font-medium rounded-md cursor-pointer">
+                Sign Up
+              </button>
             </div>
-            <div className="img-container">
+            <div className="flex-1">
               <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
             </div>
           </div>
@@ -37,13 +37,13 @@ function LandingPage() {
 
         {/* Second Section */}
         <section>
-          <div className="image-and-text">
-            <div className="img-container">
+          <div className="flex items-center">
+            <div className="flex-1">
               <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
             </div>
-            <div className="text-container">
-              <h1 className="header-text">Tired Of Cold Emailing Professors?</h1>
-              <p className="para-text">
+            <div className="flex-1 p-10 pr-5 pb-30 pl-80 mt-10 mr-10 mb-30 ml-10">
+              <h1 className="mt-4 mb-4 text-left">Tired Of Cold Emailing Professors?</h1>
+              <p className="mt-4 mb-4 text-left">
                 bResearch connects your detailed application to every
                 <br />
                 professor-- no more lost emails in the pile.
@@ -54,14 +54,14 @@ function LandingPage() {
 
         {/* Third Section */}
         <section>
-          <div className="image-and-text">
-            <div className="text-container">
-              <h1 className="header-text">
+          <div className="flex items-center">
+            <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
+              <h1 className="mt-4 mb-4 text-left">
                 Stay Organized In Your Search
                 <br />
                 For Your Next Research Opportunity.{' '}
               </h1>
-              <p className="para-text">
+              <p className="mt-4 mb-4 text-left">
                 {' '}
                 We have developed features such as bookmarking,
                 <br />
@@ -72,14 +72,16 @@ function LandingPage() {
                 opportunity.
               </p>
             </div>
-            <div className="img-container">
+            <div className="flex-1">
               <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
             </div>
           </div>
         </section>
 
         <section>
-          <button className="createAccount-btn">Create Your Account Now</button>
+          <button className="mt-24 ml-96 mb-16 w-60 bg-blue-500 text-white py-4 px-0 text-lg font-medium rounded-md cursor-pointer">
+            Create Your Account Now
+          </button>
         </section>
       </main>
 

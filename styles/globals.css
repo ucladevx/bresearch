@@ -30,73 +30,8 @@ a {
 }
 
 h1 {
-  font-size: 1.3em;
+  font-size: 1.3rem;
   color: black;
-}
-
-.header-text {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  text-align: left;
-}
-
-.para-text {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  text-align: left;
-}
-
-.signUp-btn {
-  margin-top: 25px;
-  margin-left: 6.5em;
-  width: 7rem;
-  background-color: blue;
-  color: white;
-  padding: 15px 0;
-  font-size: 20px;
-  font-weight: 400;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.createAccount-btn {
-  margin-top: 25px;
-  width: 15rem;
-  background-color: blue;
-  color: white;
-  padding: 15px 0;
-  font-size: 20px;
-  font-weight: 400;
-  border-radius: 10px;
-  cursor: pointer;
-  margin: 4em 28em;
-}
-
-.image-and-text {
-  display: flex;
-  align-items: center;
-}
-
-.text-container {
-  flex: 1;
-  padding-top: 10px;
-  padding-right: 20px;
-  padding-bottom: 30px;
-  padding-left: 60px;
-  margin-top: 10px;
-  margin-right: 20px;
-  margin-bottom: 30px;
-  margin-left: 80px;
-}
-
-.img-container {
-  flex: 1;
-}
-
-.img-container img {
-  display: block;
-  margin: 0 auto;
-  margin-top: 1em;
 }
 
 img {
@@ -104,8 +39,4 @@ img {
   clear: both;
   padding-left: 60px;
   margin-left: 20px; /* optional: add some spacing between the image and text */
-}
-
-.footer {
-  margin: 4em 35em;
 }
