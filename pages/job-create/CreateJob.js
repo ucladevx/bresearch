@@ -26,15 +26,19 @@ export default function CreateJob() {
 
   function handleChange(e) {
     e.preventDefault();
+    const date_obj = new Date(jobclosingDate);
+    const date_iso = date_obj.toISOString();
+    const job_paid_bool = jobPaid === 'Yes';
+    const job_credit_bool = jobcredit === 'Yes';
     const newJob = {
       title: jobTitle,
       description: jobDescription,
-      closingDate: jobclosingDate,
-      paid: jobPaid,
+      closingDate: date_iso,
+      paid: job_paid_bool,
       duration: jobDuration,
       departments: jobDepartments,
       weeklyHours: jobweeklyHours,
-      credit: jobcredit,
+      credit: job_credit_bool,
       location: jobLocation,
     };
     console.log('new job', newJob);
@@ -171,8 +175,7 @@ export default function CreateJob() {
               value={jobPaid}
               onChange={(e) => {
                 console.log('e', e.target.value);
-                if (e.target.value === 'Yes') setjobPaid(true);
-                else setjobPaid(false);
+                e.target.value;
               }}
             >
               <option value="">--Select an option--</option>
@@ -203,8 +206,7 @@ export default function CreateJob() {
               required
               value={jobcredit}
               onChange={(e) => {
-                if (e.target.value === 'Yes') setjobcredit(true);
-                else setjobcredit(false);
+                setjobcredit(e.target.value);
               }}
             >
               <option value="">--Select an option--</option>
