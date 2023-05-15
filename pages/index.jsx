@@ -17,11 +17,6 @@ export async function getStaticProps() {
       id: true,
       title: true,
       description: true,
-      lab: {
-        select: {
-          name: true,
-        },
-      },
       departments: true,
       duration: true,
     },

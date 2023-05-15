@@ -28,6 +28,7 @@ class JobCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
+      console.log('test', req.body);
       const { error, value } = JobCreationValidator.validate(req.body);
 
       if (error) {

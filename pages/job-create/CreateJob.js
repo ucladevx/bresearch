@@ -1,16 +1,18 @@
 import NavBar from '../nav/NavBar';
 import { useState } from 'react';
+import Select from 'react-select';
 
 export default function CreateJob() {
   const Department = [
-    'ENGINEERING',
-    'HUMANITIES',
-    'LIFE_SCIENCES',
-    'PHYSICAL_SCIENCES',
-    'SOCIAL_SCIENCES',
+    { value: 'ENGINEERING', label: 'Engineering' },
+    { value: 'HUMANITIES', label: 'Humanities' },
+    { value: 'LIFE_SCIENCES', label: 'Life Sciences' },
+    { value: 'PHYSICAL_SCIENCES', label: 'Physical Sciences' },
+    { value: 'SOCIAL_SCIENCES', label: 'Social Sciences' },
   ];
   const Duration = ['QUARTERLY', 'SUMMER', 'ACADEMIC_YEAR', 'YEAR_ROUND'];
   const paidCreditOptions = ['Yes', 'No'];
+  const Location = ['ON_CAMPUS', 'OFF_CAMPUS', 'REMOTE'];
 
   const [jobTitle, setjobTitle] = useState('');
   const [jobDescription, setjobDescription] = useState('');
@@ -20,23 +22,28 @@ export default function CreateJob() {
   const [jobPaid, setjobPaid] = useState(false);
   const [jobweeklyHours, setweeklyHours] = useState(0);
   const [jobcredit, setjobcredit] = useState(false);
+  const [jobLocation, setjobLocation] = useState('');
 
-  function handleChange() {
+  function handleChange(e) {
+    e.preventDefault();
+    const newJob = {
+      title: jobTitle,
+      description: jobDescription,
+      closingDate: jobclosingDate,
+      paid: jobPaid,
+      duration: jobDuration,
+      departments: jobDepartments,
+      weeklyHours: jobweeklyHours,
+      credit: jobcredit,
+      location: jobLocation,
+    };
+    console.log('new job', newJob);
     fetch('/api/jobs/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title: jobTitle,
-        description: jobDescription,
-        closingDate: jobclosingDate,
-        paid: jobPaid,
-        duration: jobDuration,
-        departments: jobDepartments,
-        weeklyHours: jobweeklyHours,
-        credit: jobcredit,
-      }),
+      body: JSON.stringify(newJob),
     });
   }
   return (
@@ -80,14 +87,14 @@ export default function CreateJob() {
                 setclosingDate(e.target.value);
               }}
               type="date"
-              id="closingdate"
-              name="closingdate"
-              required
+              id="closingDate"
+              name="closingDate"
             />
           </div>
           <div>
             <label for="duration">Duration</label>
             <select
+              required
               value={jobDuration}
               onChange={(e) => {
                 setjobDuration(e.target.value);
@@ -102,16 +109,55 @@ export default function CreateJob() {
             </select>
           </div>
           <div>
-            {/* Need to make this multiple options */}
             <label for="departments">Departments</label>
-            <select
+            {/* <select
+              multiple
               value={jobDepartments}
               onChange={(e) => {
-                setjobDepartments(e.target.value);
+                const newSelectedOptions = [];
+                const optionsLength = e.target.options.length;
+                for (let i = 0; i < optionsLength; i++) {
+                  if (e.target.options[i].selected) {
+                    newSelectedOptions.push(e.target.options[i].value);
+                  }
+                }
+                console.log('selected:', e);
+                console.log('selected value', newSelectedOptions);
+                setjobDepartments(newSelectedOptions);
               }}
             >
               <option value="">--Select an option--</option>
-              {Department.map((val, index) => (
+              {Department.map((dept) => (
+                <option key={dept.index} value={dept.value}>
+                  {dept.label}
+                </option>
+              ))}
+            </select> */}
+            <Select
+              isMulti
+              name="department"
+              options={Department}
+              onChange={(selected) => {
+                const newSelectedOptions = [];
+                const selectedLength = selected.length;
+                for (let i = 0; i < selectedLength; i++) {
+                  newSelectedOptions.push(selected[i].value);
+                }
+                setjobDepartments(newSelectedOptions);
+              }}
+            />
+          </div>
+          <div>
+            <label for="location">Location</label>
+            <select
+              required
+              value={jobLocation}
+              onChange={(e) => {
+                setjobLocation(e.target.value);
+              }}
+            >
+              <option value="">--Select an option--</option>
+              {Location.map((val, index) => (
                 <option key={index} value={val}>
                   {val}
                 </option>
@@ -121,8 +167,10 @@ export default function CreateJob() {
           <div>
             <label for="paid">Paid</label>
             <select
+              required
               value={jobPaid}
               onChange={(e) => {
+                console.log('e', e.target.value);
                 if (e.target.value === 'Yes') setjobPaid(true);
                 else setjobPaid(false);
               }}
@@ -136,15 +184,15 @@ export default function CreateJob() {
             </select>
           </div>
           <div>
-            <label for="weeklyhours">Weekly Hours</label>
+            <label for="weeklyHours">Weekly Hours</label>
             <input
               value={jobweeklyHours}
               onChange={(e) => {
                 setweeklyHours(e.target.value);
               }}
               type="number"
-              id="weeklyhours"
-              name="weeklyhours"
+              id="weeklyHours"
+              name="weeklyHours"
               required
               max="100"
             />
@@ -152,6 +200,7 @@ export default function CreateJob() {
           <div>
             <label for="credit">Credit</label>
             <select
+              required
               value={jobcredit}
               onChange={(e) => {
                 if (e.target.value === 'Yes') setjobcredit(true);
@@ -168,10 +217,8 @@ export default function CreateJob() {
           </div>
           <div>
             <button
-              type="submit"
-              onClick={() => {
-                handleChange();
-              }}
+              // type="submit"
+              onClick={handleChange}
             >
               Submit
             </button>
