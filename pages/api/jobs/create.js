@@ -28,15 +28,23 @@ class JobCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
-      console.log('test', req.body);
       const { error, value } = JobCreationValidator.validate(req.body);
 
       if (error) {
         throw error;
       }
 
-      const { closingDate, title, description, paid, duration, departments, weeklyHours, credit } =
-        value;
+      const {
+        closingDate,
+        title,
+        description,
+        paid,
+        duration,
+        departments,
+        weeklyHours,
+        credit,
+        location,
+      } = value;
 
       // TODO: what if closingDate is not passed in request body
       let closeDate = null;
@@ -49,6 +57,7 @@ class JobCreationRoute extends ApiRoute {
           closingDate: closeDate,
           closed: closeDate ? closeDate < new Date() : false,
           title,
+          location,
           description,
           posters: {
             connect: [{ email: req.session.user.email }],
@@ -70,6 +79,7 @@ class JobCreationRoute extends ApiRoute {
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        console.error(e);
         res.status(500).json({ message: e.meta });
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
