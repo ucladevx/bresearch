@@ -1,6 +1,6 @@
 import { Prisma } from 'prisma/prisma-client';
 
-import { ProfileCreationValidator, isValidationError } from '@lib/validators';
+import { SecondProfileCreationValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
 
 /* example POST request body
@@ -23,7 +23,7 @@ import ApiRoute from '@lib/ApiRoute';
 }
 */
 
-class FirstProfileCreationRoute extends ApiRoute {
+class SecondProfileCreationRoute extends ApiRoute {
   /**
    * profile creation endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
@@ -33,41 +33,20 @@ class FirstProfileCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
-      const { error, value } = ProfileCreationValidator.validate(req.body);
+      const { error, value } = SecondProfileCreationValidator.validate(req.body);
 
       if (error) {
         throw error;
       }
 
-      const {
-        pronouns,
-        preferredEmail,
-        phoneNumber,
-        bio,
-        major,
-        additionalMajor,
-        graduation,
-        gpa,
-        majorGpa,
-        labExperience,
-        coursework,
-        links,
-      } = value;
+      const { firstName, lastName, uclaEmail } = value;
 
+      //update profile created on first page?
       const result = await prisma.studentprofile.create({
         data: {
-          pronouns,
-          preferredEmail,
-          phoneNumber,
-          bio,
-          major,
-          additionalMajor,
-          graduation,
-          gpa,
-          majorGpa,
-          labExperience,
-          coursework,
-          links,
+          firstName,
+          lastName,
+          uclaEmail,
         },
       });
 
@@ -93,4 +72,4 @@ class FirstProfileCreationRoute extends ApiRoute {
   }
 }
 
-export default new FirstProfileCreationRoute().as_handler();
+export default new SecondProfileCreationRoute().as_handler();
