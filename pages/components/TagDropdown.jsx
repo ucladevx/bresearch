@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 // - Changing text color on click also
 //Fix: Resizing behavior of tag buttons (buttons mess with padding and resize incorrectly when viewport is reduced)
 //Fix: Dropdown overlap/scroll behavior
-//Refactor via mapping? to condense code
+//Could change to a Listbox from HeadlessUI for readability
 //OnClick should call to database to change status for that applicant to that tag
 
 export default function TagDropdown() {

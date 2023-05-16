@@ -3,7 +3,8 @@
 //TODO: Checkboxes, sorting, search
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 //Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
-import TagDropdown from './components/TagDropdown';
+import TagDropdown from '../../components/TagDropdown';
+import Link from 'next/link';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 
@@ -65,7 +66,7 @@ const ApplicantsCard = (props) => {
   return (
     <div className="bg-white w-11/12 h-1/3 mx-auto min-h-max p-12 rounded-lg shadow-sm my-4">
       <div className="relative overflow-x-auto flex flex-col">
-        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
@@ -98,13 +99,15 @@ const ApplicantsCard = (props) => {
                 <td className="px-6 py-4">
                   {applicants.firstName} {applicants.lastName}
                 </td>
-                <td className="px-6 py-4">2025</td>
+                <td className="px-6 py-4">graduationDate</td>
                 <td className="px-6 py-4">
                   <TagDropdown />
                 </td>
-                <td className="px-6 py-4">file</td>
-                <td className="px-6 py-4">view</td>
-                <td className="py-4 pl-7 pr-4 ">01/01/2023</td>
+                <td className="px-6 py-4">resumeFile</td>
+                <td className="px-6 py-4">
+                  <Link href="/pi-view/applicant-manager/1">view</Link>
+                </td>
+                <td className="py-4 px-6">dateApplied</td>
               </tr>
             ))}
           </tbody>
@@ -156,7 +159,7 @@ export default function ApplicantManager() {
   ];
   //Main page display
   return (
-    <div className="z-1 w-full h-full absolute bg-neutral-100">
+    <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
       <h1 className="ml-16 mt-3 text-2xl font-bold">Manage Applicants</h1>
       <div>
         <ApplicantsCard applicants={applicants} />
