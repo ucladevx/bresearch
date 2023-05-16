@@ -3,7 +3,7 @@
 //TODO: Checkboxes, sorting, search
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 //Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
-import TagDropdown from '../../components/TagDropdown';
+import TagDropdown from '../../../components/TagDropdown';
 import Link from 'next/link';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
