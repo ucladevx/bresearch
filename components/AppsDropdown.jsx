@@ -16,23 +16,6 @@ function classNames(...classes) {
 
 export default function AppsDropdown(props) {
   const { jobId } = props;
-  function handleClick(newStatus) {
-    //e.preventDefault();'
-    fetch(`/api/applications/${jobId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        status: `${newStatus}`,
-      }),
-    })
-      .then((response) => response.json())
-      //.then((data) => {})
-      .catch((error) => {
-        console.log(error);
-      });
-  }
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -60,15 +43,17 @@ export default function AppsDropdown(props) {
               {({ active }) => (
                 <a
                   //TODO: Link to apply page - links to job page for now
-                  href={`/job/${apps.id}`}
+                  href={`/job/${jobId}`}
                   //Changes font color & bg color when hovering over dropdown options
                   className={classNames(
                     active ? 'bg-gray-100 bg text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <ArrowTopRightOnSquareIcon className=" w-6 px-1 " />
-                  Apply
+                  <Menu.Button>
+                    <ArrowTopRightOnSquareIcon className=" w-6 px-1 " />
+                    Apply
+                  </Menu.Button>
                 </a>
               )}
             </Menu.Item>
@@ -78,14 +63,31 @@ export default function AppsDropdown(props) {
               {({ active }) => (
                 <a
                   //TODO: Change status of job to applied in database, make sure page reloads
-                  onClick={handleClick('APPLIED')}
+                  onClick={() => {
+                    fetch(`/api/applications/${jobId}`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        status: 'APPLIED',
+                      }),
+                    })
+                      .then((response) => console.log(response))
+                      //.then((data) => {})
+                      .catch((error) => {
+                        console.log(error);
+                      });
+                  }}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <CheckIcon className="w-6 px-1" />
-                  Mark as Applied
+                  <Menu.Button>
+                    <CheckIcon className="w-6 px-1" />
+                    Mark as Applied
+                  </Menu.Button>
                 </a>
               )}
             </Menu.Item>
@@ -95,14 +97,31 @@ export default function AppsDropdown(props) {
               {({ active }) => (
                 <a
                   //TODO: Change status of job in database to unlink it from student, maybe have confirmation popup
-                  onClick={handleClick('HIDDEN')}
+                  onClick={() => {
+                    fetch(`/api/applications/${jobId}`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        status: 'HIDDEN',
+                      }),
+                    })
+                      .then((response) => console.log(response))
+                      //.then((data) => {})
+                      .catch((error) => {
+                        console.log(error);
+                      });
+                  }}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <TrashIcon className=" w-6 px-1" />
-                  Remove
+                  <Menu.Button>
+                    <TrashIcon className=" w-6 px-1" />
+                    Remove
+                  </Menu.Button>
                 </a>
               )}
             </Menu.Item>

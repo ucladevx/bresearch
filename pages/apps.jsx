@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
-import AppsDropdown from './AppsDropdown';
+import AppsDropdown from '../components/AppsDropdown';
 //TODO: Implement menu functionality, fix menu not overlapping
 //Should text or card resize for longer/shorter titles?
 
@@ -12,12 +12,12 @@ const AppCard = (props) => {
     <div>
       <ul
         className=" w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
-        key={apps.id}
+        key={apps.job.id}
       >
         <li className="flex justify-end -mr-4 -mt-4">
-          <AppsDropdown jobId={apps.id} />
+          <AppsDropdown jobId={apps.job.id} />
         </li>
-        <Link href={`/job/${apps.id}`}>
+        <Link href={`/job/${apps.job.id}`}>
           <li className="font-semibold">{apps.job.title}</li>
         </Link>
         {/*TODO: Change date info when updated in prisma */}
@@ -44,7 +44,7 @@ const AppWrapper = (props) => {
       </h1>
       {/*Maps applications to AppCards to display */}
       {apps.map((apps) => (
-        <AppCard key={apps.id} apps={apps} />
+        <AppCard key={apps.job.id} apps={apps} />
       ))}
     </div>
   );
