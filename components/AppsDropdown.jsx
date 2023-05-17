@@ -7,6 +7,10 @@ import {
 } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
+//TODO: When a job has already been applied to, remove "Mark as Applied" option
+//Could change it so when a job is in Applied column, option changes to "Mark as Saved"
+//TODO: Add a modal when removing that confirms the user wants to remove it
+
 //Used for updating className when hovering over dropdown options
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -17,6 +21,9 @@ function classNames(...classes) {
 export default function AppsDropdown(props) {
   const { jobId } = props;
 
+  //Note: Adding onClick handler outside render method makes it so clicking anywhere on the menu triggers the click
+  //Results in immediately marking as applied or removing
+  //But onClick works when embedded, so leaving it like that for now
   return (
     <Menu as="div" className="relative inline-block text-left">
       {/* The ... dropdown button */}
@@ -25,7 +32,7 @@ export default function AppsDropdown(props) {
           <EllipsisVerticalIcon className=" h-5 w-5 text-gray-500" aria-hidden="true" />
         </Menu.Button>
       </div>
-      {/*Transition styling */}
+      {/*Transition styling when menu is opened */}
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
@@ -50,10 +57,8 @@ export default function AppsDropdown(props) {
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <Menu.Button>
-                    <ArrowTopRightOnSquareIcon className=" w-6 px-1 " />
-                    Apply
-                  </Menu.Button>
+                  <ArrowTopRightOnSquareIcon className=" w-6 px-1 " />
+                  Apply
                 </a>
               )}
             </Menu.Item>
@@ -62,7 +67,6 @@ export default function AppsDropdown(props) {
             <Menu.Item className="flex flex-row">
               {({ active }) => (
                 <a
-                  //TODO: Change status of job to applied in database, make sure page reloads
                   onClick={() => {
                     fetch(`/api/applications/${jobId}`, {
                       method: 'PATCH',
@@ -84,10 +88,8 @@ export default function AppsDropdown(props) {
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <Menu.Button>
-                    <CheckIcon className="w-6 px-1" />
-                    Mark as Applied
-                  </Menu.Button>
+                  <CheckIcon className="w-6 px-1" />
+                  Mark as Applied
                 </a>
               )}
             </Menu.Item>
@@ -96,7 +98,6 @@ export default function AppsDropdown(props) {
             <Menu.Item className="flex flex-row">
               {({ active }) => (
                 <a
-                  //TODO: Change status of job in database to unlink it from student, maybe have confirmation popup
                   onClick={() => {
                     fetch(`/api/applications/${jobId}`, {
                       method: 'PATCH',
@@ -118,10 +119,8 @@ export default function AppsDropdown(props) {
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <Menu.Button>
-                    <TrashIcon className=" w-6 px-1" />
-                    Remove
-                  </Menu.Button>
+                  <TrashIcon className=" w-6 px-1" />
+                  Remove
                 </a>
               )}
             </Menu.Item>

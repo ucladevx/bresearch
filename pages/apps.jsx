@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
-//TODO: Implement menu functionality, fix menu not overlapping
+//TODO: Fix menu not overlapping
 //Should text or card resize for longer/shorter titles?
 
 //Card for each application
@@ -62,7 +62,6 @@ export default function Apps() {
       headers: {
         'Content-Type': 'application/json',
       },
-      //Adjust to only fetch status: saved or applied, not hidden
     })
       .then((response) => response.json())
       .then((data) => {
