@@ -12,7 +12,7 @@ function Job(props) {
 
 const JobWrapper = (props) => {
   const { job } = props;
-  const { departments, duration, careerGoals } = job;
+  const { departments, duration } = job;
 
   return (
     <div className="w-10/12 pb-8 min-h-screen bg-blue-500">
@@ -24,9 +24,6 @@ const JobWrapper = (props) => {
           <JobTagNav>No departments found</JobTagNav>
         )}
         {<JobTagItem>{duration}</JobTagItem>}
-        {careerGoals.map((careerGoal) => (
-          <JobTagItem key={careerGoal}>{careerGoal}</JobTagItem>
-        ))}
       </JobTagNav>
 
       <JobHero job={job} />
@@ -127,7 +124,6 @@ export async function getStaticProps(context) {
       description: true,
       departments: true,
       duration: true,
-      careerGoals: true,
       closingDate: true,
     },
     where: { id: parseInt(context.params.jobId, 10) },
@@ -156,7 +152,7 @@ export async function getStaticPaths() {
     params: { jobId: job.id.toString(10) },
   }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 }
 
 export default Job;
