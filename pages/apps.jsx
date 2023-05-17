@@ -15,7 +15,7 @@ const AppCard = (props) => {
         key={apps.id}
       >
         <li className="flex justify-end -mr-4 -mt-4">
-          <AppsDropdown />
+          <AppsDropdown jobId={apps.id} />
         </li>
         <Link href={`/job/${apps.id}`}>
           <li className="font-semibold">{apps.job.title}</li>
@@ -62,6 +62,7 @@ export default function Apps() {
       headers: {
         'Content-Type': 'application/json',
       },
+      //Adjust to only fetch status: saved or applied, not hidden
     })
       .then((response) => response.json())
       .then((data) => {

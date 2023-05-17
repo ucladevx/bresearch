@@ -14,7 +14,26 @@ function classNames(...classes) {
 
 //Dropdown menu for applications on App Tracker
 
-export default function AppsDropdown() {
+export default function AppsDropdown(props) {
+  const { jobId } = props;
+  function handleClick(newStatus) {
+    //e.preventDefault();'
+    fetch(`/api/applications/${jobId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: `${newStatus}`,
+      }),
+    })
+      .then((response) => response.json())
+      //.then((data) => {})
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       {/* The ... dropdown button */}
@@ -40,8 +59,8 @@ export default function AppsDropdown() {
             <Menu.Item className="flex flex-row">
               {({ active }) => (
                 <a
-                  //TODO: Link to apply page (might be job-specific or might not)
-                  href="#"
+                  //TODO: Link to apply page - links to job page for now
+                  href={`/job/${apps.id}`}
                   //Changes font color & bg color when hovering over dropdown options
                   className={classNames(
                     active ? 'bg-gray-100 bg text-gray-900' : 'text-gray-700',
@@ -59,7 +78,7 @@ export default function AppsDropdown() {
               {({ active }) => (
                 <a
                   //TODO: Change status of job to applied in database, make sure page reloads
-                  href="#"
+                  onClick={handleClick('APPLIED')}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
@@ -76,7 +95,7 @@ export default function AppsDropdown() {
               {({ active }) => (
                 <a
                   //TODO: Change status of job in database to unlink it from student, maybe have confirmation popup
-                  href="#"
+                  onClick={handleClick('HIDDEN')}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
