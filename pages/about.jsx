@@ -13,7 +13,7 @@ function LandingPage() {
         <section>
           <div className="flex items-center">
             <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
-              <h1 className="mt-4 mb-4 text-left">
+              <h1 className="mt-4 mb-4 text-left text-black text-xl">
                 Countless Research Opportunities,
                 <br />
                 All In One Place
@@ -30,7 +30,13 @@ function LandingPage() {
               </button>
             </div>
             <div className="flex-1">
-              <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
+              <img
+                src="/BaseImage.png"
+                alt="Generic Picture"
+                width={748}
+                height={641}
+                class="float-right clear-both pt-20 ml-20"
+              />
             </div>
           </div>
         </section>
@@ -39,10 +45,18 @@ function LandingPage() {
         <section>
           <div className="flex items-center">
             <div className="flex-1">
-              <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
+              <img
+                src="/BaseImage.png"
+                alt="Generic Picture"
+                width={748}
+                height={641}
+                class="float-right clear-both pl-20 pt-20 ml-20"
+              />
             </div>
             <div className="flex-1 p-10 pr-5 pb-30 pl-80 mt-10 mr-10 mb-30 ml-10">
-              <h1 className="mt-4 mb-4 text-left">Tired Of Cold Emailing Professors?</h1>
+              <h1 className="mt-4 mb-4 text-left text-black text-xl">
+                Tired Of Cold Emailing Professors?
+              </h1>
               <p className="mt-4 mb-4 text-left">
                 bResearch connects your detailed application to every
                 <br />
@@ -56,7 +70,7 @@ function LandingPage() {
         <section>
           <div className="flex items-center">
             <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
-              <h1 className="mt-4 mb-4 text-left">
+              <h1 className="mt-4 mb-4 text-left text-black text-xl">
                 Stay Organized In Your Search
                 <br />
                 For Your Next Research Opportunity.{' '}
@@ -73,7 +87,13 @@ function LandingPage() {
               </p>
             </div>
             <div className="flex-1">
-              <img src="/BaseImage.png" alt="Generic Picture" width={748} height={641} />
+              <img
+                src="/BaseImage.png"
+                alt="Generic Picture"
+                width={748}
+                height={641}
+                class="float-right clear-both pt-20 ml-20"
+              />
             </div>
           </div>
         </section>

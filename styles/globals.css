@@ -28,15 +28,3 @@ a {
     background: white;
   }
 }
-
-h1 {
-  font-size: 1.3rem;
-  color: black;
-}
-
-img {
-  float: right;
-  clear: both;
-  padding-left: 60px;
-  margin-left: 20px; /* optional: add some spacing between the image and text */
-}
