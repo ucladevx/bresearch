@@ -14,7 +14,7 @@ import ApiRoute from '@lib/ApiRoute';
   "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   "major": "Computer Science",
   "additionalMajor": "Math",
-  "graduation": "June 2025",
+  "graduationDate": "June 2025",
   "gpa": "4.0",
   "majorGpa": "3.9",
   "labExperience": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -40,13 +40,16 @@ class FirstProfileCreationRoute extends ApiRoute {
       }
 
       const {
+        firstName,
+        lastName,
+        uclaEmail,
         pronouns,
         preferredEmail,
         phoneNumber,
         bio,
         major,
         additionalMajor,
-        graduation,
+        graduationDate,
         gpa,
         majorGpa,
         labExperience,
@@ -54,7 +57,9 @@ class FirstProfileCreationRoute extends ApiRoute {
         links,
       } = value;
 
-      const result = await prisma.studentprofile.create({
+      const tempEmail = req.session.user.email;
+
+      const result = await prisma.studentProfile.create({
         data: {
           pronouns,
           preferredEmail,
@@ -62,17 +67,33 @@ class FirstProfileCreationRoute extends ApiRoute {
           bio,
           major,
           additionalMajor,
-          graduation,
+          graduationDate,
           gpa,
           majorGpa,
           labExperience,
           coursework,
           links,
+          student: {
+            connect: [{ email: req.session.user.email }],
+          },
         },
       });
 
-      await res.revalidate(`/profile/${result.id}`);
-      await res.revalidate('/');
+      const email = uclaEmail;
+      const result2 = await prisma.student.update({
+        where: {
+          //email: req.session.user.email,
+          email: tempEmail,
+        },
+        data: {
+          firstName,
+          lastName,
+          email,
+        },
+      });
+
+      // await res.revalidate(`/profile/${result.id}`);
+      // await res.revalidate('/');
 
       res.status(200).json(result);
     } catch (e) {

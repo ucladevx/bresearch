@@ -39,14 +39,37 @@ class SecondProfileCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const { firstName, lastName, uclaEmail } = value;
+      const {
+        firstName,
+        lastName,
+        uclaEmail,
+        pronouns,
+        preferredEmail,
+        phoneNumber,
+        bio,
+        major,
+        additionalMajor,
+        graduation,
+        gpa,
+        majorGpa,
+        labExperience,
+        coursework,
+        links,
+      } = value;
 
-      //update profile created on first page?
-      const result = await prisma.studentprofile.create({
+      const student = await prisma.student.findUnique({
+        where: {
+          email: req.session.user.email,
+        },
+      });
+      const result = await prisma.studentprofile.update({
+        where: {
+          student: student,
+        },
         data: {
-          firstName,
-          lastName,
-          uclaEmail,
+          labExperience,
+          coursework,
+          links,
         },
       });
 
