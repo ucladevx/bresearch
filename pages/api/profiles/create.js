@@ -57,22 +57,27 @@ class FirstProfileCreationRoute extends ApiRoute {
         links,
       } = value;
 
-      const tempEmail = req.session.user.email;
+      //default to null on the first page for values that don't get set
+      let tempBio = bio || null;
+      let tempPronouns = pronouns || 'NOT_LISTED';
+      let tempLabExperience = labExperience || null;
+      let tempCoursework = coursework || null;
+      let tempLinks = links || undefined;
 
       const result = await prisma.studentProfile.create({
         data: {
-          pronouns,
+          pronouns: tempPronouns,
           preferredEmail,
           phoneNumber,
-          bio,
+          bio: tempBio,
           major,
           additionalMajor,
           graduationDate,
           gpa,
           majorGpa,
-          labExperience,
-          coursework,
-          links,
+          experience: tempLabExperience,
+          coursework: tempCoursework,
+          links: tempLinks,
           student: {
             connect: [{ email: req.session.user.email }],
           },
@@ -82,8 +87,7 @@ class FirstProfileCreationRoute extends ApiRoute {
       const email = uclaEmail;
       const result2 = await prisma.student.update({
         where: {
-          //email: req.session.user.email,
-          email: tempEmail,
+          email: req.session.user.email,
         },
         data: {
           firstName,
