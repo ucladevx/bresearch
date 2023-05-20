@@ -42,7 +42,7 @@ class FirstProfileCreationRoute extends ApiRoute {
       const {
         firstName,
         lastName,
-        uclaEmail,
+        email,
         pronouns,
         preferredEmail,
         phoneNumber,
@@ -68,7 +68,7 @@ class FirstProfileCreationRoute extends ApiRoute {
         data: {
           pronouns: tempPronouns,
           preferredEmail,
-          phoneNumber,
+          phoneNumber: phoneNumber.toString(),
           bio: tempBio,
           major,
           additionalMajor,
@@ -84,7 +84,6 @@ class FirstProfileCreationRoute extends ApiRoute {
         },
       });
 
-      const email = uclaEmail;
       const result2 = await prisma.student.update({
         where: {
           email: req.session.user.email,

@@ -1,6 +1,6 @@
 import { Prisma } from 'prisma/prisma-client';
 
-import { UpdateProfileValidator, isValidationError } from '@lib/validators';
+import { SecondUpdateProfileValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
 
 /* example PATCH request body
@@ -11,7 +11,7 @@ import ApiRoute from '@lib/ApiRoute';
 Request body can contain one or both of the fields, but not neither.
 */
 
-class ProfileUpdateRoute extends ApiRoute {
+class SecondProfileUpdateRoute extends ApiRoute {
   /**
    * profile update endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req
@@ -25,20 +25,22 @@ class ProfileUpdateRoute extends ApiRoute {
 
       if (error) throw error;
 
-      const studentId = parseInt(req.query.studentId);
+      const { experience, coursework, links } = value;
 
-      if (studentId === NaN) {
-        return res.status(400).json({ message: 'invalid request' });
-      }
-
-      const result = await prisma.studentprofile.update({
+      const student = await prisma.student.findUnique({
         where: {
-          studentId: {
-            studentId,
-          },
+          email: req.session.user.email,
+        },
+      });
+
+      const result = await prisma.studentProfile.update({
+        where: {
+          studentId: student.id,
         },
         data: {
-          ...value,
+          experience: experience || undefined,
+          coursework: coursework || undefined,
+          links: links || undefined,
         },
       });
 
@@ -46,14 +48,18 @@ class ProfileUpdateRoute extends ApiRoute {
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
       if (isValidationError(e)) {
+        console.log(e);
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(e);
         res.status(500).json({ message: e.meta });
         console.error(e);
       } else if (e instanceof Prisma.PrismaClientValidationError) {
+        console.log(e);
         res.status(400).json({ message: 'invalid request' });
         console.error(e);
       } else {
+        console.log(e);
         console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
@@ -63,4 +69,4 @@ class ProfileUpdateRoute extends ApiRoute {
   }
 }
 
-export default new ApplicationsUpdateRoute().as_handler();
+export default new SecondProfileUpdateRoute().as_handler();

@@ -25,20 +25,55 @@ class ProfileUpdateRoute extends ApiRoute {
 
       if (error) throw error;
 
-      const studentId = parseInt(req.query.studentId);
+      const {
+        firstName,
+        lastName,
+        email,
+        preferredEmail,
+        pronouns,
+        phoneNumber,
+        bio,
+        major,
+        additionalMajor,
+        graduationDate,
+        gpa,
+        majorGpa,
+      } = value;
 
-      if (studentId === NaN) {
-        return res.status(400).json({ message: 'invalid request' });
-      }
-
-      const result = await prisma.studentprofile.update({
+      const student = await prisma.student.findUnique({
         where: {
-          studentId: {
-            studentId,
-          },
+          email: req.session.user.email,
+        },
+      });
+
+      let phone = null;
+      if (phoneNumber) {
+        phone = phoneNumber.toString();
+      }
+      const result = await prisma.studentProfile.update({
+        where: {
+          studentId: student.id,
         },
         data: {
-          ...value,
+          preferredEmail: preferredEmail || undefined,
+          pronouns: pronouns || undefined,
+          bio: bio || undefined,
+          major: major || undefined,
+          additionalMajor: additionalMajor || undefined,
+          graduationDate: graduationDate || undefined,
+          gpa: gpa || undefined,
+          majorGpa: majorGpa || undefined,
+          phoneNumber: phone || undefined,
+        },
+      });
+      const result2 = await prisma.student.update({
+        where: {
+          email: req.session.user.email,
+        },
+        data: {
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+          email: email || undefined,
         },
       });
 
@@ -46,14 +81,18 @@ class ProfileUpdateRoute extends ApiRoute {
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
       if (isValidationError(e)) {
+        console.log(e);
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(e);
         res.status(500).json({ message: e.meta });
         console.error(e);
       } else if (e instanceof Prisma.PrismaClientValidationError) {
+        console.log(e);
         res.status(400).json({ message: 'invalid request' });
         console.error(e);
       } else {
+        console.log(e);
         console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
@@ -63,4 +102,4 @@ class ProfileUpdateRoute extends ApiRoute {
   }
 }
 
-export default new ApplicationsUpdateRoute().as_handler();
+export default new ProfileUpdateRoute().as_handler();
