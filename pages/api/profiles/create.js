@@ -52,7 +52,7 @@ class FirstProfileCreationRoute extends ApiRoute {
         graduationDate,
         gpa,
         majorGpa,
-        labExperience,
+        experience,
         coursework,
         links,
       } = value;
@@ -60,7 +60,7 @@ class FirstProfileCreationRoute extends ApiRoute {
       //default to null on the first page for values that don't get set
       let tempBio = bio || '';
       let tempPronouns = pronouns || 'NOT_LISTED';
-      let tempLabExperience = labExperience || '';
+      let tempLabExperience = experience || '';
       let tempCoursework = coursework || '';
       let tempLinks = links || '';
 
@@ -103,28 +103,12 @@ class FirstProfileCreationRoute extends ApiRoute {
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
       if (isValidationError(e)) {
-        console.log(e);
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        const student = await prisma.student.findUnique({
-          where: {
-            email: req.session.user.email,
-          },
-        });
-        console.log(student);
-        console.log(e);
         res.status(500).json({ message: e.meta });
       } else if (e instanceof Prisma.PrismaClientValidationError) {
-        console.log(e);
-        const student = await prisma.student.findUnique({
-          where: {
-            email: req.session.user.email,
-          },
-        });
-        console.log(student);
         res.status(400).json({ message: 'Invalid data format' });
       } else {
-        console.log(e);
         console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
