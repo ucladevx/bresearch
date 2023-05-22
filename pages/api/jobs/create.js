@@ -34,8 +34,17 @@ class JobCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const { closingDate, title, description, paid, duration, departments, weeklyHours, credit } =
-        value;
+      const {
+        closingDate,
+        title,
+        description,
+        paid,
+        duration,
+        departments,
+        weeklyHours,
+        credit,
+        location,
+      } = value;
 
       // TODO: what if closingDate is not passed in request body
       let closeDate = null;
@@ -57,11 +66,12 @@ class JobCreationRoute extends ApiRoute {
           departments,
           weeklyHours,
           credit,
+          location,
         },
       });
 
       await res.revalidate(`/job/${result.id}`);
-      await res.revalidate('');
+      await res.revalidate('/');
 
       res.status(200).json(result);
     } catch (e) {
