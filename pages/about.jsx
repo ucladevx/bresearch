@@ -79,7 +79,6 @@ function LandingPage() {
                 For Your Next Research Opportunity.
               </h1>
               <p className="mt-4 mb-4 text-left">
-                {' '}
                 We have developed features such as bookmarking,
                 <br />
                 application tracking, and a refined filter to help you
