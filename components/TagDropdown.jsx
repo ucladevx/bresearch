@@ -12,11 +12,13 @@ import { useState, useEffect } from 'react';
 //OnClick should call to database to change status for that applicant to that tag
 
 export default function TagDropdown() {
-  const [color, setColor] = useState('bg-sky-100 hover:bg-sky-200');
+  const [color, setColor] = useState(
+    'text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
+  );
   const [tag, setTag] = useState('CONSIDERING');
 
   const buttonStyle =
-    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold text-gray-900 shadow-md ring-gray-300';
+    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-gray-300';
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -48,11 +50,15 @@ export default function TagDropdown() {
                 <a
                   onClick={() => {
                     //Setting color and title
-                    setColor('bg-sky-100 hover:bg-sky-200');
+                    setColor(
+                      'text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
+                    );
                     setTag('CONSIDERING');
                   }}
                 >
-                  <Menu.Button className={`bg-sky-100 hover:bg-sky-200 ${buttonStyle}`}>
+                  <Menu.Button
+                    className={`text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50 ${buttonStyle}`}
+                  >
                     CONSIDERING
                   </Menu.Button>
                 </a>
@@ -64,11 +70,15 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor('bg-lime-100 hover:bg-lime-200');
+                    setColor(
+                      'text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60'
+                    );
                     setTag('ACCEPTED');
                   }}
                 >
-                  <Menu.Button className={`bg-lime-100 hover:bg-lime-200 ${buttonStyle}`}>
+                  <Menu.Button
+                    className={`text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60 ${buttonStyle}`}
+                  >
                     ACCEPTED
                   </Menu.Button>
                 </a>
@@ -80,11 +90,15 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor('bg-violet-200 hover:bg-violet-300');
+                    setColor(
+                      'text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30'
+                    );
                     setTag('INTERVIEWING');
                   }}
                 >
-                  <Menu.Button className={`bg-violet-200 hover:bg-violet-300 ${buttonStyle}`}>
+                  <Menu.Button
+                    className={`text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30 ${buttonStyle}`}
+                  >
                     INTERVIEWING
                   </Menu.Button>
                 </a>
@@ -96,11 +110,15 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor('bg-red-200 hover:bg-red-300');
+                    setColor(
+                      'text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40'
+                    );
                     setTag('NOT ACCEPTED');
                   }}
                 >
-                  <Menu.Button className={`bg-red-200 hover:bg-red-300 ${buttonStyle}`}>
+                  <Menu.Button
+                    className={`text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40 ${buttonStyle}`}
+                  >
                     NOT ACCEPTED
                   </Menu.Button>
                 </a>
@@ -112,11 +130,15 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor('bg-indigo-200 hover:bg-indigo-300');
+                    setColor(
+                      'text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30'
+                    );
                     setTag('JOINED');
                   }}
                 >
-                  <Menu.Button className={`bg-indigo-200 hover:bg-indigo-300 ${buttonStyle}`}>
+                  <Menu.Button
+                    className={`text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30 ${buttonStyle}`}
+                  >
                     JOINED
                   </Menu.Button>
                 </a>
