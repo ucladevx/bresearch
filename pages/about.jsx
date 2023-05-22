@@ -1,5 +1,5 @@
-import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 function LandingPage() {
   return (
@@ -19,23 +19,26 @@ function LandingPage() {
                 All In One Place
               </h1>
               <p className="mt-4 mb-4 text-left">
-                bResearch is a new web app that connects ucla
+                bResearch is a new web app that connects UCLA
                 <br />
                 students to research opportunities, completely free for
                 <br />
                 everyone.
               </p>
-              <button className="mt-24 ml-28 w-28 bg-blue-500 text-white py-4 px-0 text-lg font-medium rounded-md cursor-pointer">
+              <Link
+                href="/api/auth/signin"
+                className="mt-24 ml-28 w-28 bg-blue-500 text-white py-4 px-10 text-lg font-medium rounded-md cursor-pointer"
+              >
                 Sign Up
-              </button>
+              </Link>
             </div>
             <div className="flex-1">
-              <img
+              <Image
                 src="/BaseImage.png"
                 alt="Generic Picture"
                 width={748}
                 height={641}
-                class="float-right clear-both pt-20 ml-20"
+                className="float-right clear-both pt-20 ml-20"
               />
             </div>
           </div>
@@ -45,22 +48,22 @@ function LandingPage() {
         <section>
           <div className="flex items-center">
             <div className="flex-1">
-              <img
+              <Image
                 src="/BaseImage.png"
                 alt="Generic Picture"
                 width={748}
                 height={641}
-                class="float-right clear-both pl-20 pt-20 ml-20"
+                className="float-right clear-both pl-20 pt-20 ml-20"
               />
             </div>
             <div className="flex-1 p-10 pr-5 pb-30 pl-80 mt-10 mr-10 mb-30 ml-10">
               <h1 className="mt-4 mb-4 text-left text-black text-xl">
-                Tired Of Cold Emailing Professors?
+                Tired of Cold Emailing Professors?
               </h1>
               <p className="mt-4 mb-4 text-left">
                 bResearch connects your detailed application to every
                 <br />
-                professor-- no more lost emails in the pile.
+                professor&mdash;no more lost emails in the pile.
               </p>
             </div>
           </div>
@@ -71,9 +74,9 @@ function LandingPage() {
           <div className="flex items-center">
             <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
               <h1 className="mt-4 mb-4 text-left text-black text-xl">
-                Stay Organized In Your Search
+                Stay Organized in Your Search
                 <br />
-                For Your Next Research Opportunity.{' '}
+                For Your Next Research Opportunity.
               </h1>
               <p className="mt-4 mb-4 text-left">
                 {' '}
@@ -87,21 +90,24 @@ function LandingPage() {
               </p>
             </div>
             <div className="flex-1">
-              <img
+              <Image
                 src="/BaseImage.png"
                 alt="Generic Picture"
                 width={748}
                 height={641}
-                class="float-right clear-both pt-20 ml-20"
+                className="float-right clear-both pt-20 ml-20"
               />
             </div>
           </div>
         </section>
 
-        <section>
-          <button className="mt-24 ml-96 mb-16 w-60 bg-blue-500 text-white py-4 px-0 text-lg font-medium rounded-md cursor-pointer">
+        <section className="flex justify-center">
+          <Link
+            href="/api/auth/signin"
+            className="mt-24 mb-16 w-60 bg-blue-500 text-white py-4 text-lg font-medium rounded-md cursor-pointer text-center"
+          >
             Create Your Account Now
-          </button>
+          </Link>
         </section>
       </main>
 
