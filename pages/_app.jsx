@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import { SessionProvider } from 'next-auth/react';
 import { Kumbh_Sans } from 'next/font/google';
 
-const kumbhSans = Kumbh_Sans({ subsets: ['latin'] });
+const kumbhSans = Kumbh_Sans({ subsets: ['latin'], fallback: ['sans-serif'] });
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
