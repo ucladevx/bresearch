@@ -3,6 +3,16 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
+  const researcherA = await prisma.researcher.upsert({
+    where: { email: 'johndoe@g.ucla.edu' },
+    create: {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'johndoe@g.ucla.edu',
+    },
+    update: {},
+  });
+
   const job = await prisma.job.upsert({
     where: { id: 1 },
     create: {
@@ -15,16 +25,11 @@ async function main() {
       weeklyHours: 10,
       credit: true,
       location: 'ON_CAMPUS',
-    },
-    update: {},
-  });
-
-  const researcherA = await prisma.researcher.upsert({
-    where: { email: 'johndoe@g.ucla.edu' },
-    create: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'johndoe@g.ucla.edu',
+      poster: {
+        connect: {
+          id: researcherA.id,
+        },
+      },
     },
     update: {},
   });
@@ -54,6 +59,7 @@ async function main() {
       applicantEmail: studentA.email,
       bookmarked: true,
       status: 'SAVED',
+      piStatus: 'CONSIDERING',
     },
     update: {},
   });
