@@ -33,6 +33,13 @@ enum Pronouns {
   NOT_LISTED
 }
 
+model User {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String      @unique @db.VarChar(100)
+  student    Student?
+  researcher Researcher?
+}
+
 model Student {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName      String          @db.VarChar(80)
@@ -41,6 +48,8 @@ model Student {
   email          String          @unique @db.VarChar(100)
   jobs           LabeledJob[]
   departments    Department[]
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String          @unique @db.Uuid
   studentProfile StudentProfile?
 }
 
@@ -72,6 +81,8 @@ model Researcher {
   lastName  String @db.VarChar(80)
   email     String @unique @db.VarChar(100)
   jobs      Job[]
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String @unique @db.Uuid
 }
 
 enum Duration {
