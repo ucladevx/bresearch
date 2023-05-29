@@ -33,6 +33,42 @@ export const authOptions = {
       }
       return true;
     },
+    async jwt({ token, account, profile }) {
+      if (account) {
+        // only truthy during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
+        const currentUser = await prisma.user.findUnique({
+          where: { email: profile.email },
+          select: {
+            student: true,
+            researcher: true,
+          },
+        });
+        if (currentUser.student) {
+          token.accountType = 'student';
+        } else if (currentUser.researcher) {
+          token.accountType = 'researcher';
+        } else {
+        }
+        console.log({ currentUser, accountType: token.accountType }, 'jwt');
+      } else if (token && !token.accountType) {
+        const currentUser = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: {
+            student: true,
+            researcher: true,
+          },
+        });
+        if (currentUser.student) {
+          token.accountType = 'student';
+        } else if (currentUser.researcher) {
+          token.accountType = 'researcher';
+        }
+
+        console.log({ currentUser, accountType: token.accountType }, 'jwt');
+      }
+      console.log({ account, profile }, 'jwt');
+      return token;
+    },
   },
 };
 export default NextAuth(authOptions);
