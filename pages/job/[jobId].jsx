@@ -152,7 +152,7 @@ export async function getStaticPaths() {
     params: { jobId: job.id.toString(10) },
   }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 }
 
 export default Job;
