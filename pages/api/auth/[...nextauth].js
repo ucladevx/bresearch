@@ -1,5 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import prisma from '@lib/prisma';
+
 export const authOptions = {
   // Configure one or more authentication providers
   providers: [
@@ -17,13 +19,19 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ account, profile, user }) {
-      if (account.provider === 'google') {
-        return (
-          profile.email_verified &&
-          (profile.email.endsWith('@ucla.edu') || profile.email.endsWith('.ucla.edu'))
-        );
+      if (
+        account.provider !== 'google' ||
+        !profile.email_verified ||
+        (!profile.email.endsWith('@ucla.edu') && !profile.email.endsWith('.ucla.edu'))
+      ) {
+        return false;
       }
-      return false; // Do different verification for other providers that don't have `email_verified`
+
+      const currentUser = await prisma.user.findUnique({ where: { email: profile.email } });
+      if (!currentUser) {
+        await prisma.user.create({ data: { email: profile.email } });
+      }
+      return true;
     },
   },
 };
