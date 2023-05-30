@@ -33,13 +33,6 @@ enum Pronouns {
   NOT_LISTED
 }
 
-// model User {
-//   id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   email      String      @unique @db.VarChar(100)
-//   student    Student?
-//   researcher Researcher?
-// }
-
 model Student {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email          String          @unique @db.VarChar(100) // TODO: remove and use something else in LabeledJob
