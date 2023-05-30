@@ -6,6 +6,7 @@
 import TagDropdown from '../../../components/TagDropdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 
@@ -34,9 +35,9 @@ const Paginator = (props) => {
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                   />
                 </svg>
               </a>
@@ -46,9 +47,9 @@ const Paginator = (props) => {
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                   />
                 </svg>
               </a>
@@ -92,13 +93,14 @@ const ApplicantsCard = (props) => {
           </thead>
           {/*Maps applicants to table rows, some values hard-coded for now */}
           <tbody>
-            {applicants.map((applicants) => (
+            {applicants?.map((applicants) => (
               <tr
-                key={applicants.id}
+                /*ID fetch doesn't work yet, needs to be included in get api*/
+                key={applicants.applicant.id}
                 className="bg-white border-b dark:border-gray-700  text-gray-700"
               >
                 <td className="px-6 py-2.5">
-                  {applicants.firstName} {applicants.lastName}
+                  {applicants.applicant.firstName} {applicants.applicant.lastName}
                 </td>
                 <td className="px-6 py-2.5">graduationDate</td>
                 <td className="pl-5 py-2.5">
@@ -114,13 +116,15 @@ const ApplicantsCard = (props) => {
           </tbody>
           {/*Footer contains pagination */}
           <tfoot>
-            <td className="px-6 py-4"></td>
-            <td className="px-6 py-4"></td>
-            <td className="px-5 py-4"></td>
-            <td className="px-6 py-4"></td>
-            <td colspan="2" className="pt-4">
-              <Paginator />
-            </td>
+            <tr>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-5 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td colSpan="2" className="pt-4">
+                <Paginator />
+              </td>
+            </tr>
           </tfoot>
         </table>
       </div>
@@ -130,67 +134,29 @@ const ApplicantsCard = (props) => {
 
 //Applicant Manager page
 export default function ApplicantManager() {
-  //Hard-coding some applicants for testing until API set up
-  /*
-  const applicants = [
-    {
-      id: 1,
-      firstName: 'Joe',
-      lastName: 'Bruin',
-    },
-    {
-      id: 2,
-      firstName: 'Jane',
-      lastName: 'Doe',
-    },
-    {
-      id: 3,
-      firstName: 'Josie',
-      lastName: 'B',
-    },
-    {
-      id: 4,
-      firstName: 'UCLA',
-      lastName: 'Student',
-    },
-    {
-      id: 5,
-      firstName: 'John',
-      lastName: 'Doe',
-    },
-  ];
-  */
   const [applicants, setApplicants] = useState([]);
   const router = useRouter();
+
   useEffect(() => {
-    //Figure out how to get jobID from page url, static paths?
-    fetch(`/api/applications/2/applicants`, {
+    //Router isn't initially hydrated with query params, so wait until ready
+    if (!router.isReady) return;
+    const { jobId } = router.query;
+    fetch(`/api/applications/${jobId}/applicants`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        applicants: {
-          applicant: {
-            id: true,
-            firstName: true,
-            preferredName: true,
-            lastName: true,
-          },
-          piStatus: true,
-          lastUpdated: true,
-        },
-      }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        setApplicants(data.applicants);
+        console.log(data.applicants);
       })
       .catch((error) => {
         console.log(error);
       });
     //Reloading apps so that if user changes status it updates
-  }, []);
+  }, [router]);
 
   //Main page display
   //ml-28 mt-8 mb-8
