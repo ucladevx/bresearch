@@ -12,25 +12,25 @@ import { useState, useEffect } from 'react';
 //OnClick should call to database to change status for that applicant to that tag
 
 export default function TagDropdown() {
-  const [color, setColor] = useState(
-    'text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
+  const [bgColor, setBgColor] = useState(
+    'bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
   );
+  const [textColor, setTextColor] = useState('text-[#1E2F97]');
   const [tag, setTag] = useState('CONSIDERING');
 
   const buttonStyle =
-    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-gray-300';
+    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-0.5 text-sm font-semibold shadow-sm';
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button
-          //Changing button color based on the current selection
-          className={` ${color} ${buttonStyle}`}
-        >
-          {tag}
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-        </Menu.Button>
-      </div>
+    <Menu as="div" className="relative inline-block">
+      <Menu.Button
+        //Changing button color based on the current selection
+        className={` ${textColor} ${bgColor} ${buttonStyle} `}
+      >
+        {tag}
+        <ChevronDownIcon className={`-mr-1 -ml-1 h-5 w-5 ${textColor}`} aria-hidden="true" />
+      </Menu.Button>
+
       {/*Transition behavior */}
       <Transition
         as={Fragment}
@@ -50,9 +50,10 @@ export default function TagDropdown() {
                 <a
                   onClick={() => {
                     //Setting color and title
-                    setColor(
-                      'text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
+                    setBgColor(
+                      'bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
                     );
+                    setTextColor('text-[#1E2F97]');
                     setTag('CONSIDERING');
                   }}
                 >
@@ -70,9 +71,10 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor(
-                      'text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60'
+                    setBgColor(
+                      'bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60'
                     );
+                    setTextColor('text-[#29570D]');
                     setTag('ACCEPTED');
                   }}
                 >
@@ -90,9 +92,8 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor(
-                      'text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30'
-                    );
+                    setBgColor('bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30');
+                    setTextColor('text-[#2A0062]');
                     setTag('INTERVIEWING');
                   }}
                 >
@@ -110,9 +111,8 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor(
-                      'text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40'
-                    );
+                    setBgColor('bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40');
+                    setTextColor('text-[#570D0D]');
                     setTag('NOT ACCEPTED');
                   }}
                 >
@@ -130,9 +130,8 @@ export default function TagDropdown() {
               {({ active }) => (
                 <a
                   onClick={() => {
-                    setColor(
-                      'text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30'
-                    );
+                    setBgColor('bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30');
+                    setTextColor('text-[#141466]');
                     setTag('JOINED');
                   }}
                 >

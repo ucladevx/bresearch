@@ -64,24 +64,24 @@ const ApplicantsCard = (props) => {
   const { applicants } = props;
 
   return (
-    <div className="bg-white w-11/12 h-1/3 mx-auto min-h-max p-12 rounded-lg shadow-sm my-4">
-      <div className="relative overflow-x-auto flex flex-col">
+    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-lg shadow-sm ">
+      <div className="relative overflow-x-auto flex flex-col ">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-2.5">
                 Applicant
               </th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-2.5">
                 Graduating
               </th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="pl-5 py-2.5">
                 Tags
               </th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-2.5">
                 Resume
               </th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-2.5">
                 Profile
               </th>
               <th scope="col" className="py-4 pl-6 pr-4">
@@ -96,18 +96,18 @@ const ApplicantsCard = (props) => {
                 key={applicants.id}
                 className="bg-white border-b dark:border-gray-700  text-gray-700"
               >
-                <td className="px-6 py-4">
+                <td className="px-6 py-2.5">
                   {applicants.firstName} {applicants.lastName}
                 </td>
-                <td className="px-6 py-4">graduationDate</td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-2.5">graduationDate</td>
+                <td className="pl-5 py-2.5">
                   <TagDropdown />
                 </td>
-                <td className="px-6 py-4">resumeFile</td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-2.5">resumeFile</td>
+                <td className="px-6 py-2.5">
                   <Link href="/pi-view/applicant-manager/1">view</Link>
                 </td>
-                <td className="py-4 px-6">dateApplied</td>
+                <td className="py-2.5 px-6">dateApplied</td>
               </tr>
             ))}
           </tbody>
@@ -115,9 +115,9 @@ const ApplicantsCard = (props) => {
           <tfoot>
             <td className="px-6 py-4"></td>
             <td className="px-6 py-4"></td>
+            <td className="px-5 py-4"></td>
             <td className="px-6 py-4"></td>
-            <td className="px-6 py-4"></td>
-            <td colspan="2" className="pt-3">
+            <td colspan="2" className="pt-4">
               <Paginator />
             </td>
           </tfoot>
@@ -157,11 +157,13 @@ export default function ApplicantManager() {
       lastName: 'Doe',
     },
   ];
+
   //Main page display
+  //ml-28 mt-8 mb-8
   return (
     <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
-      <h1 className="ml-16 mt-3 text-2xl font-bold">Manage Applicants</h1>
-      <div>
+      <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
+      <div className="">
         <ApplicantsCard applicants={applicants} />
       </div>
     </div>
