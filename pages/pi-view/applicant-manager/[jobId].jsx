@@ -5,6 +5,7 @@
 //Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
 import TagDropdown from '../../../components/TagDropdown';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 
@@ -130,6 +131,7 @@ const ApplicantsCard = (props) => {
 //Applicant Manager page
 export default function ApplicantManager() {
   //Hard-coding some applicants for testing until API set up
+  /*
   const applicants = [
     {
       id: 1,
@@ -157,6 +159,38 @@ export default function ApplicantManager() {
       lastName: 'Doe',
     },
   ];
+  */
+  const [applicants, setApplicants] = useState([]);
+  const router = useRouter();
+  useEffect(() => {
+    //Figure out how to get jobID from page url, static paths?
+    fetch(`/api/applications/2/applicants`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        applicants: {
+          applicant: {
+            id: true,
+            firstName: true,
+            preferredName: true,
+            lastName: true,
+          },
+          piStatus: true,
+          lastUpdated: true,
+        },
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    //Reloading apps so that if user changes status it updates
+  }, []);
 
   //Main page display
   //ml-28 mt-8 mb-8
