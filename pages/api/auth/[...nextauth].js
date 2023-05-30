@@ -43,9 +43,9 @@ export const authOptions = {
             researcher: true,
           },
         });
-        if (currentUser.student) {
+        if (currentUser.student || currentUser.studentId) {
           token.accountType = 'student';
-        } else if (currentUser.researcher) {
+        } else if (currentUser.researcher || currentUser.researcherId) {
           token.accountType = 'researcher';
         } else {
         }
@@ -58,9 +58,10 @@ export const authOptions = {
             researcher: true,
           },
         });
-        if (currentUser.student) {
+
+        if (currentUser.student || currentUser.studentId) {
           token.accountType = 'student';
-        } else if (currentUser.researcher) {
+        } else if (currentUser.researcher || currentUser.researcherId) {
           token.accountType = 'researcher';
         }
 
