@@ -33,20 +33,17 @@ enum Pronouns {
   NOT_LISTED
 }
 
-model User {
-  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String      @unique @db.VarChar(100)
-  student    Student?
-  researcher Researcher?
-}
+// model User {
+//   id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   email      String      @unique @db.VarChar(100)
+//   student    Student?
+//   researcher Researcher?
+// }
 
 model Student {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email          String          @unique @db.VarChar(100) // TODO: remove and use something else in LabeledJob
   jobs           LabeledJob[]
-  departments    Department[]
-  user           User            @relation(fields: [userId], references: [id])
-  userId         String          @unique @db.Uuid
   studentProfile StudentProfile?
 }
 
@@ -75,11 +72,10 @@ model StudentProfile {
 }
 
 model Researcher {
-  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email  String @unique @db.VarChar(100)
-  jobs   Job[]
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique @db.Uuid
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email String @unique @db.VarChar(100)
+  jobs  Job[]
+  // researcherProfile ResearcherProfile?
 }
 
 enum Duration {
