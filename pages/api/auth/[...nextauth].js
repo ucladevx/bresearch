@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import prisma from '@lib/prisma';
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -27,10 +26,6 @@ export const authOptions = {
         return false;
       }
 
-      const currentUser = await prisma.user.findUnique({ where: { email: profile.email } });
-      if (!currentUser) {
-        await prisma.user.create({ data: { email: profile.email } });
-      }
       return true;
     },
   },
