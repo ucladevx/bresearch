@@ -38,8 +38,7 @@ class SecondProfileCreationRoute extends ApiRoute {
       if (error) {
         throw error;
       }
-
-      const { experience, coursework, links } = value;
+      const { labExperience, coursework, links, skills } = value;
 
       const student = await prisma.student.findUnique({
         where: {
@@ -51,11 +50,15 @@ class SecondProfileCreationRoute extends ApiRoute {
           studentId: student.id,
         },
         data: {
-          experience,
-          coursework,
+          experience: labExperience?.trim() || null,
+          coursework: coursework?.trim() || null,
           links,
+          skills,
         },
       });
+
+      const slug = `/student/profile/${result.id.replaceAll('-', '')}`;
+      await res.revalidate(slug);
 
       res.status(200).json(result);
     } catch (e) {
