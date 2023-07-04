@@ -80,6 +80,9 @@ class FirstProfileCreationRoute extends ApiRoute {
         },
       });
 
+      const slug = `/student/profile/${result.id.replaceAll('-', '')}`;
+      await res.revalidate(slug);
+
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
