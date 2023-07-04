@@ -66,7 +66,7 @@ function CreateProfile() {
 
   async function onSubmit(data) {
     // e.preventDefault();
-    const res = await fetch('/api/profiles/create', {
+    const res = await fetch('/api/student/profile/create', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {

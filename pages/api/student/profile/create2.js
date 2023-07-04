@@ -1,6 +1,6 @@
 import { Prisma } from 'prisma/prisma-client';
 
-import { ProfileCreationValidator, isValidationError } from '@lib/validators';
+import { SecondProfileCreationValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
 
 /* example POST request body
@@ -14,7 +14,7 @@ import ApiRoute from '@lib/ApiRoute';
   "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   "major": "Computer Science",
   "additionalMajor": "Math",
-  "graduationDate": "June 2025",
+  "graduation": "June 2025",
   "gpa": "4.0",
   "majorGpa": "3.9",
   "labExperience": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -23,7 +23,7 @@ import ApiRoute from '@lib/ApiRoute';
 }
 */
 
-class FirstProfileCreationRoute extends ApiRoute {
+class SecondProfileCreationRoute extends ApiRoute {
   /**
    * profile creation endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
@@ -33,70 +33,29 @@ class FirstProfileCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
-      const { error, value } = ProfileCreationValidator.validate(req.body);
+      const { error, value } = SecondProfileCreationValidator.validate(req.body);
 
       if (error) {
         throw error;
       }
+      const { labExperience, coursework, links, skills } = value;
 
-      const {
-        firstName,
-        lastName,
-        email,
-        pronouns,
-        preferredEmail,
-        phoneNumber,
-        bio,
-        major,
-        additionalMajor,
-        graduationDate,
-        gpa,
-        majorGpa,
-        experience,
-        coursework,
-        links,
-      } = value;
-
-      //default to null on the first page for values that don't get set
-      let tempBio = bio || '';
-      let tempPronouns = pronouns || 'NOT_LISTED';
-      let tempLabExperience = experience || '';
-      let tempCoursework = coursework || '';
-      let tempLinks = links || '';
-
-      const result = await prisma.studentProfile.create({
-        data: {
-          pronouns: tempPronouns,
-          preferredEmail,
-          phoneNumber: phoneNumber.toString(),
-          bio: tempBio,
-          major,
-          additionalMajor,
-          graduationDate,
-          gpa,
-          majorGpa,
-          experience: tempLabExperience,
-          coursework: tempCoursework,
-          links: tempLinks,
-          student: {
-            connect: { email: req.session.user.email },
-          },
-        },
-      });
-
-      const result2 = await prisma.student.update({
+      const student = await prisma.student.findUnique({
         where: {
           email: req.session.user.email,
         },
+      });
+      const result = await prisma.studentProfile.update({
+        where: {
+          studentId: student.id,
+        },
         data: {
-          firstName,
-          lastName,
-          email,
+          experience: labExperience?.trim() || null,
+          coursework: coursework?.trim() || null,
+          links,
+          skills,
         },
       });
-
-      // await res.revalidate(`/profile/${result.id}`);
-      // await res.revalidate('/');
 
       res.status(200).json(result);
     } catch (e) {
@@ -117,4 +76,4 @@ class FirstProfileCreationRoute extends ApiRoute {
   }
 }
 
-export default new FirstProfileCreationRoute().as_handler();
+export default new SecondProfileCreationRoute().as_handler();
