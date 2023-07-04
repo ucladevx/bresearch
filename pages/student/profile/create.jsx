@@ -90,11 +90,11 @@ function CreateProfile() {
         {/* <main className="max-w-[100rem]"> */}
         {/* TODO: fix above main width */}
         <div className="flex justify-center mb-9 mt-4">
-          <h2 className="font-bold nocommonligs text-3xl">Create Profile</h2>
+          <h1 className="font-bold nocommonligs text-3xl">Create Profile</h1>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex mb-9">
-            <h3 className="font-bold text-2xl">Personal Information</h3>
+            <h2 className="font-bold text-2xl">Personal Information</h2>
           </div>
           <div className="flex justify-between gap-x-10 gap-y-3 flex-col sm:flex-row mb-9">
             <div className="flex flex-col basis-2/5 shrink-[3] min-w-[6rem] max-w-[22.5rem] gap-y-3">
@@ -212,7 +212,7 @@ function CreateProfile() {
             ></div>
           </div>
           <div className="flex mb-9">
-            <h3 className="font-bold text-2xl">Educational Information</h3>
+            <h2 className="font-bold text-2xl">Educational Information</h2>
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
