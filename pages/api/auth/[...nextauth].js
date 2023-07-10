@@ -36,10 +36,10 @@ export const authOptions = {
       if (account) {
         // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
         const currentStudent = process.env.USE_SUPABASE
-          ? (await supabase.from('Student').select().eq('email', profile.email).limit(1).single())
+          ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
               ?.data
           : await prisma.student.findUnique({
-              where: { email: profile.email },
+              where: { email: token.email },
             });
         if (currentStudent) {
           token.accountType = 'student';
@@ -49,12 +49,12 @@ export const authOptions = {
                 await supabase
                   .from('Researcher')
                   .select()
-                  .eq('email', profile.email)
+                  .eq('email', token.email)
                   .limit(1)
                   .single()
               )?.data
             : await prisma.researcher.findUnique({
-                where: { email: profile.email },
+                where: { email: token.email },
               });
           if (currentResearcher) {
             token.accountType = 'researcher';
@@ -66,10 +66,10 @@ export const authOptions = {
       } else if (token) {
         if (!token.accountType) {
           const currentStudent = process.env.USE_SUPABASE
-            ? (await supabase.from('Student').select().eq('email', profile.email).limit(1).single())
+            ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
                 ?.data
             : await prisma.student.findUnique({
-                where: { email: profile.email },
+                where: { email: token.email },
               });
           if (currentStudent) {
             token.accountType = 'student';
@@ -79,12 +79,12 @@ export const authOptions = {
                   await supabase
                     .from('Researcher')
                     .select()
-                    .eq('email', profile.email)
+                    .eq('email', token.email)
                     .limit(1)
                     .single()
                 )?.data
               : await prisma.researcher.findUnique({
-                  where: { email: profile.email },
+                  where: { email: token.email },
                 });
             if (currentResearcher) {
               token.accountType = 'researcher';
