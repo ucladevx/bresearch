@@ -6,6 +6,7 @@ import {
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 //TODO: When a job has already been applied to, remove "Mark as Applied" option
 //Could change it so when a job is in Applied column, option changes to "Mark as Saved"
@@ -19,7 +20,7 @@ function classNames(...classes) {
 //Dropdown menu for applications on App Tracker
 
 export default function AppsDropdown(props) {
-  const { jobId } = props;
+  const { jobId, markApplied, removeJob, type } = props;
 
   //Note: Adding onClick handler outside render method makes it so clicking anywhere on the menu triggers the click
   //Results in immediately marking as applied or removing
@@ -29,7 +30,7 @@ export default function AppsDropdown(props) {
       {/* The ... dropdown button */}
       <div>
         <Menu.Button className="inline-flex w-full justify-center  rounded-full bg-white px-1 py-1 gap-x-1.5 text-sm font-semibold text-gray-900 hover:bg-neutral-100">
-          <EllipsisVerticalIcon className=" h-5 w-5 text-gray-500" aria-hidden="true" />
+          <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
         </Menu.Button>
       </div>
       {/*Transition styling when menu is opened */}
@@ -46,9 +47,10 @@ export default function AppsDropdown(props) {
         <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-neutral-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             {/*Apply*/}
+
             <Menu.Item className="flex flex-row">
               {({ active }) => (
-                <a
+                <Link
                   //TODO: Link to apply page - links to job page for now
                   href={`/job/${jobId}`}
                   //Changes font color & bg color when hovering over dropdown options
@@ -57,47 +59,52 @@ export default function AppsDropdown(props) {
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  <ArrowTopRightOnSquareIcon className=" w-6 px-1 " />
-                  Apply
-                </a>
+                  <ArrowTopRightOnSquareIcon className="w-6 px-1" />
+                  {type !== 'Applied' ? 'Apply' : 'Application'}
+                </Link>
               )}
             </Menu.Item>
-
             {/*Mark as Applied*/}
-            <Menu.Item className="flex flex-row">
-              {({ active }) => (
-                <a
-                  onClick={() => {
-                    fetch(`/api/applications/${jobId}`, {
-                      method: 'PATCH',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        status: 'APPLIED',
-                      }),
-                    })
-                      .then((response) => console.log(response))
-                      //.then((data) => {})
-                      .catch((error) => {
-                        console.log(error);
-                      });
-                  }}
-                  className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
-                  )}
-                >
-                  <CheckIcon className="w-6 px-1" />
-                  Mark as Applied
-                </a>
-              )}
-            </Menu.Item>
-
+            {type !== 'Applied' && (
+              <Menu.Item className="flex flex-row">
+                {({ active }) => (
+                  <button
+                    onClick={() => {
+                      fetch(`/api/applications/${jobId}`, {
+                        method: 'PATCH',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          status: 'APPLIED',
+                        }),
+                      })
+                        .then((response) => {
+                          console.log(response);
+                          if (markApplied !== undefined) {
+                            markApplied(jobId);
+                          }
+                        })
+                        //.then((data) => {})
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    }}
+                    className={classNames(
+                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      'block px-4 py-2 text-sm text-left w-full'
+                    )}
+                  >
+                    <CheckIcon className="w-6 px-1" />
+                    Mark as Applied
+                  </button>
+                )}
+              </Menu.Item>
+            )}
             {/*Remove*/}
             <Menu.Item className="flex flex-row">
               {({ active }) => (
-                <a
+                <button
                   onClick={() => {
                     fetch(`/api/applications/${jobId}`, {
                       method: 'PATCH',
@@ -108,7 +115,10 @@ export default function AppsDropdown(props) {
                         status: 'HIDDEN',
                       }),
                     })
-                      .then((response) => console.log(response))
+                      .then((response) => {
+                        console.log(response);
+                        removeJob(jobId);
+                      })
                       //.then((data) => {})
                       .catch((error) => {
                         console.log(error);
@@ -116,12 +126,12 @@ export default function AppsDropdown(props) {
                   }}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
+                    'block px-4 py-2 text-sm text-left w-full'
                   )}
                 >
-                  <TrashIcon className=" w-6 px-1" />
+                  <TrashIcon className="w-6 px-1" />
                   Remove
-                </a>
+                </button>
               )}
             </Menu.Item>
           </div>
