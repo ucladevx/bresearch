@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { UUIDV4Validator } from '@lib/validators';
-const prisma = new PrismaClient();
+import prisma from '@lib/prisma';
 
 const pronounsMapping = {
   NOT_LISTED: 'Not Listed',
@@ -113,7 +112,6 @@ export async function getStaticProps(context) {
 
   const { error } = UUIDV4Validator.validate(profileID);
   if (error) {
-    console.log({ error, slug: profileID });
     return { notFound: true };
   }
 
