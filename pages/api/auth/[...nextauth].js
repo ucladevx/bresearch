@@ -1,6 +1,9 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import prisma from '@lib/prisma';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.SUPABASE_DATABASE_URL, process.env.SUPABASE_DATABASE_KEY);
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -31,16 +34,28 @@ export const authOptions = {
     },
     async jwt({ token, account, profile }) {
       if (account) {
-        // only truthy during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
-        const currentStudent = await prisma.student.findUnique({
-          where: { email: profile.email },
-        });
+        // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
+        const currentStudent = process.env.USE_SUPABASE
+          ? (await supabase.from('Student').select().eq('email', profile.email).limit(1).single())
+              ?.data
+          : await prisma.student.findUnique({
+              where: { email: profile.email },
+            });
         if (currentStudent) {
           token.accountType = 'student';
         } else {
-          const currentResearcher = await prisma.researcher.findUnique({
-            where: { email: profile.email },
-          });
+          const currentResearcher = process.env.USE_SUPABASE
+            ? (
+                await supabase
+                  .from('Researcher')
+                  .select()
+                  .eq('email', profile.email)
+                  .limit(1)
+                  .single()
+              )?.data
+            : await prisma.researcher.findUnique({
+                where: { email: profile.email },
+              });
           if (currentResearcher) {
             token.accountType = 'researcher';
           } else {
@@ -50,15 +65,27 @@ export const authOptions = {
         }
       } else if (token) {
         if (!token.accountType) {
-          const currentStudent = await prisma.student.findUnique({
-            where: { email: token.email },
-          });
+          const currentStudent = process.env.USE_SUPABASE
+            ? (await supabase.from('Student').select().eq('email', profile.email).limit(1).single())
+                ?.data
+            : await prisma.student.findUnique({
+                where: { email: profile.email },
+              });
           if (currentStudent) {
             token.accountType = 'student';
           } else {
-            const currentResearcher = await prisma.researcher.findUnique({
-              where: { email: token.email },
-            });
+            const currentResearcher = process.env.USE_SUPABASE
+              ? (
+                  await supabase
+                    .from('Researcher')
+                    .select()
+                    .eq('email', profile.email)
+                    .limit(1)
+                    .single()
+                )?.data
+              : await prisma.researcher.findUnique({
+                  where: { email: profile.email },
+                });
             if (currentResearcher) {
               token.accountType = 'researcher';
             } else {
