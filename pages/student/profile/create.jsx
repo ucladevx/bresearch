@@ -3,6 +3,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { ProfileCreationValidator } from '@lib/validators';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 // function Input(props) {
 //   return (
@@ -64,24 +65,31 @@ function CreateProfile() {
   } = useForm({ resolver: joiResolver(ProfileCreationValidator) });
   const userSession = useSession();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   async function onSubmit(data) {
     // e.preventDefault();
-    const res = await fetch('/api/student/profile/create', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (res.status === 200) {
-      await router.push('/student/profile/add');
+    if (isSubmitting) {
+      return;
     }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/student/profile/create', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.status === 200) {
+        await router.push('/student/profile/add');
+      }
+    } catch (e) {}
+    setIsSubmitting(false);
   }
 
   const majors = [{ major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' }];
   const minors = [{ minor: 'LINGUISTICS', text: 'Linguistics' }];
-
-  console.log(errors?.phoneNumber?.message, '1234', errors);
 
   return (
     <div className="flex flex-col items-center">
@@ -106,7 +114,7 @@ function CreateProfile() {
                 autoFocus
                 error={errors.firstName}
                 register={register}
-                fieldName={'firstName'}
+                fieldName="firstName"
                 registerBody={{ required: true }}
                 maxLength={80}
               ></Input>
@@ -119,7 +127,7 @@ function CreateProfile() {
                 id="lastName"
                 error={errors.lastName}
                 register={register}
-                fieldName={'lastName'}
+                fieldName="lastName"
                 registerBody={{ required: true }}
                 maxLength={80}
               ></Input>
@@ -161,7 +169,7 @@ function CreateProfile() {
                 id="preferredEmail"
                 error={errors.preferredEmail}
                 register={register}
-                fieldName={'preferredEmail'}
+                fieldName="preferredEmail"
                 maxLength={100}
               ></Input>
             </div>
@@ -354,8 +362,9 @@ function CreateProfile() {
           </div>
           <div className="flex justify-end">
             <button
-              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3"
+              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
               type="submit"
+              disabled={isSubmitting}
             >
               Create Profile
             </button>
