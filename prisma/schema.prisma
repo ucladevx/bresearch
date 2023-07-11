@@ -32,6 +32,9 @@ enum Minor {
 
 enum Pronouns {
   NOT_LISTED
+  HE_HIM
+  SHE_HER
+  THEY_THEM
 }
 
 model Student {

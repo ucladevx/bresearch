@@ -3,7 +3,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { ProfileCreationValidator } from '@lib/validators';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 
 // function Input(props) {
 //   return (
@@ -62,7 +62,12 @@ function CreateProfile() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm({ resolver: joiResolver(ProfileCreationValidator) });
+  if (watch('major', true) === watch('additionalMajor', '')) {
+    setValue('additionalMajor', '');
+  }
   const userSession = useSession();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,8 +92,10 @@ function CreateProfile() {
     } catch (e) {}
     setIsSubmitting(false);
   }
-
-  const majors = [{ major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' }];
+  const majors = [
+    { major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' },
+    { major: 'COMPUTER_SCIENCE', text: 'Computer Science' },
+  ];
   const minors = [{ minor: 'LINGUISTICS', text: 'Linguistics' }];
 
   return (
@@ -144,9 +151,9 @@ function CreateProfile() {
                 {...register('pronouns')}
               >
                 <option value="">Not selected</option>
-                <option value="he/him">he/him</option>
-                <option>she/her</option>
-                <option>they/them</option>
+                <option value="HE_HIM">he/him</option>
+                <option value="SHE_HER">she/her</option>
+                <option value="THEY_THEM">they/them</option>
                 <option value="NOT_LISTED">Not listed</option>
               </select>
             </div>
@@ -253,11 +260,15 @@ function CreateProfile() {
                 {...register('additionalMajor')}
               >
                 <option value=""></option>
-                {majors.map(({ major, text }) => (
-                  <option value={major} key={major}>
-                    {text}
-                  </option>
-                ))}
+                {majors.map(({ major, text }) =>
+                  major !== watch('major') ? (
+                    <option value={major} key={major}>
+                      {text}
+                    </option>
+                  ) : (
+                    <Fragment key={major} />
+                  )
+                )}
               </select>
             </div>
           </div>

@@ -65,7 +65,7 @@ class FirstProfileCreationRoute extends ApiRoute {
           lastName,
           pronouns: tempPronouns,
           preferredEmail,
-          phoneNumber,
+          phoneNumber: phoneNumber || null,
           bio: tempBio,
           major,
           additionalMajor,
