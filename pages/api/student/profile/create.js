@@ -65,7 +65,7 @@ class FirstProfileCreationRoute extends ApiRoute {
           lastName,
           pronouns: tempPronouns,
           preferredEmail,
-          phoneNumber,
+          phoneNumber: phoneNumber || null,
           bio: tempBio,
           major,
           additionalMajor,
@@ -86,6 +86,7 @@ class FirstProfileCreationRoute extends ApiRoute {
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
+      console.error(e);
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -93,7 +94,6 @@ class FirstProfileCreationRoute extends ApiRoute {
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
       } else {
-        console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
     } finally {

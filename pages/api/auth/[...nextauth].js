@@ -3,7 +3,11 @@ import GoogleProvider from 'next-auth/providers/google';
 import prisma from '@lib/prisma';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_DATABASE_URL, process.env.SUPABASE_DATABASE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_DATABASE_URL,
+  process.env.SUPABASE_DATABASE_KEY,
+  { auth: { persistSession: false } }
+);
 
 export const authOptions = {
   // Configure one or more authentication providers

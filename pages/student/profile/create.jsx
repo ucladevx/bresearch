@@ -3,6 +3,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { ProfileCreationValidator } from '@lib/validators';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { useState, Fragment } from 'react';
 
 // function Input(props) {
 //   return (
@@ -61,27 +62,41 @@ function CreateProfile() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm({ resolver: joiResolver(ProfileCreationValidator) });
+  if (watch('major', true) === watch('additionalMajor', '')) {
+    setValue('additionalMajor', '');
+  }
   const userSession = useSession();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit(data) {
     // e.preventDefault();
-    const res = await fetch('/api/student/profile/create', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (res.status === 200) {
-      await router.push('/student/profile/add');
+    if (isSubmitting) {
+      return;
     }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/student/profile/create', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.status === 200) {
+        await router.push('/student/profile/add');
+      }
+    } catch (e) {}
+    setIsSubmitting(false);
   }
-
-  const majors = [{ major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' }];
+  const majors = [
+    { major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' },
+    { major: 'COMPUTER_SCIENCE', text: 'Computer Science' },
+  ];
   const minors = [{ minor: 'LINGUISTICS', text: 'Linguistics' }];
-
-  console.log(errors?.phoneNumber?.message, '1234', errors);
 
   return (
     <div className="flex flex-col items-center">
@@ -106,7 +121,7 @@ function CreateProfile() {
                 autoFocus
                 error={errors.firstName}
                 register={register}
-                fieldName={'firstName'}
+                fieldName="firstName"
                 registerBody={{ required: true }}
                 maxLength={80}
               ></Input>
@@ -119,7 +134,7 @@ function CreateProfile() {
                 id="lastName"
                 error={errors.lastName}
                 register={register}
-                fieldName={'lastName'}
+                fieldName="lastName"
                 registerBody={{ required: true }}
                 maxLength={80}
               ></Input>
@@ -136,9 +151,9 @@ function CreateProfile() {
                 {...register('pronouns')}
               >
                 <option value="">Not selected</option>
-                <option value="he/him">he/him</option>
-                <option>she/her</option>
-                <option>they/them</option>
+                <option value="HE_HIM">he/him</option>
+                <option value="SHE_HER">she/her</option>
+                <option value="THEY_THEM">they/them</option>
                 <option value="NOT_LISTED">Not listed</option>
               </select>
             </div>
@@ -161,7 +176,7 @@ function CreateProfile() {
                 id="preferredEmail"
                 error={errors.preferredEmail}
                 register={register}
-                fieldName={'preferredEmail'}
+                fieldName="preferredEmail"
                 maxLength={100}
               ></Input>
             </div>
@@ -245,11 +260,15 @@ function CreateProfile() {
                 {...register('additionalMajor')}
               >
                 <option value=""></option>
-                {majors.map(({ major, text }) => (
-                  <option value={major} key={major}>
-                    {text}
-                  </option>
-                ))}
+                {majors.map(({ major, text }) =>
+                  major !== watch('major') ? (
+                    <option value={major} key={major}>
+                      {text}
+                    </option>
+                  ) : (
+                    <Fragment key={major} />
+                  )
+                )}
               </select>
             </div>
           </div>
@@ -354,8 +373,9 @@ function CreateProfile() {
           </div>
           <div className="flex justify-end">
             <button
-              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3"
+              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
               type="submit"
+              disabled={isSubmitting}
             >
               Create Profile
             </button>

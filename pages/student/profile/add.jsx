@@ -51,17 +51,8 @@ function AddToProfile() {
   const router = useRouter();
   const [skills, setSkills] = useState([]);
   const [links, setLinks] = useState([]);
-  const [uploadURL, setUploadURL] = useState(null);
   const [pdf, setPDF] = useState(null);
-  console.log({ skills, uploadURL, pdf });
 
-  // useEffect(() => {
-  //   async function getUploadURL() {
-  //     // TODO: retrying fetch
-  //     setUploadURL((await (await fetch('/api/student/profile/upload')).json()).url);
-  //   }
-  //   getUploadURL();
-  // }, []);
   const {
     register,
     handleSubmit,
@@ -73,12 +64,14 @@ function AddToProfile() {
     if (!pdf) {
       return;
     }
-    const uploadURL = (
-      await (await fetch(`/api/student/profile/upload?size=${pdf.size.toString(10)}`)).json()
-    ).url;
-    // const requests = [fetch(uploadURL, { method: 'POST', body: pdf })];
-    // await Promise.all(requests);
-    // console.log(requests[0], 'uploaded');
+    let uploadURL;
+    try {
+      uploadURL = (
+        await (await fetch(`/api/student/profile/upload?size=${pdf.size.toString(10)}`)).json()
+      ).url;
+    } catch (e) {
+      return;
+    }
     const formData = new FormData();
     formData.append('Content-Type', 'application/pdf');
     formData.append('pdf', pdf);
@@ -106,7 +99,6 @@ function AddToProfile() {
       }
       const profileSlug = (await finishedRequests[1].json()).id.replaceAll('-', '');
       await router.push(`/student/profile/${profileSlug}`);
-      console.log('pushed');
     } catch (e) {}
   }
 

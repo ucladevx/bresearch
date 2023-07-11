@@ -10,8 +10,10 @@ function StudentProfile({ profile }) {
   const [pdfURL, setPDFURL] = useState(null);
   useEffect(() => {
     async function getPDFURL() {
-      const { url } = await (await fetch('/api/student/profile/me')).json();
-      setPDFURL(url);
+      try {
+        const { url } = await (await fetch('/api/student/profile/me')).json();
+        setPDFURL(url);
+      } catch (e) {}
     }
     getPDFURL();
   });
