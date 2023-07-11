@@ -12,8 +12,8 @@ function StudentProfile({ profile }) {
     async function getPDFURL() {
       try {
         const { url } = await (await fetch('/api/student/profile/me')).json();
+        setPDFURL(url);
       } catch (e) {}
-      setPDFURL(url);
     }
     getPDFURL();
   });
