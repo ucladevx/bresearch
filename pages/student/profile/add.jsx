@@ -122,9 +122,6 @@ function AddToProfile() {
 
   return (
     <div className="flex flex-col items-center">
-      {skills.map((s) => (
-        <ul key={s}>{s}</ul>
-      ))}
       {/* <main className="max-w-5xl min-w-[80%]"> */}
       <main className="w-[80%] max-w-6xl">
         {/* <main className="max-w-[100rem]"> */}
@@ -199,6 +196,10 @@ function AddToProfile() {
               className="basis-1/2 invisible border-solid border-2 border-black"
               aria-hidden="true"
             ></div>
+            {/* TODO: Use this instead of only using react-select */}
+            {/* {skills.map((s) => (
+                        <ul key={s}>{s}</ul>
+                      ))} */}
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
