@@ -52,6 +52,7 @@ function AddToProfile() {
   const [skills, setSkills] = useState([]);
   const [links, setLinks] = useState([]);
   const [pdf, setPDF] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -61,15 +62,17 @@ function AddToProfile() {
 
   async function onSubmit(data) {
     // e.preventDefault();
-    if (!pdf) {
+    if (!pdf || isSubmitting) {
       return;
     }
+    setIsSubmitting(true);
     let uploadURL;
     try {
       uploadURL = (
         await (await fetch(`/api/student/profile/upload?size=${pdf.size.toString(10)}`)).json()
       ).url;
     } catch (e) {
+      setIsSubmitting(false);
       return;
     }
     const formData = new FormData();
@@ -100,6 +103,7 @@ function AddToProfile() {
       const profileSlug = (await finishedRequests[1].json()).id.replaceAll('-', '');
       await router.push(`/student/profile/${profileSlug}`);
     } catch (e) {}
+    setIsSubmitting(false);
   }
 
   const majors = [{ major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' }];
@@ -287,8 +291,9 @@ function AddToProfile() {
               Skip for now
             </Link>
             <button
-              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3"
+              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
               type="submit"
+              disabled={isSubmitting}
             >
               Complete
             </button>
