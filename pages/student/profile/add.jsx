@@ -222,6 +222,24 @@ function AddToProfile() {
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
+              <label htmlFor="relevantCoursework" className="text-base">
+                <span className="font-bold">Relevant Coursework</span> (optional)
+              </label>
+              <textarea
+                id="relevantCoursework"
+                className={`border-solid border-2 h-40 text-base px-3 nocommonligs resize-none py-3 rounded ${
+                  errors.coursework ? 'border-red-600' : 'border-black'
+                }`}
+                {...register('coursework')}
+              ></textarea>
+            </div>
+            <div
+              className="basis-1/2 invisible border-solid border-2 border-black"
+              aria-hidden="true"
+            ></div>
+          </div>
+          <div className="flex justify-between gap-x-10 mb-9">
+            <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="links" className="text-base">
                 <span className="font-bold">Additional Links</span> (Portfolio, Website, GitHub)
               </label>
