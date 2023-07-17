@@ -19,6 +19,11 @@ a {
   box-sizing: border-box;
 }
 
+.nocommonligs {
+  font-variant-ligatures: no-common-ligatures;
+  /* font-feature-settings: 'liga' 0; */
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
