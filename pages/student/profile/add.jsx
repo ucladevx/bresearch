@@ -52,6 +52,8 @@ function AddToProfile() {
   const [skills, setSkills] = useState([]);
   const [links, setLinks] = useState([]);
   const [pdf, setPDF] = useState(null);
+  const [pdfError, setPDFError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -61,15 +63,17 @@ function AddToProfile() {
 
   async function onSubmit(data) {
     // e.preventDefault();
-    if (!pdf) {
+    if (!pdf || isSubmitting) {
       return;
     }
+    setIsSubmitting(true);
     let uploadURL;
     try {
       uploadURL = (
         await (await fetch(`/api/student/profile/upload?size=${pdf.size.toString(10)}`)).json()
       ).url;
     } catch (e) {
+      setIsSubmitting(false);
       return;
     }
     const formData = new FormData();
@@ -100,17 +104,32 @@ function AddToProfile() {
       const profileSlug = (await finishedRequests[1].json()).id.replaceAll('-', '');
       await router.push(`/student/profile/${profileSlug}`);
     } catch (e) {}
+    setIsSubmitting(false);
   }
 
   const majors = [{ major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' }];
   const minors = [{ minor: 'LINGUISTICS', text: 'Linguistics' }];
 
-  // console.log(errors?.phoneNumber?.message, '1234', errors);
-  const onDrop = (acceptedFiles) => {
+  const onDropAccepted = (acceptedFiles) => {
+    setPDFError(null);
     setPDF(acceptedFiles[0]);
   };
+
+  const onDropRejected = (rejections) => {
+    setPDF(null);
+    const error = rejections[0].errors[0].code;
+    if (error === 'file-invalid-type') {
+      setPDFError("File wasn't a PDF");
+    } else if (error === 'file-too-large') {
+      setPDFError('PDF was too large (Max 100 KB)');
+    } else {
+      setPDFError('An error occurred');
+    }
+  };
+
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+    onDropAccepted,
+    onDropRejected,
     accept: { 'application/pdf': [] },
     maxSize: 102400, // 100 KiB,
     multiple: false,
@@ -118,9 +137,6 @@ function AddToProfile() {
 
   return (
     <div className="flex flex-col items-center">
-      {skills.map((s) => (
-        <ul key={s}>{s}</ul>
-      ))}
       {/* <main className="max-w-5xl min-w-[80%]"> */}
       <main className="w-[80%] max-w-6xl">
         {/* <main className="max-w-[100rem]"> */}
@@ -132,17 +148,31 @@ function AddToProfile() {
           {/* <div className="flex mb-9">
             <h2 className="font-bold text-2xl">Personal Information</h2>
           </div> */}
-          <div className="flex justify-between gap-x-10 mb-9">
+          <div className="mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="resumeUpload" className="font-bold text-base">
                 Resume Upload*
               </label>
               <div
                 {...getRootProps({ className: 'dropzone' })}
-                className="border-dashed border-2 p-5 focus:border-blue-500"
+                className={
+                  'border-dashed border-2 p-5 active:border-blue-500 text-center w-full' +
+                  (pdfError ? ' border-red-600' : '')
+                }
               >
                 <input {...getInputProps()} />
-                <p>Click to Upload or Drag and Drop</p>
+                <p>
+                  {pdfError ||
+                    (pdf ? (
+                      `Successfully attached ${pdf.name}`
+                    ) : (
+                      <>
+                        Click to Upload or Drag and Drop
+                        <br />
+                        PDF File up to 100 KB
+                      </>
+                    ))}
+                </p>
               </div>
             </div>
           </div>
@@ -195,6 +225,10 @@ function AddToProfile() {
               className="basis-1/2 invisible border-solid border-2 border-black"
               aria-hidden="true"
             ></div>
+            {/* TODO: Use this instead of only using react-select */}
+            {/* {skills.map((s) => (
+                        <ul key={s}>{s}</ul>
+                      ))} */}
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
@@ -217,6 +251,24 @@ function AddToProfile() {
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
+              <label htmlFor="relevantCoursework" className="text-base">
+                <span className="font-bold">Relevant Coursework</span> (optional)
+              </label>
+              <textarea
+                id="relevantCoursework"
+                className={`border-solid border-2 h-40 text-base px-3 nocommonligs resize-none py-3 rounded ${
+                  errors.coursework ? 'border-red-600' : 'border-black'
+                }`}
+                {...register('coursework')}
+              ></textarea>
+            </div>
+            <div
+              className="basis-1/2 invisible border-solid border-2 border-black"
+              aria-hidden="true"
+            ></div>
+          </div>
+          <div className="flex justify-between gap-x-10 mb-9">
+            <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="links" className="text-base">
                 <span className="font-bold">Additional Links</span> (Portfolio, Website, GitHub)
               </label>
@@ -226,36 +278,47 @@ function AddToProfile() {
                 instanceId="links"
                 // options={[{ option: 'd' }]}
                 placeholder=""
-                formatCreateLabel={(s) => s}
+                formatOptionLabel={({ value }) =>
+                  value.startsWith('http') ? value : `https://${value}`
+                }
+                formatCreateLabel={(s) => (s.startsWith('http') ? s : `https://${s}`)}
                 isValidNewOption={(s) => {
                   if (s.trim().length === 0) {
                     return false;
                   }
-                  const { error } = SecondProfileCreationValidator.validate({
+                  let { error } = SecondProfileCreationValidator.validate({
                     skills: [],
                     links: [s],
-                    labExperience: '',
-                    coursework: '',
                   });
                   if (error) {
-                    return false;
+                    ({ error } = SecondProfileCreationValidator.validate({
+                      skills: [],
+                      links: [`https://${s}`],
+                    }));
                   }
-                  return true;
+                  return !error;
                 }}
                 onChange={(opt, meta) => {
                   // console.log({ opt, meta });
                   if (meta.action === 'create-option') {
-                    const { error } = SecondProfileCreationValidator.validate({
+                    let { error } = SecondProfileCreationValidator.validate({
                       skills: [],
                       links: [meta.option.value],
-                      labExperience: '',
-                      coursework: '',
                     });
-                    // console.log({ error, links });
+                    if (error) {
+                      ({ error } = SecondProfileCreationValidator.validate({
+                        skills: [],
+                        links: [`https://${meta.option.value}`],
+                      }));
+                    }
                     if (error) {
                       return;
                     }
-                    setLinks((l) => [...l, meta.option.value]);
+                    if (meta.option.value.startsWith('http')) {
+                      setLinks((l) => [...l, meta.option.value]);
+                    } else {
+                      setLinks((l) => [...l, `https://${meta.option.value}`]);
+                    }
                   } else if (meta.action === 'pop-value') {
                     setLinks((l) => l.slice(0, -1));
                   } else if (meta.action === 'remove-value') {
@@ -287,8 +350,9 @@ function AddToProfile() {
               Skip for now
             </Link>
             <button
-              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3"
+              className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
               type="submit"
+              disabled={isSubmitting}
             >
               Complete
             </button>
