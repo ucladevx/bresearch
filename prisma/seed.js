@@ -6,9 +6,23 @@ async function main() {
   const researcherA = await prisma.researcher.upsert({
     where: { email: 'johndoe@g.ucla.edu' },
     create: {
-      firstName: 'John',
-      lastName: 'Doe',
       email: 'johndoe@g.ucla.edu',
+    },
+    update: {},
+  });
+
+  const studentB = await prisma.student.upsert({
+    where: {
+      email: 'janedoe@g.ucla.edu', // or your email here for debug purposes
+    },
+    create: {
+      // firstName: 'Jane',
+      // preferredName: 'Jane',
+      // lastName: 'Doe',
+      email: 'janedoe@g.ucla.edu',
+      // user: {
+      //   connect: { email: 'janedoe@g.ucla.edu' },
+      // },
     },
     update: {},
   });
@@ -51,12 +65,12 @@ async function main() {
     where: {
       jobId_applicantEmail: {
         jobId: job.id,
-        applicantEmail: studentA.email,
+        applicantEmail: studentB.email,
       },
     },
     create: {
       jobId: job.id,
-      applicantEmail: studentA.email,
+      applicantEmail: studentB.email,
       bookmarked: true,
       status: 'SAVED',
       piStatus: 'CONSIDERING',

@@ -42,65 +42,51 @@ class FirstProfileCreationRoute extends ApiRoute {
       const {
         firstName,
         lastName,
-        email,
         pronouns,
         preferredEmail,
         phoneNumber,
         bio,
         major,
         additionalMajor,
+        minor,
+        additionalMinor,
         graduationDate,
         gpa,
         majorGpa,
-        experience,
-        coursework,
-        links,
       } = value;
 
       //default to null on the first page for values that don't get set
       let tempBio = bio || '';
       let tempPronouns = pronouns || 'NOT_LISTED';
-      let tempLabExperience = experience || '';
-      let tempCoursework = coursework || '';
-      let tempLinks = links || '';
 
       const result = await prisma.studentProfile.create({
         data: {
+          firstName,
+          lastName,
           pronouns: tempPronouns,
           preferredEmail,
-          phoneNumber: phoneNumber.toString(),
+          phoneNumber: phoneNumber || null,
           bio: tempBio,
           major,
           additionalMajor,
+          minor,
+          additionalMinor,
           graduationDate,
           gpa,
           majorGpa,
-          experience: tempLabExperience,
-          coursework: tempCoursework,
-          links: tempLinks,
           student: {
             connect: { email: req.session.user.email },
           },
         },
       });
 
-      const result2 = await prisma.student.update({
-        where: {
-          email: req.session.user.email,
-        },
-        data: {
-          firstName,
-          lastName,
-          email,
-        },
-      });
-
-      // await res.revalidate(`/profile/${result.id}`);
-      // await res.revalidate('/');
+      const slug = `/student/profile/${result.id.replaceAll('-', '')}`;
+      await res.revalidate(slug);
 
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
+      console.error(e);
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -108,7 +94,6 @@ class FirstProfileCreationRoute extends ApiRoute {
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
       } else {
-        console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
     } finally {

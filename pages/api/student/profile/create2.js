@@ -38,8 +38,7 @@ class SecondProfileCreationRoute extends ApiRoute {
       if (error) {
         throw error;
       }
-
-      const { experience, coursework, links } = value;
+      const { labExperience, coursework, links, skills } = value;
 
       const student = await prisma.student.findUnique({
         where: {
@@ -51,15 +50,20 @@ class SecondProfileCreationRoute extends ApiRoute {
           studentId: student.id,
         },
         data: {
-          experience,
-          coursework,
+          experience: labExperience?.trim() || null,
+          coursework: coursework?.trim() || null,
           links,
+          skills,
         },
       });
+
+      const slug = `/student/profile/${result.id.replaceAll('-', '')}`;
+      await res.revalidate(slug);
 
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
+      console.error(e);
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -67,7 +71,6 @@ class SecondProfileCreationRoute extends ApiRoute {
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
       } else {
-        console.error(e);
         res.status(500).json({ message: 'something went wrong' });
       }
     } finally {
