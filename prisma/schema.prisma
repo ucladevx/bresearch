@@ -95,7 +95,8 @@ model Job {
   closed      Boolean
   title       String       @db.VarChar(50)
   description String
-  posters     Researcher[]
+  posterId    String       @db.Uuid
+  poster      Researcher   @relation(fields: [posterId], references: [id])
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
@@ -112,14 +113,24 @@ enum JobStatus {
   APPLIED
 }
 
+enum PIJobStatus {
+  CONSIDERING
+  REVIEWING
+  REJECTED
+  INTERVIEWING
+  ACCEPTED
+  JOINED
+}
+
 model LabeledJob {
-  job            Job       @relation(fields: [jobId], references: [id])
+  job            Job         @relation(fields: [jobId], references: [id])
   jobId          Int
-  applicant      Student   @relation(fields: [applicantEmail], references: [email])
-  applicantEmail String    @db.VarChar(100)
-  lastUpdated    DateTime  @default(now())
+  applicant      Student     @relation(fields: [applicantEmail], references: [email])
+  applicantEmail String      @db.VarChar(100)
+  lastUpdated    DateTime    @default(now())
   status         JobStatus
-  bookmarked     Boolean   @default(false)
+  piStatus       PIJobStatus
+  bookmarked     Boolean     @default(false)
 
   @@id([jobId, applicantEmail])
 }

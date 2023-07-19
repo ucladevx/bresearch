@@ -3,32 +3,13 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // const userA = await prisma.user.upsert({
-  //   where: { email: 'johndoe@g.ucla.edu' },
-  //   create: {
-  //     email: 'johndoe@g.ucla.edu',
-  //   },
-  //   update: {},
-  // });
   const researcherA = await prisma.researcher.upsert({
     where: { email: 'johndoe@g.ucla.edu' },
     create: {
-      // firstName: 'John',
-      // lastName: 'Doe',
       email: 'johndoe@g.ucla.edu',
-      // user: {
-      //   connect: { email: 'johndoe@g.ucla.edu' },
-      // },
     },
     update: {},
   });
-  // const userB = await prisma.user.upsert({
-  //   where: { email: 'janedoe@g.ucla.edu' },
-  //   create: {
-  //     email: 'janedoe@g.ucla.edu',
-  //   },
-  //   update: {},
-  // });
 
   const studentB = await prisma.student.upsert({
     where: {
@@ -58,9 +39,21 @@ async function main() {
       weeklyHours: 10,
       credit: true,
       location: 'ON_CAMPUS',
-      posters: {
-        connect: [{ email: researcherA.email }],
+      poster: {
+        connect: {
+          id: researcherA.id,
+        },
       },
+    },
+    update: {},
+  });
+
+  const studentA = await prisma.student.upsert({
+    where: {
+      email: 'janedoe@g.ucla.edu', // or your email here for debug purposes
+    },
+    create: {
+      email: 'janedoe@g.ucla.edu',
     },
     update: {},
   });
@@ -77,6 +70,7 @@ async function main() {
       applicantEmail: studentB.email,
       bookmarked: true,
       status: 'SAVED',
+      piStatus: 'CONSIDERING',
     },
     update: {},
   });
