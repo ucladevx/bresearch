@@ -53,9 +53,6 @@ async function main() {
       email: 'janedoe@g.ucla.edu', // or your email here for debug purposes
     },
     create: {
-      firstName: 'Jane',
-      preferredName: 'Jane',
-      lastName: 'Doe',
       email: 'janedoe@g.ucla.edu',
     },
     update: {},
