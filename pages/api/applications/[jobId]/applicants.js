@@ -55,9 +55,6 @@ class ApplicationApplicants extends ApiRoute {
               applicant: {
                 select: {
                   id: true,
-                  firstName: true,
-                  lastName: true,
-                  preferredName: true,
                   studentProfile: true,
                 },
               },
