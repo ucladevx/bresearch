@@ -3,7 +3,7 @@
 //TODO: Checkboxes, sorting, search
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 //Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
-import TagDropdown from '../../../components/TagDropdown';
+import TagDropdown from '../../components/TagDropdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
@@ -108,7 +108,12 @@ const ApplicantsCard = (props) => {
                 </td>
                 <td className="px-6 py-2.5">resumeFile</td>
                 <td className="px-6 py-2.5">
-                  <Link href="/pi-view/applicant-manager/1">view</Link>
+                  <Link
+                    href={`/student/profile/${applicant.studentProfile.id.replaceAll('-', '')}`}
+                    className="underline"
+                  >
+                    view
+                  </Link>
                 </td>
                 <td className="py-2.5 px-6">dateApplied</td>
               </tr>
