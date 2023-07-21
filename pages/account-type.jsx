@@ -36,8 +36,8 @@ function AccountType() {
     try {
       const res = await fetch('/api/researcher/create', { method: 'POST' });
       if (res.status === 200) {
-        // await getSession(); // calls jwt callback to update accountType
-        // await router.push('/researcher/profile/create');
+        await getSession(); // calls jwt callback to update accountType
+        await router.push('/researcher/profile/create');
       } else if (res.status === 500) {
         const responseBody = await res.json();
         if (responseBody?.message?.startsWith('Researcher al')) {
@@ -54,7 +54,7 @@ function AccountType() {
       <img src="/bResearchLogo.png" className="w-1/4 mx-auto my-20" />
       <button
         className="ml-60 w-1/3 h-60 bg-blue-800 text-white text-2xl font-normal rounded-md cursor-pointer disabled:opacity-75"
-        onClick={() => createStudent()}
+        onClick={createStudent}
         disabled={isSubmitting}
       >
         I am a student looking for research
@@ -65,6 +65,7 @@ function AccountType() {
       <button
         className="ml-10 w-1/3 h-60 bg-blue-800 text-white text-2xl font-normal rounded-md cursor-pointer disabled:opacity-75"
         disabled={isSubmitting}
+        onClick={createResearcher}
       >
         I am a PI looking to hire students
         <br />
