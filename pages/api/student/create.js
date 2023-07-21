@@ -11,6 +11,22 @@ class StudentCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
+      if (req.token.accountType) {
+        return res
+          .status(403)
+          .json({ message: 'User already exists for user', accountType: req.token.accountType });
+      }
+      // TODO: maybe use an interactive transaction https://www.prisma.io/docs/concepts/components/prisma-client/transactions#interactive-transactions
+      const researcher = await prisma.researcher.findUnique({
+        where: {
+          email: req.session.user.email,
+        },
+      });
+      if (researcher !== null) {
+        return res
+          .status(403)
+          .json({ message: 'Researcher already exists for user', accountType: 'researcher' });
+      }
       const result = await prisma.student.create({
         data: {
           email: req.session.user.email,
