@@ -1,7 +1,7 @@
 import { Prisma } from 'prisma/prisma-client';
 import ApiRoute from '@lib/ApiRoute';
 
-class StudentCreationRoute extends ApiRoute {
+class ResearcherCreationRoute extends ApiRoute {
   /**
    * profile creation endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req see above example request body
@@ -17,17 +17,17 @@ class StudentCreationRoute extends ApiRoute {
           .json({ message: 'User already exists for user', accountType: req.token.accountType });
       }
       // TODO: maybe use an interactive transaction https://www.prisma.io/docs/concepts/components/prisma-client/transactions#interactive-transactions
-      const researcher = await prisma.researcher.findUnique({
+      const student = await prisma.student.findUnique({
         where: {
           email: req.session.user.email,
         },
       });
-      if (researcher !== null) {
+      if (student !== null) {
         return res
           .status(403)
-          .json({ message: 'Researcher already exists for user', accountType: 'researcher' });
+          .json({ message: 'Student already exists for user', accountType: 'student' });
       }
-      const result = await prisma.student.create({
+      const result = await prisma.researcher.create({
         data: {
           email: req.session.user.email,
         },
@@ -38,7 +38,9 @@ class StudentCreationRoute extends ApiRoute {
       console.error({ e });
       // check for Node.js errors (data integrity, etc)
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        res.status(500).json({ message: 'Student already exists for user' });
+        res
+          .status(500)
+          .json({ message: 'Researcher already exists for user', accountType: 'researcher' });
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
       } else {
@@ -50,4 +52,4 @@ class StudentCreationRoute extends ApiRoute {
   }
 }
 
-export default new StudentCreationRoute().as_handler();
+export default new ResearcherCreationRoute().as_handler();

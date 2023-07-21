@@ -30,6 +30,7 @@ export async function middleware(req) {
     url.pathname !== '/api/auth/signout' &&
     url.pathname !== '/api/auth/session' &&
     url.pathname !== '/api/student/create' &&
+    url.pathname !== '/api/researcher/create' &&
     url.pathname !== '/account-type' &&
     !token.accountType
   ) {
