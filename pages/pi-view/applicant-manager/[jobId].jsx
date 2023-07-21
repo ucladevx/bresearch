@@ -93,16 +93,16 @@ const ApplicantsCard = (props) => {
           </thead>
           {/*Maps applicants to table rows, some values hard-coded for now */}
           <tbody>
-            {applicants?.map((applicants) => (
+            {applicants?.map(({ applicant }) => (
               <tr
                 /*ID fetch doesn't work yet, needs to be included in get api*/
-                key={applicants.applicant.id}
+                key={applicant.id}
                 className="bg-white border-b dark:border-gray-700  text-gray-700"
               >
                 <td className="px-6 py-2.5">
-                  {applicants.applicant.firstName} {applicants.applicant.lastName}
+                  {applicant.studentProfile.firstName} {applicant.studentProfile.lastName}
                 </td>
-                <td className="px-6 py-2.5">graduationDate</td>
+                <td className="px-6 py-2.5">{applicant.studentProfile.graduationDate}</td>
                 <td className="pl-5 py-2.5">
                   <TagDropdown />
                 </td>
@@ -139,7 +139,9 @@ export default function ApplicantManager() {
 
   useEffect(() => {
     //Router isn't initially hydrated with query params, so wait until ready
-    if (!router.isReady) return;
+    if (!router.isReady) {
+      return;
+    }
     const { jobId } = router.query;
     fetch(`/api/applications/${jobId}/applicants`, {
       method: 'GET',
