@@ -58,8 +58,8 @@ class JobCreationRoute extends ApiRoute {
           closed: closeDate ? closeDate < new Date() : false,
           title,
           description,
-          posters: {
-            connect: [{ email: req.session.user.email }],
+          poster: {
+            connect: { email: req.session.user.email },
           },
           paid,
           duration,
