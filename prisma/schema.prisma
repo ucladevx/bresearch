@@ -69,10 +69,17 @@ model StudentProfile {
 }
 
 model Researcher {
-  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email String @unique @db.VarChar(100)
-  jobs  Job[]
-  // researcherProfile ResearcherProfile?
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String             @unique @db.VarChar(100)
+  jobs              Job[]
+  researcherProfile ResearcherProfile?
+}
+
+model ResearcherProfile {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  researcher   Researcher @relation(fields: [researcherId], references: [id])
+  researcherId String     @unique @db.Uuid
+  name         String     @db.VarChar(161)
 }
 
 enum Duration {
