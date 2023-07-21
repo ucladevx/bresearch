@@ -29,7 +29,7 @@ function OnboardingPage() {
         },
       });
       if (res.status === 200) {
-        await router.push('/app-manager');
+        await router.push('/jobs');
       }
     } catch (e) {}
     setIsSubmitting(false);
