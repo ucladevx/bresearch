@@ -52,6 +52,10 @@ function OnboardingPage() {
           <input
             type="text"
             className="w-full h-8 mb-2 pb-2 text-black bg-white border border-black rounded-sm pl-2 pt-1"
+            id="labName"
+            autoFocus={true}
+            {...register('labName', {})}
+            maxLength={50}
           />
 
           <label className="block mt-4 text-lg leading-9 text-left text-black">Area</label>
@@ -67,7 +71,6 @@ function OnboardingPage() {
             type="text"
             className="w-full h-8 mb-2 pb-2 text-black bg-white border border-black rounded-sm pl-2 pt-1"
             id="name"
-            autoFocus={true}
             {...register('name', {})}
             maxLength={161}
           />
