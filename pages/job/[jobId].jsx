@@ -1,4 +1,5 @@
 import prisma from '@lib/prisma';
+import 'react-quill/dist/quill.snow.css';
 
 function Job(props) {
   return (
@@ -44,6 +45,7 @@ const JobHeading = (props) => {
       </div>
       <div>
         <div className="text-base font-medium text-black my-0.5">{job.title}</div>
+        <div className="text-base font-medium text-black my-0.5">Lab: {job.lab.name}</div>
       </div>
     </div>
   );
@@ -90,7 +92,9 @@ const JobDescription = (props) => {
   return (
     <div className="">
       <p className="text-md font-medium text-slate-500 mb-1.5">Description</p>
-      <p className="text-sm font-light leading-normal">{description}</p>
+      {/* https://github.com/facebook/react/issues/19901 */}
+      <div dangerouslySetInnerHTML={{ __html: description }} className="ql-editor !px-0" />
+      {/* <p className="text-sm font-light leading-normal">{description}</p> */}
     </div>
   );
 };
@@ -115,6 +119,11 @@ const ActionMenu = ({ href }) => {
 };
 
 export async function getStaticProps(context) {
+  const jobId = parseInt(context.params.jobId, 10);
+  if (Number.isNaN(jobId)) {
+    return { notFound: true };
+  }
+
   const job = await prisma.job.findUnique({
     select: {
       created: true,
@@ -124,10 +133,16 @@ export async function getStaticProps(context) {
       departments: true,
       duration: true,
       closingDate: true,
+      lab: {
+        select: { name: true },
+      },
     },
-    where: { id: parseInt(context.params.jobId, 10) },
+    where: { id: jobId },
   });
   // console.log({ job });
+  if (!job) {
+    return { notFound: true };
+  }
   return {
     props: {
       job: {

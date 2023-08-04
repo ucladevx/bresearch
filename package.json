@@ -21,6 +21,7 @@
     "@supabase/supabase-js": "2.26.0",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.3",
+    "isomorphic-dompurify": "1.8.0",
     "joi": "17.8.3",
     "next": "13.4.3",
     "next-auth": "4.20.1",
@@ -28,6 +29,7 @@
     "react-dom": "18.2.0",
     "react-dropzone": "14.2.3",
     "react-hook-form": "7.43.9",
+    "react-quill": "2.0.0",
     "react-select": "5.7.3"
   },
   "devDependencies": {

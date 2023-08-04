@@ -1,8 +1,21 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobCreationFormValidator } from '@lib/validators';
 import { useRouter } from 'next/router';
-import { useState, Fragment } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
+
+// https://github.com/zenoamaro/react-quill/issues/718#issuecomment-873541445
+// https://github.com/zenoamaro/react-quill/issues/596#issuecomment-1207420071
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    // eslint-disable-next-line react/display-name
+    return ({ forwardedRef, ...props }) => <RQ ref={forwardedRef} {...props} />;
+  },
+  { ssr: false }
+);
 
 function Input({
   id,
@@ -37,10 +50,24 @@ function CreateJobPosting() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: joiResolver(JobCreationFormValidator) });
+    control,
+  } = useForm({
+    resolver: joiResolver(JobCreationFormValidator),
+    defaultValues: { description: '<p><br></p>' },
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [labs, setLabs] = useState([]);
 
+  useEffect(() => {
+    async function getLabs() {
+      try {
+        const { labs } = await (await fetch('/api/researcher/labs')).json();
+        setLabs(labs);
+      } catch (e) {}
+    }
+    getLabs();
+  }, []);
   async function onSubmit(data) {
     // e.preventDefault();
     if (isSubmitting) {
@@ -50,6 +77,7 @@ function CreateJobPosting() {
     try {
       const tempFutureDate = new Date();
       tempFutureDate.setDate(tempFutureDate.getDate() + 30);
+
       const res = await fetch('/api/jobs/create', {
         method: 'POST',
         body: JSON.stringify({
@@ -88,7 +116,17 @@ function CreateJobPosting() {
               <label htmlFor="lab" className="font-bold text-base">
                 Lab*
               </label>
-              <select id="lab" disabled></select>
+              <select
+                id="lab"
+                className="border-solid border-2 border-black h-11"
+                {...register('lab', {})}
+              >
+                {labs.map(({ id, name }) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="positionTitle" className="font-bold text-base">
@@ -129,15 +167,31 @@ function CreateJobPosting() {
             <label htmlFor="description" className="font-bold text-base">
               Description of the Opportunity*
             </label>
-            {/* https://stackoverflow.com/questions/50229792/adding-a-new-line-in-a-jsx-string-inside-a-paragraph-react */}
-            <textarea
-              id="description"
-              className={`w-full border-solid border-2 h-40 text-base px-3 nocommonligs resize-none py-3 rounded ${
-                errors.description ? 'border-red-600' : 'border-black'
-              }`}
-              maxLength={15_000}
-              {...register('description')}
-            ></textarea>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field }) => {
+                // console.log({ field, errors }, field.ref.toString());
+                return (
+                  <ReactQuill
+                    {...field} // https://github.com /zenoamaro/react-quill/issues/642#issuecomment-717661518
+                    ref={undefined} // errors on .focus() if ref is passed
+                    forwardedRef={field.ref}
+                    defaultValue="<p><br></p>"
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', { list: 'bullet' }, { list: 'ordered' }],
+                      ],
+                    }}
+                    formats={['bold', 'italic', 'underline', 'list', 'strong']}
+                    style={{
+                      border: errors.description ? '2px solid red' : '2px solid black',
+                    }}
+                    className="nocommonligs"
+                  />
+                );
+              }}
+            />
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">

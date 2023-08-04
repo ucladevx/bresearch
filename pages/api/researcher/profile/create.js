@@ -24,8 +24,19 @@ class ResearcherProfileCreationRoute extends ApiRoute {
         throw error;
       }
 
-      const { name } = value;
+      const { name, labName } = value;
+      // TODO: combine queries into a prisma transaction
 
+      await prisma.lab.create({
+        data: {
+          name: labName,
+          adminResearchers: {
+            connect: {
+              email: req.session.user.email,
+            },
+          },
+        },
+      });
       const result = await prisma.researcherProfile.create({
         data: {
           name,

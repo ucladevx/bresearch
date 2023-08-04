@@ -1,13 +1,14 @@
 import { Prisma } from 'prisma/prisma-client';
 
 import { JobCreationValidator, isValidationError } from '@lib/validators';
+import { sanitize } from 'isomorphic-dompurify';
 import ApiRoute from '@lib/ApiRoute';
 
 /* example POST request body
 {
     "closingDate": "2023-03-18T23:28:19.179Z",
     "title": "my first job post",
-    "description": "description for my first job post",
+    "description": "<p>description for my first job post</p>",
     "paid": false,
     "duration": "QUARTERLY",
     "departments": [
@@ -33,6 +34,16 @@ class JobCreationRoute extends ApiRoute {
       if (error) {
         throw error;
       }
+      const sanitizedHTML = sanitize(req.body.description, {
+        ALLOWED_TAGS: ['p', 'br', 'ul', 'ol', 'li', 'strong', 'em', 'u', '#text'],
+        ALLOWED_ATTR: [],
+        KEEP_CONTENT: false,
+      });
+      if (sanitizedHTML !== req.body.description) {
+        return res.status(400).json({
+          message: 'Invalid job description',
+        });
+      }
 
       const {
         closingDate,
@@ -44,6 +55,7 @@ class JobCreationRoute extends ApiRoute {
         weeklyHours,
         credit,
         location,
+        lab: labId,
       } = value;
 
       // TODO: what if closingDate is not passed in request body
@@ -52,6 +64,7 @@ class JobCreationRoute extends ApiRoute {
         closeDate = new Date(closingDate);
       }
 
+      // TODO: ensure researcher is in the lab
       const result = await prisma.job.create({
         data: {
           closingDate: closeDate,
@@ -60,6 +73,9 @@ class JobCreationRoute extends ApiRoute {
           description,
           poster: {
             connect: { email: req.session.user.email },
+          },
+          lab: {
+            connect: { id: labId },
           },
           paid,
           duration,

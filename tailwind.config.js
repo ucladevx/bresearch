@@ -15,6 +15,9 @@ module.exports = {
         'text-black': '#404040',
         'light-gray': '#F5F5F5',
       },
+      fontFamily: {
+        sans: ['var(--font-kumbh-sans)'],
+      },
     },
   },
   plugins: [],
