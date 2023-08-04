@@ -115,6 +115,11 @@ const ActionMenu = ({ href }) => {
 };
 
 export async function getStaticProps(context) {
+  const jobId = parseInt(context.params.jobId, 10);
+  if (Number.isNaN(jobId)) {
+    return { notFound: true };
+  }
+
   const job = await prisma.job.findUnique({
     select: {
       created: true,
@@ -128,6 +133,9 @@ export async function getStaticProps(context) {
     where: { id: parseInt(context.params.jobId, 10) },
   });
   // console.log({ job });
+  if (!job) {
+    return { notFound: true };
+  }
   return {
     props: {
       job: {
