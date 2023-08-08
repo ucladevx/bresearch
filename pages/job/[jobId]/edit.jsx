@@ -1,11 +1,11 @@
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
-import { JobCreationFormValidator } from '@lib/validators';
+import { JobEditFormValidator } from '@lib/validators';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
-import ResearcherSidebar from '../../components/ResearcherSidebar';
+import ResearcherSidebar from '../../../components/ResearcherSidebar';
 
 // https://github.com/zenoamaro/react-quill/issues/718#issuecomment-873541445
 // https://github.com/zenoamaro/react-quill/issues/596#issuecomment-1207420071
@@ -46,34 +46,69 @@ function Input({
   );
 }
 
-function CreateJobPosting() {
+function EditJobPosting() {
   const router = useRouter();
+  const { jobId } = router.query;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
-    watch,
     setValue,
   } = useForm({
-    resolver: joiResolver(JobCreationFormValidator),
-    defaultValues: { description: '<p><br></p>', credit: true },
+    resolver: joiResolver(JobEditFormValidator),
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [labs, setLabs] = useState([]);
+  const [jobInfo, setJobInfo] = useState(null);
 
   useEffect(() => {
     async function getLabs() {
+      if (jobId === undefined) {
+        return;
+      }
       try {
-        const { labs } = await (await fetch('/api/researcher/labs')).json();
-        setLabs(labs);
-        setValue('lab', labs[0].id, { shouldValidate: true });
+        const jobInfo = await (await fetch(`/api/jobs/${jobId}`)).json();
+        setJobInfo(jobInfo);
+        const fields = ['title', 'description', 'credit', 'location'];
+        for (const field of fields) {
+          setValue(field, jobInfo[field]);
+        }
+        setValue('weeklyHours', jobInfo.weeklyHours.toString(10));
+        setValue(
+          'closingDate',
+          new Intl.DateTimeFormat('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          }).format(new Date(jobInfo.closingDate))
+        );
       } catch (e) {}
     }
     getLabs();
-  }, [setValue]);
+  }, [jobId, setValue]);
+  async function closeJob() {
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/edit`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          closed: true,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.status === 200) {
+        await router.push('/posts');
+      }
+    } catch (e) {}
+    setIsSubmitting(false);
+  }
 
   async function onSubmit(data) {
     // e.preventDefault();
@@ -81,16 +116,13 @@ function CreateJobPosting() {
       return;
     }
     setIsSubmitting(true);
-    delete data.department;
-    delete data.startDate;
     try {
-      const res = await fetch('/api/jobs/create', {
-        method: 'POST',
+      delete data.department;
+      delete data.startDate;
+      const res = await fetch(`/api/jobs/${jobId}/edit`, {
+        method: 'PATCH',
         body: JSON.stringify({
           ...data,
-          duration: 'QUARTERLY',
-          departments: [],
-          paid: true,
           closingDate: new Date(data.closingDate),
         }),
         headers: {
@@ -112,7 +144,7 @@ function CreateJobPosting() {
         <main className="w-[80%] max-w-6xl">
           {/* TODO: fix above main width */}
           <div className="flex justify-center mb-9 mt-4">
-            <h1 className="font-bold nocommonligs text-3xl">Create Post</h1>
+            <h1 className="font-bold nocommonligs text-3xl">Edit Post</h1>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex mb-9">
@@ -123,17 +155,9 @@ function CreateJobPosting() {
                 <label htmlFor="lab" className="font-bold text-base">
                   Lab*
                 </label>
-                <select
-                  id="lab"
-                  className="border-solid border-2 border-black h-11"
-                  {...register('lab', {})}
-                >
-                  {labs.map(({ id, name }) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                <div id="lab" className="border-solid border-2 border-black h-11">
+                  {jobInfo && jobInfo.lab.name}
+                </div>
               </div>
               <div className="flex flex-col basis-1/2 gap-y-3">
                 <label htmlFor="positionTitle" className="font-bold text-base">
@@ -296,13 +320,20 @@ function CreateJobPosting() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              <button
+                className="px-6 py-4 bg-[#E53939] text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
+                disabled={isSubmitting}
+                onClick={closeJob}
+              >
+                Stop Receiving Applications
+              </button>
               <button
                 className="px-6 py-4 bg-blue-600 text-white font-bold text-xl rounded-xl nocommonligs mb-3 disabled:opacity-75"
                 type="submit"
                 disabled={isSubmitting}
               >
-                Create Posting
+                Publish Changes
               </button>
             </div>
           </form>
@@ -312,4 +343,4 @@ function CreateJobPosting() {
   );
 }
 
-export default CreateJobPosting;
+export default EditJobPosting;

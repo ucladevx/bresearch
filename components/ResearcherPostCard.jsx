@@ -41,7 +41,7 @@ export default function ResearcherPostCard({ id, labName, title, closingDate }) 
         <div className="font-semibold flex gap-x-4">
           <Link
             href={`/job/${id}/edit`}
-            className="px-6 py-4 border-[1px] border-dark-blue rounded-xl text-dark-blue inline-block invisible"
+            className="px-6 py-4 border-[1px] border-dark-blue rounded-xl text-dark-blue inline-block"
           >
             Edit Post
           </Link>
