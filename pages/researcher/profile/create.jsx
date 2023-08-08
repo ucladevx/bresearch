@@ -29,7 +29,7 @@ function OnboardingPage() {
         },
       });
       if (res.status === 200) {
-        await router.push('/jobs');
+        await router.push('/posts');
       }
     } catch (e) {}
     setIsSubmitting(false);
