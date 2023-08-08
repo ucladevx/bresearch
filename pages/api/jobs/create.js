@@ -1,7 +1,12 @@
 import { Prisma } from 'prisma/prisma-client';
 
 import { JobCreationValidator, isValidationError } from '@lib/validators';
-import { sanitize } from 'isomorphic-dompurify';
+// import { sanitize } from 'isomorphic-dompurify';
+import { JSDOM } from 'jsdom';
+import DOMPurify from 'dompurify';
+
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
 import ApiRoute from '@lib/ApiRoute';
 
 /* example POST request body
@@ -29,12 +34,18 @@ class JobCreationRoute extends ApiRoute {
    */
   async post(req, res, prisma) {
     try {
+      if (req.token.accountType !== 'researcher') {
+        return res
+          .status(403)
+          .json({ message: 'You are not a researcher', accountType: req.token.accountType });
+      }
+
       const { error, value } = JobCreationValidator.validate(req.body);
 
       if (error) {
         throw error;
       }
-      const sanitizedHTML = sanitize(req.body.description, {
+      const sanitizedHTML = purify.sanitize(req.body.description, {
         ALLOWED_TAGS: ['p', 'br', 'ul', 'ol', 'li', 'strong', 'em', 'u', '#text'],
         ALLOWED_ATTR: [],
         KEEP_CONTENT: false,
@@ -64,7 +75,7 @@ class JobCreationRoute extends ApiRoute {
         closeDate = new Date(closingDate);
       }
 
-      // TODO: ensure researcher is in the lab
+      // TODO: ensure researcher is in the lab and # of jobs < 50
       const result = await prisma.job.create({
         data: {
           closingDate: closeDate,
@@ -92,6 +103,7 @@ class JobCreationRoute extends ApiRoute {
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
+      console.error(e);
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
