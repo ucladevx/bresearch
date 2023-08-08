@@ -18,7 +18,115 @@ a {
 * {
   box-sizing: border-box;
 }
+@layer utilities {
+  .nocommonligs {
+    font-variant-ligatures: no-common-ligatures;
+    /* font-feature-settings: 'liga' 0; */
+  }
+  /* .ql-container p {
+    font-family: 'Times New Roman' !important;
+  } */
+  /* .ql-container { */
+  /* font-family: 'var(--font-kumbh-sans)' !important; */
+  /* font-variant-ligatures: no-common-ligatures; */
+  /* @apply !font-sans; */
+  /* } */
+}
 
+.ql-container {
+  /* font-family: 'var(--font-kumbh-sans)' !important; */
+  /* font-variant-ligatures: no-common-ligatures; */
+  @apply !font-sans;
+}
+.ql-display ul > li::before {
+  content: '\2022';
+}
+
+.ql-display ol li {
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+  counter-increment: list-0;
+}
+.ql-display ol li:before {
+  content: counter(list-0, decimal) '. ';
+}
+.ql-display ol li.ql-indent-1 {
+  counter-increment: list-1;
+}
+.ql-display ol li.ql-indent-1:before {
+  content: counter(list-1, lower-alpha) '. ';
+}
+.ql-display ol li.ql-indent-1 {
+  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-2 {
+  counter-increment: list-2;
+}
+.ql-display ol li.ql-indent-2:before {
+  content: counter(list-2, lower-roman) '. ';
+}
+.ql-display ol li.ql-indent-2 {
+  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-3 {
+  counter-increment: list-3;
+}
+.ql-display ol li.ql-indent-3:before {
+  content: counter(list-3, decimal) '. ';
+}
+.ql-display ol li.ql-indent-3 {
+  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-4 {
+  counter-increment: list-4;
+}
+.ql-display ol li.ql-indent-4:before {
+  content: counter(list-4, lower-alpha) '. ';
+}
+.ql-display ol li.ql-indent-4 {
+  counter-reset: list-5 list-6 list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-5 {
+  counter-increment: list-5;
+}
+.ql-display ol li.ql-indent-5:before {
+  content: counter(list-5, lower-roman) '. ';
+}
+.ql-display ol li.ql-indent-5 {
+  counter-reset: list-6 list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-6 {
+  counter-increment: list-6;
+}
+.ql-display ol li.ql-indent-6:before {
+  content: counter(list-6, decimal) '. ';
+}
+.ql-display ol li.ql-indent-6 {
+  counter-reset: list-7 list-8 list-9;
+}
+.ql-display ol li.ql-indent-7 {
+  counter-increment: list-7;
+}
+.ql-display ol li.ql-indent-7:before {
+  content: counter(list-7, lower-alpha) '. ';
+}
+.ql-display ol li.ql-indent-7 {
+  counter-reset: list-8 list-9;
+}
+.ql-display ol li.ql-indent-8 {
+  counter-increment: list-8;
+}
+.ql-display ol li.ql-indent-8:before {
+  content: counter(list-8, lower-roman) '. ';
+}
+.ql-display ol li.ql-indent-8 {
+  counter-reset: list-9;
+}
+.ql-display ol li.ql-indent-9 {
+  counter-increment: list-9;
+}
+.ql-display ol li.ql-indent-9:before {
+  content: counter(list-9, decimal) '. ';
+}
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

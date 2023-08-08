@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Department {
@@ -18,24 +19,75 @@ enum Department {
   SOCIAL_SCIENCES
 }
 
+// https://admission.ucla.edu/apply/majors
+enum Major {
+  COGNITIVE_SCIENCE
+  COMPUTER_SCIENCE
+}
+
+// https://admission.ucla.edu/apply/minors
+enum Minor {
+  LINGUISTICS
+}
+
+enum Pronouns {
+  NOT_LISTED
+  HE_HIM
+  SHE_HER
+  THEY_THEM
+}
+
 model Student {
-  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName     String       @db.VarChar(80)
-  preferredName String?      @db.VarChar(80)
-  lastName      String       @db.VarChar(80)
-  email         String       @unique @db.VarChar(100)
-  jobs          LabeledJob[]
-  departments   Department[]
-  // majors        Major[]
-  // minors        Minor[]
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String          @unique @db.VarChar(100) // TODO: remove and use something else in LabeledJob
+  jobs           LabeledJob[]
+  studentProfile StudentProfile?
+}
+
+model StudentProfile {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student         Student  @relation(fields: [studentId], references: [id])
+  studentId       String   @unique @db.Uuid
+  firstName       String   @db.VarChar(80)
+  lastName        String   @db.VarChar(80)
+  pronouns        Pronouns
+  preferredEmail  String?  @db.VarChar(100)
+  phoneNumber     String?  @db.VarChar(30)
+  bio             String   @db.VarChar(500)
+  major           Major
+  additionalMajor Major?
+  minor           Minor?
+  additionalMinor Minor?
+  graduationDate  String   @db.VarChar(12)
+  gpa             String   @db.VarChar(5)
+  majorGpa        String   @db.VarChar(5)
+  skills          String[] @db.VarChar(60)
+  experience      String?  @db.VarChar(1000)
+  coursework      String?  @db.VarChar(800)
+  links           String[] @db.VarChar(200)
+  // resume
 }
 
 model Researcher {
-  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName String @db.VarChar(80)
-  lastName  String @db.VarChar(80)
-  email     String @unique @db.VarChar(100)
-  jobs      Job[]
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String             @unique @db.VarChar(100)
+  jobs              Job[]
+  labs              Lab[]
+  researcherProfile ResearcherProfile?
+}
+
+model ResearcherProfile {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  researcher   Researcher @relation(fields: [researcherId], references: [id])
+  researcherId String     @unique @db.Uuid
+  name         String     @db.VarChar(161)
+}
+
+model Lab {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String       @db.VarChar(50)
+  jobs             Job[]
+  adminResearchers Researcher[]
 }
 
 enum Duration {
@@ -58,7 +110,10 @@ model Job {
   closed      Boolean
   title       String       @db.VarChar(50)
   description String
-  posters     Researcher[]
+  poster      Researcher   @relation(fields: [posterId], references: [id])
+  posterId    String       @db.Uuid
+  lab         Lab          @relation(fields: [labId], references: [id])
+  labId       String       @db.Uuid
   applicants  LabeledJob[]
   paid        Boolean
   duration    Duration
@@ -66,26 +121,33 @@ model Job {
   weeklyHours Int
   credit      Boolean
   location    Location
+  external    Boolean      @default(false)
 }
 
 enum JobStatus {
   HIDDEN
-  INTERESTED
-  IN_PROGRESS
+  SAVED
   APPLIED
-  IN_REVIEW
-  WITHDRAWN
-  ACCEPTED
+}
+
+enum PIJobStatus {
+  CONSIDERING
+  REVIEWING
   REJECTED
+  INTERVIEWING
+  ACCEPTED
+  JOINED
 }
 
 model LabeledJob {
-  job         Job       @relation(fields: [jobId], references: [id])
-  jobId       Int
-  applicant   Student   @relation(fields: [applicantId], references: [id])
-  applicantId String    @db.Uuid
-  // applied     Boolean
-  status      JobStatus
+  job            Job         @relation(fields: [jobId], references: [id])
+  jobId          Int
+  applicant      Student     @relation(fields: [applicantEmail], references: [email])
+  applicantEmail String      @db.VarChar(100)
+  lastUpdated    DateTime    @default(now())
+  status         JobStatus
+  piStatus       PIJobStatus
+  bookmarked     Boolean     @default(false)
 
-  @@id([jobId, applicantId])
+  @@id([jobId, applicantEmail])
 }
