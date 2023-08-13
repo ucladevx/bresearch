@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
+import NavBar from '../components/NavBar';
 //TODO: Fix menu not overlapping
 //Should text or card resize for longer/shorter titles?
 
@@ -109,7 +110,7 @@ export default function Apps() {
   return (
     <div className="fixed bg-neutral-100 h-screen w-screen">
       <header>
-        <nav>{/*NavBar*/}</nav>
+        <NavBar />
       </header>
       <h1 className="text-2xl font-bold flex justify-center mt-6">App Tracker</h1>
       <div

@@ -81,6 +81,7 @@ class JobCreationRoute extends ApiRoute {
           closingDate: closeDate,
           closed: closeDate ? closeDate < new Date() : false,
           title,
+          location,
           description,
           poster: {
             connect: { email: req.session.user.email },
@@ -107,6 +108,7 @@ class JobCreationRoute extends ApiRoute {
       if (isValidationError(e)) {
         res.status(400).json({ message: e.message });
       } else if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        console.error(e);
         res.status(500).json({ message: e.meta });
       } else if (e instanceof Prisma.PrismaClientValidationError) {
         res.status(400).json({ message: 'Invalid data format' });
