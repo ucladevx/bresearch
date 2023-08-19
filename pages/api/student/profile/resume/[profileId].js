@@ -1,5 +1,3 @@
-import { Prisma } from 'prisma/prisma-client';
-
 import ApiRoute from '@lib/ApiRoute';
 
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
