@@ -1,12 +1,14 @@
 import prisma from '@lib/prisma';
 
 import { useState, Fragment, useEffect } from 'react';
-import { Listbox } from '@headlessui/react';
+import { Listbox, Dialog, Transition } from '@headlessui/react';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { BookmarkIcon } from '@heroicons/react/20/solid';
 import NavBar from '../components/NavBar';
+import { useForm } from 'react-hook-form';
+import { joiResolver } from '@hookform/resolvers/joi';
+import { JobSearchValidator } from '@lib/validators';
 
 function JobCard({
   id,
@@ -26,10 +28,6 @@ function JobCard({
       return await (
         await fetch(`/api/applications/${id}/save`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({}),
         })
       ).json();
     },
@@ -227,7 +225,10 @@ const durations = [
   { value: 'ACADEMIC_YEAR', label: 'Academic Year' },
   { value: 'YEAR_ROUND', label: 'Year Round' },
 ];
-const payRanges = [];
+const payRanges = [
+  { value: true, label: 'Paid' },
+  { value: false, label: 'Unpaid' },
+];
 
 function Home({ jobs: originalJobs }) {
   const { isLoading, isError, data, status } = useQuery({
@@ -246,6 +247,8 @@ function Home({ jobs: originalJobs }) {
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [selectedJobID, setSelectedJobID] = useState(null);
 
+  const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(!true);
+
   const [isReversed, setIsReversed] = useState(false);
   useEffect(() => {
     if (status !== 'success') {
@@ -259,7 +262,24 @@ function Home({ jobs: originalJobs }) {
     setSelectedJobID(unmarkedJobs[0]?.id);
   }, [data, status, originalJobs]);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: joiResolver(JobSearchValidator),
+  });
+
+  useEffect(() => {
+    if (errors?.jobSearchQuery?.type === 'string.empty') {
+      setJobs(originalJobs);
+    }
+  }, [errors]);
+
   let filteredJobs = [...jobs];
+  if (selectedPayRanges.length !== 0 && selectedPayRanges.length !== departments.length) {
+    filteredJobs = filteredJobs.filter(({ paid }) => selectedPayRanges.includes(paid));
+  }
   if (selectedLocations.length !== 0 && selectedLocations.length !== locations.length) {
     filteredJobs = filteredJobs.filter(({ location }) => selectedLocations.includes(location));
   }
@@ -290,6 +310,47 @@ function Home({ jobs: originalJobs }) {
         <div className="flex gap-9 flex-col">
           <div className="flex">
             <div className="flex gap-x-6 flex-wrap gap-y-36">
+              <form
+                className="flex items-center gap-2"
+                role="search"
+                onSubmit={handleSubmit(async (d) => {
+                  try {
+                    const response = await fetch(
+                      `/api/jobs/search?jobSearchQuery=${d.jobSearchQuery}`
+                    );
+                    if (response.ok) {
+                      const jobs = await response.json();
+                      setJobs(jobs);
+                    }
+                  } catch (e) {}
+                })}
+              >
+                <input
+                  placeholder="Search"
+                  className="rounded-3xl px-3 h-[3.25rem]"
+                  {...register('jobSearchQuery')}
+                />
+                <svg
+                  width="20"
+                  height="26"
+                  viewBox="0 0 20 26"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M12.1029 5.7118C9.88777 4.45771 6.64861 4.92822 4.70834 7.22395C3.79332 8.3066 2.12809 8.47928 0.988936 7.60965C-0.150218 6.74003 -0.331917 5.15739 0.583099 4.07474C4.07376 -0.055407 10.1921 -1.22293 14.8102 1.39108C18.6866 3.58463 20.7335 8.04179 19.7589 12.2912C19.1292 15.0363 17.4498 16.8817 15.9423 18.0365C15.9723 18.0774 16.0023 18.1184 16.0323 18.1593C16.9825 19.4558 17.932 20.7513 18.8828 22.047C19.7187 23.186 19.4248 24.7533 18.2264 25.5477C17.0279 26.3421 15.3788 26.0628 14.5429 24.9238C13.5912 23.6269 12.6396 22.3286 11.6884 21.0307C11.1284 20.2666 10.5685 19.5027 10.0088 18.7393C9.55022 18.1139 9.41496 17.3244 9.6411 16.5929C9.86724 15.8615 10.4304 15.267 11.1721 14.9768C11.4339 14.8743 14.0064 13.7596 14.5891 11.2202M12.1029 5.7118C14.0162 6.79425 15.0807 9.07621 14.5891 11.2202L12.1029 5.7118Z"
+                    fill="#8B8B8B"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M8.15315 9.68257C7.88077 9.90492 7.72363 10.139 7.71868 10.1464C7.33302 10.7383 6.52261 10.9169 5.90871 10.545C5.2948 10.1731 5.10977 9.39179 5.49543 8.79983C5.56919 8.68661 5.89392 8.20989 6.45672 7.75044C7.02053 7.29017 7.91403 6.7761 9.08691 6.78267L9.08849 6.78268C10.0438 6.78914 10.765 7.14044 11.1398 7.36282C11.7572 7.7292 11.9498 8.50886 11.5698 9.10424C11.1898 9.69962 10.3813 9.88525 9.76381 9.51887C9.60778 9.42628 9.36376 9.31638 9.07085 9.31421C8.73734 9.31258 8.43071 9.45598 8.15315 9.68257Z"
+                    fill="#8B8B8B"
+                  />
+                </svg>
+              </form>
               <button onClick={() => setIsReversed(!isReversed)}>Sort By</button>
               <div className="flex flex-col relative">
                 {/* https://www.w3docs.com/snippets/css/how-to-set-absolute-positioning-relative-to-the-parent-element.html */}
@@ -384,6 +445,12 @@ function Home({ jobs: originalJobs }) {
                   </Listbox.Options>
                 </Listbox>
               </div>
+              <button
+                onClick={() => setIsFiltersDialogOpen(true)}
+                className="h-12 rounded-3xl text-lg px-4 py-3 text-center text-white bg-dark-blue"
+              >
+                All Filters
+              </button>
             </div>
           </div>
           {!isLoading && !isError && (
@@ -481,6 +548,150 @@ function Home({ jobs: originalJobs }) {
           )}
         </div>
       </main>
+      <Transition appear show={isFiltersDialogOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={() => setIsFiltersDialogOpen(false)}>
+          {/* TODO: Add font https://stackoverflow.com/questions/75422265/next-font-works-everywhere-except-one-specific-component */}
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title as="div" className="text-lg font-medium leading-6 text-gray-900">
+                    All Filters
+                  </Dialog.Title>
+                  <div className="flex">
+                    <div className="flex-col">
+                      <div>Departments</div>
+                      {departments.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedDepartments(
+                            selectedDepartments.includes(value)
+                              ? selectedDepartments.filter((d) => d !== value)
+                              : [...selectedDepartments, value]
+                          );
+                        return (
+                          <Fragment key={value}>
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedDepartments.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
+                            <br />
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                    <div className="flex-col">
+                      <div>Paid</div>
+                      {payRanges.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedPayRanges(
+                            selectedPayRanges.includes(value)
+                              ? selectedPayRanges.filter((p) => p !== value)
+                              : [...selectedPayRanges, value]
+                          );
+                        return (
+                          <Fragment key={value}>
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedPayRanges.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
+                            <br />
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                    <div className="flex-col">
+                      <div>Duration</div>
+                      {durations.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedDurations(
+                            selectedDurations.includes(value)
+                              ? selectedDurations.filter((duration) => duration !== value)
+                              : [...selectedDurations, value]
+                          );
+                        return (
+                          <Fragment key={value}>
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedDurations.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
+                            <br />
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                    <div className="flex-col">
+                      <div>Locations</div>
+                      {locations.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedLocations(
+                            selectedLocations.includes(value)
+                              ? selectedLocations.filter((location) => location !== value)
+                              : [...selectedLocations, value]
+                          );
+                        return (
+                          <Fragment key={value}>
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedLocations.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
+                            <br />
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsFiltersDialogOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }
@@ -499,6 +710,7 @@ export async function getStaticProps() {
       closingDate: true,
       credit: true,
       weeklyHours: true,
+      paid: true,
     },
     take: 50,
   });
