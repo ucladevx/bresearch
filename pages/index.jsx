@@ -57,14 +57,14 @@ function JobCard({
           >
             {/* TODO: change below to loading icon */}
             <svg
-              width="30"
-              height="30"
-              viewBox="0 0 30 30"
+              width="26"
+              height="29"
+              viewBox="0 0 26 29"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M21.0249 2.5H8.9749C6.3124 2.5 4.1499 4.675 4.1499 7.325V24.9375C4.1499 27.1875 5.7624 28.1375 7.7374 27.05L13.8374 23.6625C14.4874 23.3 15.5374 23.3 16.1749 23.6625L22.2749 27.05C24.2499 28.15 25.8624 27.2 25.8624 24.9375V7.325C25.8499 4.675 23.6874 2.5 21.0249 2.5Z"
+                d="M18.875 2H6.825C4.1625 2 2 4.175 2 6.825V24.4375C2 26.6875 3.6125 27.6375 5.5875 26.55L11.6875 23.1625C12.3375 22.8 13.3875 22.8 14.025 23.1625L20.125 26.55C22.1 27.65 23.7125 26.7 23.7125 24.4375V6.825C23.7 4.175 21.5375 2 18.875 2Z"
                 stroke="#1E2F97"
                 strokeWidth="3"
                 strokeLinecap="round"
@@ -82,14 +82,14 @@ function JobCard({
             }}
           >
             <svg
-              width="30"
-              height="30"
-              viewBox="0 0 30 30"
+              width="26"
+              height="29"
+              viewBox="0 0 26 29"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M21.0249 2.5H8.9749C6.3124 2.5 4.1499 4.675 4.1499 7.325V24.9375C4.1499 27.1875 5.7624 28.1375 7.7374 27.05L13.8374 23.6625C14.4874 23.3 15.5374 23.3 16.1749 23.6625L22.2749 27.05C24.2499 28.15 25.8624 27.2 25.8624 24.9375V7.325C25.8499 4.675 23.6874 2.5 21.0249 2.5Z"
+                d="M18.875 2H6.825C4.1625 2 2 4.175 2 6.825V24.4375C2 26.6875 3.6125 27.6375 5.5875 26.55L11.6875 23.1625C12.3375 22.8 13.3875 22.8 14.025 23.1625L20.125 26.55C22.1 27.65 23.7125 26.7 23.7125 24.4375V6.825C23.7 4.175 21.5375 2 18.875 2Z"
                 stroke="#1E2F97"
                 strokeWidth="3"
                 strokeLinecap="round"
@@ -127,10 +127,6 @@ function SavedJobCard({
       return await (
         await fetch(`/api/applications/${id}/unsave`, {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({}),
         })
       ).json();
     },
@@ -157,7 +153,22 @@ function SavedJobCard({
             aria-label="Loading"
           >
             {/* TODO: change below to loading icon */}
-            <BookmarkIcon />
+            <svg
+              width="26"
+              height="29"
+              viewBox="0 0 26 29"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.875 2H6.825C4.1625 2 2 4.175 2 6.825V24.4375C2 26.6875 3.6125 27.6375 5.5875 26.55L11.6875 23.1625C12.3375 22.8 13.3875 22.8 14.025 23.1625L20.125 26.55C22.1 27.65 23.7125 26.7 23.7125 24.4375V6.825C23.7 4.175 21.5375 2 18.875 2Z"
+                fill="#1E2F97"
+                stroke="#1E2F97"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         ) : (
           <button
@@ -168,8 +179,23 @@ function SavedJobCard({
               e.stopPropagation();
             }}
           >
-            {/* TODO: change bookmark icon */}
-            <BookmarkIcon />
+            {/* TODO: change below to loading icon */}
+            <svg
+              width="26"
+              height="29"
+              viewBox="0 0 26 29"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.875 2H6.825C4.1625 2 2 4.175 2 6.825V24.4375C2 26.6875 3.6125 27.6375 5.5875 26.55L11.6875 23.1625C12.3375 22.8 13.3875 22.8 14.025 23.1625L20.125 26.55C22.1 27.65 23.7125 26.7 23.7125 24.4375V6.825C23.7 4.175 21.5375 2 18.875 2Z"
+                fill="#1E2F97"
+                stroke="#1E2F97"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
       </div>
