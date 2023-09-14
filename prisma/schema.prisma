@@ -104,24 +104,25 @@ enum Location {
 }
 
 model Job {
-  id          Int          @id @default(autoincrement())
-  created     DateTime     @default(now())
-  closingDate DateTime? // maybe
-  closed      Boolean
-  title       String       @db.VarChar(50)
-  description String
-  poster      Researcher   @relation(fields: [posterId], references: [id])
-  posterId    String       @db.Uuid
-  lab         Lab          @relation(fields: [labId], references: [id])
-  labId       String       @db.Uuid
-  applicants  LabeledJob[]
-  paid        Boolean
-  duration    Duration
-  departments Department[]
-  weeklyHours Int
-  credit      Boolean
-  location    Location
-  external    Boolean      @default(false)
+  id           Int          @id @default(autoincrement())
+  created      DateTime     @default(now())
+  startDate    DateTime
+  closingDate  DateTime
+  closed       Boolean
+  title        String       @db.VarChar(50)
+  description  String
+  poster       Researcher   @relation(fields: [posterId], references: [id])
+  posterId     String       @db.Uuid
+  lab          Lab          @relation(fields: [labId], references: [id])
+  labId        String       @db.Uuid
+  applicants   LabeledJob[]
+  paid         Boolean
+  duration     Duration
+  departments  Department[]
+  weeklyHours  Int
+  credit       Boolean
+  location     Location
+  externalLink String?      @db.VarChar(200)
 }
 
 enum JobStatus {
