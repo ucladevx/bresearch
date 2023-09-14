@@ -158,7 +158,10 @@ export default function ResearcherSidebar() {
 
         <Link
           href="/job/create"
-          className="mt-auto mb-[3.125rem] flex items-center justify-center w-[12.25rem] h-14 rounded-lg border-dark-blue border-[1px]"
+          className={
+            'mt-auto mb-[3.125rem] flex items-center justify-center w-[12.25rem] h-14 rounded-lg border-dark-blue border-[1px]' +
+            (pathname === '/job/create' ? ' bg-gray-500 pointer-events-none invisible' : '')
+          }
         >
           <svg
             width="25"
