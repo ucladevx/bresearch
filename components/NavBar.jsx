@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { Fragment } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { Menu, Transition } from '@headlessui/react';
 
 export default function NavBar() {
+  const { data: session } = useSession();
   const router = useRouter();
   const { pathname } = router;
   return (
@@ -48,13 +53,72 @@ export default function NavBar() {
         <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
           Opportunities
         </Link>
-        <Link href="/">Departments</Link>
         <Link href="/apps" className={pathname === '/apps' ? 'text-dark-blue font-extrabold' : ''}>
           App Tracker
         </Link>
-        <Link href="/">Resources</Link>
       </div>
-      <div className="invisible w-12"></div>
+      <div className="w-12">
+        {/* <Image
+          src="https://lh3.googleusercontent.com/a/"
+          width={48}
+          height={48}
+          alt="Your Profile Picture"
+          className="rounded-[50%]"
+        /> */}
+        {session && (
+          <Menu as="div" className="relative inline-block text-left">
+            <div>
+              <Menu.Button className="w-full justify-center rounded-mdtext-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                <Image
+                  src={session.user.image}
+                  width={48}
+                  height={48}
+                  alt="Your Profile Picture"
+                  className="rounded-[50%]"
+                />
+              </Menu.Button>
+            </div>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="px-1 py-1 ">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link
+                        href="/profile"
+                        className={`${
+                          active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      >
+                        My Profile
+                      </Link>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={`${
+                          active ? 'bg-[#E53939] text-white' : 'text-[#E53939]'
+                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                        onClick={() => signOut()}
+                      >
+                        Sign Out
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        )}
+      </div>
     </nav>
   );
 }
