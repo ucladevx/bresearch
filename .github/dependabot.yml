@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Enable version updates for npm/yarn/pnpm
+  - package-ecosystem: 'npm'
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: '/'
+    schedule:
+      # `daily` = checks the npm registry for updates every weekday
+      interval: 'daily'
+    allow:
+      # Allow updates for these packages
+      - dependency-name: 'prisma'
+      - dependency-name: '@prisma/client'
+      - dependency-name: '@supabase/supabase-js'
+      - dependency-name: 'next'
+      - dependency-name: 'next-auth'
+      - dependency-name: 'dompurify'
+      - dependency-name: 'jsdom'
+      - dependency-name: 'react-quill'
+      - dependency-name: 'joi'
+    groups:
+      prisma:
+        patterns:
+          - 'prisma'
+          - '@prisma/client'
