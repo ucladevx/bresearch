@@ -57,6 +57,7 @@ class JobCreationRoute extends ApiRoute {
       }
 
       const {
+        startDate,
         closingDate,
         title,
         description,
@@ -67,6 +68,7 @@ class JobCreationRoute extends ApiRoute {
         credit,
         location,
         lab: labId,
+        externalLink,
       } = value;
 
       // TODO: what if closingDate is not passed in request body
@@ -95,6 +97,8 @@ class JobCreationRoute extends ApiRoute {
           weeklyHours,
           credit,
           location,
+          externalLink,
+          startDate,
         },
       });
 
