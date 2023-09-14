@@ -106,7 +106,8 @@ enum Location {
 model Job {
   id           Int          @id @default(autoincrement())
   created      DateTime     @default(now())
-  closingDate  DateTime? // maybe
+  startDate    DateTime
+  closingDate  DateTime
   closed       Boolean
   title        String       @db.VarChar(50)
   description  String
