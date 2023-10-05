@@ -36,74 +36,41 @@ export const authOptions = {
       return true;
     },
     async jwt({ token, account, profile }) {
-      if (account || token) {
+      if (account || (token && !token.accountType)) {
         let prisma;
         if (!process.env.USE_SUPABASE) {
           prisma = (await import('@lib/prisma')).default;
         }
 
-        if (account) {
-          // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
-          const currentStudent = process.env.USE_SUPABASE
-            ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
-                ?.data
-            : await prisma.student.findUnique({
+        // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
+        const currentStudent = process.env.USE_SUPABASE
+          ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
+              ?.data
+          : await prisma.student.findUnique({
+              where: { email: token.email },
+            });
+        if (currentStudent) {
+          token.accountType = 'student';
+        } else {
+          const currentResearcher = process.env.USE_SUPABASE
+            ? (
+                await supabase
+                  .from('Researcher')
+                  .select()
+                  .eq('email', token.email)
+                  .limit(1)
+                  .single()
+              )?.data
+            : await prisma.researcher.findUnique({
                 where: { email: token.email },
               });
-          if (currentStudent) {
-            token.accountType = 'student';
+          if (currentResearcher) {
+            token.accountType = 'researcher';
           } else {
-            const currentResearcher = process.env.USE_SUPABASE
-              ? (
-                  await supabase
-                    .from('Researcher')
-                    .select()
-                    .eq('email', token.email)
-                    .limit(1)
-                    .single()
-                )?.data
-              : await prisma.researcher.findUnique({
-                  where: { email: token.email },
-                });
-            if (currentResearcher) {
-              token.accountType = 'researcher';
-            } else {
-              token.accountType = null;
-            }
-          }
-        } else if (token) {
-          if (!token.accountType) {
-            const currentStudent = process.env.USE_SUPABASE
-              ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
-                  ?.data
-              : await prisma.student.findUnique({
-                  where: { email: token.email },
-                });
-            if (currentStudent) {
-              token.accountType = 'student';
-            } else {
-              const currentResearcher = process.env.USE_SUPABASE
-                ? (
-                    await supabase
-                      .from('Researcher')
-                      .select()
-                      .eq('email', token.email)
-                      .limit(1)
-                      .single()
-                  )?.data
-                : await prisma.researcher.findUnique({
-                    where: { email: token.email },
-                  });
-              if (currentResearcher) {
-                token.accountType = 'researcher';
-              } else {
-                token.accountType = null;
-              }
-            }
+            token.accountType = null;
           }
         }
       }
-      // console.log({ account, profile, token }, 'jwt');
       return token;
     },
   },
