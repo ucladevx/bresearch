@@ -38,10 +38,7 @@ export const authOptions = {
     async jwt({ token, account, profile }) {
       // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
       if (account || (token && !token.accountType)) {
-        let prisma;
-        if (!process.env.USE_SUPABASE) {
-          prisma = (await import('@lib/prisma')).default;
-        }
+        const prisma = !process.env.USE_SUPABASE ? (await import('@lib/prisma')).default : null;
 
         const currentStudent = process.env.USE_SUPABASE
           ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
