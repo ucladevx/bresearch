@@ -1,24 +1,44 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import aboutPic1 from '/Users/rohangandhi/Downloads/BResearch/bresearch/images/aboutPic1.png';
+import aboutPic2 from '/Users/rohangandhi/Downloads/BResearch/bresearch/images/aboutPic2.png';
+import aboutPic3 from '/Users/rohangandhi/Downloads/BResearch/bresearch/images/aboutPic3.png';
+import logo from '/Users/rohangandhi/Downloads/BResearch/bresearch/images/logo.png';
+
+function Navbar() {
+  return (
+    <nav className="bg-white p-4 w-screen">
+      <div className="flex justify-between items-center">
+        <Image src={logo} alt="Generic Picture" width={100} height={400} />
+        <Link
+          href="/api/auth/signin"
+          className="bg-blue-500 text-white py-2 px-8 text-lg font-medium rounded-md cursor-pointer ml-auto mr-10"
+        >
+          Log in / Sign Up
+        </Link>
+      </div>
+    </nav>
+  );
+}
 
 function LandingPage() {
   return (
     <div className="container">
       <header>
-        <nav>{/* Navigation bar with BResearch logo and Login/Signup button */}</nav>
+        <Navbar>{/* Navigation bar with BResearch logo and Login/Signup button */}</Navbar>
       </header>
 
       {/* First Section */}
       <main>
         <section>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
-              <h1 className="mt-4 mb-4 text-left text-black text-xl">
+              <h1 className="mt-4 mb-4 text-left text-xl font-semibold">
                 Countless Research Opportunities,
                 <br />
                 All In One Place
               </h1>
-              <p className="mt-4 mb-4 text-left">
+              <p className="mt-4 mb-4 text-left font-medium">
                 bResearch is a new web app that connects UCLA
                 <br />
                 students to research opportunities, completely free for
@@ -34,7 +54,7 @@ function LandingPage() {
             </div>
             <div className="flex-1">
               <Image
-                src="/BaseImage.png"
+                src={aboutPic1}
                 alt="Generic Picture"
                 width={748}
                 height={641}
@@ -46,21 +66,21 @@ function LandingPage() {
 
         {/* Second Section */}
         <section>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <div className="flex-1">
               <Image
-                src="/BaseImage.png"
+                src={aboutPic2}
                 alt="Generic Picture"
                 width={748}
-                height={641}
+                height={700}
                 className="float-right clear-both pl-20 pt-20 ml-20"
               />
             </div>
             <div className="flex-1 p-10 pr-5 pb-30 pl-80 mt-10 mr-10 mb-30 ml-10">
-              <h1 className="mt-4 mb-4 text-left text-black text-xl">
+              <h1 className="mt-4 mb-4 text-left text-xl font-semibold">
                 Tired of Cold Emailing Professors?
               </h1>
-              <p className="mt-4 mb-4 text-left">
+              <p className="mt-4 mb-4 text-left font-medium">
                 bResearch connects your detailed application to every
                 <br />
                 professor&mdash;no more lost emails in the pile.
@@ -71,14 +91,14 @@ function LandingPage() {
 
         {/* Third Section */}
         <section>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <div className="flex-1 p-10 pr-10 pb-30 pl-10 mt-10 mr-20 mb-30 ml-20">
-              <h1 className="mt-4 mb-4 text-left text-black text-xl">
+              <h1 className="mt-4 mb-4 text-left text-xl font-semibold">
                 Stay Organized in Your Search
                 <br />
                 For Your Next Research Opportunity.
               </h1>
-              <p className="mt-4 mb-4 text-left">
+              <p className="mt-4 mb-4 text-left font-medium">
                 We have developed features such as bookmarking,
                 <br />
                 application tracking, and a refined filter to help you
@@ -90,7 +110,7 @@ function LandingPage() {
             </div>
             <div className="flex-1">
               <Image
-                src="/BaseImage.png"
+                src={aboutPic3}
                 alt="Generic Picture"
                 width={748}
                 height={641}
