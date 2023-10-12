@@ -711,7 +711,15 @@ export async function getStaticProps() {
       credit: true,
       weeklyHours: true,
       paid: true,
+      externalLink: true,
+      startDate: true,
+      _count: {
+        select: {
+          applicants: { where: { status: 'APPLIED' } },
+        },
+      },
     },
+    where: { closed: false, closingDate: { gt: new Date() } },
     take: 50,
   });
 
@@ -721,6 +729,7 @@ export async function getStaticProps() {
         ...job,
         created: JSON.parse(JSON.stringify(job.created)),
         closingDate: JSON.parse(JSON.stringify(job.closingDate)),
+        startDate: JSON.parse(JSON.stringify(job.startDate)),
       })),
     },
   };
