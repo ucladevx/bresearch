@@ -69,12 +69,20 @@ export default function NavBar() {
           <Menu as="div" className="relative inline-block text-left">
             <div>
               <Menu.Button className="w-full justify-center rounded-mdtext-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-                <Image
+                {/* <Image
                   src={session.user.image}
                   width={48}
                   height={48}
                   alt="Your Profile Picture"
                   className="rounded-[50%]"
+                  // unoptimized
+                /> */}
+                <img
+                  src={session.user.image}
+                  alt="Your Profile Picture"
+                  className="rounded-[50%]"
+                  referrerPolicy="no-referrer"
+                  // https://stackoverflow.com/questions/40570117/http403-forbidden-error-when-trying-to-load-img-src-with-google-profile-pic
                 />
               </Menu.Button>
             </div>
