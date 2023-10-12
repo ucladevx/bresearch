@@ -10,6 +10,56 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { JobSearchValidator } from '@lib/validators';
 import Head from 'next/head';
 
+function ResearcherJobCard({
+  id,
+  title,
+  location,
+  duration,
+  departments,
+  labName,
+  setSelectedJob,
+  isSelectedJob,
+}) {
+  return (
+    <div
+      className={
+        'flex flex-col p-9 bg-white text-black gap-4 rounded-[20px]' +
+        (isSelectedJob ? ' border-4 border-light-blue' : '')
+      }
+      onClick={setSelectedJob}
+    >
+      <div className="flex justify-between">
+        <div className="text-base font-medium">{labName}</div>
+        {
+          <button className="flex items-center w-6 invisible" aria-hidden>
+            <svg
+              width="26"
+              height="29"
+              viewBox="0 0 26 29"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.875 2H6.825C4.1625 2 2 4.175 2 6.825V24.4375C2 26.6875 3.6125 27.6375 5.5875 26.55L11.6875 23.1625C12.3375 22.8 13.3875 22.8 14.025 23.1625L20.125 26.55C22.1 27.65 23.7125 26.7 23.7125 24.4375V6.825C23.7 4.175 21.5375 2 18.875 2Z"
+                stroke="#1E2F97"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        }
+      </div>
+      <div className="font-semibold text-xl">{title}</div>
+      <ul className="flex font-medium text-sm">
+        <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
+          {locations.find(({ value }) => value === location).label}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function JobCard({
   id,
   title,
