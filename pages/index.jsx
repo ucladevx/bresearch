@@ -504,7 +504,10 @@ function Home({ jobs: originalJobs }) {
                     <div className="flex gap-2 mt-4">
                       <div>Posted on {dateFormatter.format(new Date(selectedJob.created))}</div>
                       <div aria-hidden="true">|</div>
-                      <div>{0} Applicants</div>
+                      <div>
+                        {selectedJob._count.applicants} Applicant
+                        {selectedJob._count.applicants !== 1 && 's'}
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-4 mt-12 sticky">
                       {[
