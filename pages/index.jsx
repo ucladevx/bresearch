@@ -8,6 +8,7 @@ import NavBar from '../components/NavBar';
 import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobSearchValidator } from '@lib/validators';
+import Head from 'next/head';
 
 function JobCard({
   id,
@@ -304,6 +305,9 @@ function Home({ jobs: originalJobs }) {
 
   return (
     <div>
+      <Head>
+        <title>bResearch</title>
+      </Head>
       <NavBar pathname="/" />
       <main className="min-h-screen bg-light-gray pt-9 pl-[3.75rem]">
         <div className="flex gap-9 flex-col">
