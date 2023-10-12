@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import prisma from '@lib/prisma';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -37,8 +36,10 @@ export const authOptions = {
       return true;
     },
     async jwt({ token, account, profile }) {
-      if (account) {
-        // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
+      // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
+      if (account || (token && !token.accountType)) {
+        const prisma = !process.env.USE_SUPABASE ? (await import('@lib/prisma')).default : null;
+
         const currentStudent = process.env.USE_SUPABASE
           ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
               ?.data
@@ -63,43 +64,10 @@ export const authOptions = {
           if (currentResearcher) {
             token.accountType = 'researcher';
           } else {
-            // console.log('signin unselected');
             token.accountType = null;
           }
         }
-      } else if (token) {
-        if (!token.accountType) {
-          const currentStudent = process.env.USE_SUPABASE
-            ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
-                ?.data
-            : await prisma.student.findUnique({
-                where: { email: token.email },
-              });
-          if (currentStudent) {
-            token.accountType = 'student';
-          } else {
-            const currentResearcher = process.env.USE_SUPABASE
-              ? (
-                  await supabase
-                    .from('Researcher')
-                    .select()
-                    .eq('email', token.email)
-                    .limit(1)
-                    .single()
-                )?.data
-              : await prisma.researcher.findUnique({
-                  where: { email: token.email },
-                });
-            if (currentResearcher) {
-              token.accountType = 'researcher';
-            } else {
-              token.accountType = null;
-              // console.log('not signin unselected');
-            }
-          }
-        }
       }
-      // console.log({ account, profile, token }, 'jwt');
       return token;
     },
   },
