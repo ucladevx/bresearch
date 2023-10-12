@@ -1,14 +1,30 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
 import { Fragment } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
+import { useEffect, useState } from 'react';
 
-export default function NavBar() {
+export default function NavBar({ pathname }) {
   const { data: session } = useSession();
-  const router = useRouter();
-  const { pathname } = router;
+  const [accountType, setAccountType] = useState(null);
+  useEffect(() => {
+    const storedAccountType = localStorage.getItem('accountType');
+    if (storedAccountType === 'researcher' || storedAccountType === 'student') {
+      setAccountType(storedAccountType);
+    } else {
+      async function getAccountType() {
+        try {
+          const accType = (await (await fetch('/api/account-type')).json()).accountType;
+          localStorage.setItem('accountType', accType);
+          setAccountType(accType);
+        } catch (err) {
+          setAccountType('student'); // default to student // TODO: improve this when fetch fails
+        }
+      }
+      getAccountType();
+    }
+  }, []);
+
   return (
     <nav className="h-24 flex px-12 py-6 justify-between items-center text-[1.375rem] leading-7 font-medium bg-white">
       <Link href="/">
@@ -50,12 +66,34 @@ export default function NavBar() {
         </svg>
       </Link>
       <div className="flex gap-x-[3.75rem]">
-        <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
-          Opportunities
-        </Link>
-        <Link href="/apps" className={pathname === '/apps' ? 'text-dark-blue font-extrabold' : ''}>
-          App Tracker
-        </Link>
+        {/* Makes links pop in at same time */}
+        {accountType !== null && (
+          <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
+            Opportunities
+          </Link>
+        )}
+        {accountType !== null &&
+          (accountType === 'researcher' ? (
+            // <Link
+            //   href="/app-manager"
+            //   className={pathname === '/app-manager' ? 'text-dark-blue font-extrabold' : ''}
+            // >
+            //   Apps
+            // </Link>
+            <Link
+              href="/dashboard"
+              className={pathname === '/dashboard' ? 'text-dark-blue font-extrabold' : ''}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/apps"
+              className={pathname === '/apps' ? 'text-dark-blue font-extrabold' : ''}
+            >
+              App Tracker
+            </Link>
+          ))}
       </div>
       <div className="w-12">
         {/* <Image
