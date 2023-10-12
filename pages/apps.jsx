@@ -110,7 +110,7 @@ export default function Apps() {
   return (
     <div className="fixed bg-neutral-100 h-screen w-screen">
       <header>
-        <NavBar />
+        <NavBar pathname="/apps" />
       </header>
       <h1 className="text-2xl font-bold flex justify-center mt-6">App Tracker</h1>
       <div

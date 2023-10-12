@@ -305,7 +305,7 @@ function Home({ jobs: originalJobs }) {
 
   return (
     <div>
-      <NavBar />
+      <NavBar pathname="/" />
       <main className="min-h-screen bg-light-gray pt-9 pl-[3.75rem]">
         <div className="flex gap-9 flex-col">
           <div className="flex">
