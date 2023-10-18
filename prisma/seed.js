@@ -67,6 +67,9 @@ async function main() {
     update: {},
   });
 
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 100);
+
   const job = await prisma.job.upsert({
     where: { id: 1 },
     create: {
@@ -76,9 +79,11 @@ async function main() {
       description: 'test job description',
       paid: true,
       duration: 'QUARTERLY',
-      weeklyHours: 10,
+      weeklyHours: 20,
       credit: true,
       location: 'ON_CAMPUS',
+      startDate,
+      departments: ['ENGINEERING', 'PHYSICAL_SCIENCES'],
       poster: {
         connect: {
           id: researcherA.id,
@@ -92,6 +97,8 @@ async function main() {
     },
     update: {},
   });
+
+  console.log(job);
 
   const trackedJob = await prisma.labeledJob.upsert({
     where: {

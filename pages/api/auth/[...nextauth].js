@@ -2,11 +2,13 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_DATABASE_URL,
-  process.env.SUPABASE_DATABASE_KEY,
-  { auth: { persistSession: false } }
-);
+const USE_SUPABASE = process.env.USE_SUPABASE === 'true';
+
+const supabase = USE_SUPABASE
+  ? createClient(process.env.SUPABASE_DATABASE_URL, process.env.SUPABASE_DATABASE_KEY, {
+      auth: { persistSession: false },
+    })
+  : null;
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -38,9 +40,9 @@ export const authOptions = {
     async jwt({ token, account, profile }) {
       // user, account, profile and isNewUser are only passed during signin https://next-auth.js.org/configuration/callbacks#jwt-callback
       if (account || (token && !token.accountType)) {
-        const prisma = !process.env.USE_SUPABASE ? (await import('@lib/prisma')).default : null;
+        const prisma = !USE_SUPABASE ? (await import('@lib/prisma')).default : null;
 
-        const currentStudent = process.env.USE_SUPABASE
+        const currentStudent = USE_SUPABASE
           ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
               ?.data
           : await prisma.student.findUnique({
@@ -49,7 +51,7 @@ export const authOptions = {
         if (currentStudent) {
           token.accountType = 'student';
         } else {
-          const currentResearcher = process.env.USE_SUPABASE
+          const currentResearcher = USE_SUPABASE
             ? (
                 await supabase
                   .from('Researcher')

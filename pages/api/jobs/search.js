@@ -1,5 +1,7 @@
 import { JobSearchValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
 
 class JobSearchRoute extends ApiRoute {
   /**
@@ -17,12 +19,17 @@ class JobSearchRoute extends ApiRoute {
         throw error;
       }
       const { jobSearchQuery } = value;
+      const queryTokens = jobSearchQuery.split(/\s/);
+
+      const session = await getServerSession(req, res, authOptions);
 
       const result = await prisma.job.findMany({
         where: {
           title: {
-            contains: jobSearchQuery,
-            mode: 'insensitive',
+            search: queryTokens.join(' | '),
+          },
+          description: {
+            search: queryTokens.join(' & '),
           },
         },
         select: {
@@ -34,15 +41,29 @@ class JobSearchRoute extends ApiRoute {
           location: true,
           lab: { select: { name: true } },
           created: true,
+          startDate: true,
           closingDate: true,
           credit: true,
           weeklyHours: true,
           paid: true,
+          _count: {
+            select: {
+              applicants: true,
+            },
+          },
+          applicants: {
+            where: {
+              applicantEmail: session.user?.email,
+            },
+            select: {
+              status: true,
+            },
+          },
         },
         take: 50,
       });
 
-      res.status(200).json(result);
+      res.status(200).json(result.map((e) => ({ ...e, status: e.applicants[0].status })));
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
       console.error(e);
