@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import aboutPic1 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic1.png';
-import aboutPic2 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic2.png';
-import aboutPic3 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic3.png';
+import aboutPic1 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic1.svg';
+import aboutPic2 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic2.svg';
+import aboutPic3 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic3.svg';
 import logo from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/logo.png';
 
 function Navbar() {
