@@ -6,15 +6,21 @@
 import TagDropdown from '../../components/TagDropdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
+import {
+  Table as ReactTable,
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+} from '@tanstack/react-table';
 
-//Pagination Component
+import { options } from 'joi';
+
+//Pagination - will be replaced but keeping now for styling
 const Paginator = (props) => {
-  //TODO: implement pagination
-  //TODO: Styling will be fixed for readability later
-  //TODO: Adjust display numbers to be dynamic
+  //TODO: replace with Tanstack Table version of styling
   return (
     <div className="flex flex-row justify-end space-x-4 ">
       <div>
@@ -61,82 +67,6 @@ const Paginator = (props) => {
   );
 };
 
-//Displaying table of applicants
-const ApplicantsCard = (props) => {
-  const { applicants } = props;
-
-  return (
-    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-lg shadow-sm ">
-      <div className="relative overflow-x-auto flex flex-col ">
-        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
-          <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" className="px-6 py-2.5">
-                Applicant
-              </th>
-              <th scope="col" className="px-6 py-2.5">
-                Graduating
-              </th>
-              <th scope="col" className="pl-5 py-2.5">
-                Tags
-              </th>
-              <th scope="col" className="px-6 py-2.5">
-                Resume
-              </th>
-              <th scope="col" className="px-6 py-2.5">
-                Profile
-              </th>
-              <th scope="col" className="py-4 pl-6 pr-4">
-                Date Applied
-              </th>
-            </tr>
-          </thead>
-          {/*Maps applicants to table rows, some values hard-coded for now */}
-          <tbody>
-            {applicants?.map(({ applicant }) => (
-              <tr
-                /*ID fetch doesn't work yet, needs to be included in get api*/
-                key={applicant.id}
-                className="bg-white border-b dark:border-gray-700  text-gray-700"
-              >
-                <td className="px-6 py-2.5">
-                  {applicant.studentProfile.firstName} {applicant.studentProfile.lastName}
-                </td>
-                <td className="px-6 py-2.5">{applicant.studentProfile.graduationDate}</td>
-                <td className="pl-5 py-2.5">
-                  <TagDropdown />
-                </td>
-                <td className="px-6 py-2.5">resumeFile</td>
-                <td className="px-6 py-2.5">
-                  <Link
-                    href={`/student/profile/${applicant.studentProfile.id.replaceAll('-', '')}`}
-                    className="underline"
-                  >
-                    view
-                  </Link>
-                </td>
-                <td className="py-2.5 px-6">dateApplied</td>
-              </tr>
-            ))}
-          </tbody>
-          {/*Footer contains pagination */}
-          <tfoot>
-            <tr>
-              <td className="px-6 py-4"></td>
-              <td className="px-6 py-4"></td>
-              <td className="px-5 py-4"></td>
-              <td className="px-6 py-4"></td>
-              <td colSpan="2" className="pt-4">
-                <Paginator />
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-  );
-};
-
 //Applicant Manager page
 export default function ApplicantManager() {
   const [applicants, setApplicants] = useState([]);
@@ -171,8 +101,117 @@ export default function ApplicantManager() {
     <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
       <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
       <div className="">
-        <ApplicantsCard applicants={applicants} />
+        {/*<ApplicantsCard applicants={applicants} />*/}
+        <ReactTableComponent data={applicants} />
       </div>
     </div>
   );
 }
+
+//React Table Pagination/Filtering with TanStack Version
+//This would get called where Applicants Card gets called
+const ReactTableComponent = (props) => {
+  const { data } = props;
+  const columns = [
+    {
+      header: 'First Name',
+      accessorKey: 'applicant.studentProfile.firstName', //might not work because we literally need the values
+    },
+    {
+      header: 'Last Name',
+      accessorKey: 'applicant.studentProfile.lastName',
+    },
+    {
+      header: 'Graduating',
+      accessorKey: 'applicant.studentProfile.graduationDate',
+    },
+    {
+      header: 'Tags',
+      id: 'tags',
+      cell: (props) => (
+        <div className=" py-2.5">
+          <TagDropdown />
+        </div>
+      ),
+    },
+    {
+      //TODO: Set up resume link
+      header: 'Resume',
+      accessorKey: 'applicant.studentProfile.id',
+      cell: ({ getValue }) => <div>name_resume.pdf</div>,
+    },
+    {
+      header: 'Profile',
+      accessorKey: 'applicant.studentProfile.id',
+      cell: ({ getValue }) => (
+        <div>
+          <Link
+            className="underline"
+            href={`/student/profile/${getValue().toString().replaceAll('-', '')}`}
+          >
+            view
+          </Link>
+        </div>
+      ),
+    },
+    {
+      //TODO: Add actual value, is it just dateUpdated?
+      header: 'Date Applied',
+      id: 'Date Applied',
+      cell: (props) => <div>dateApplied</div>,
+    },
+  ];
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-lg shadow-sm ">
+      <div className="relative overflow-x-auto flex flex-col ">
+        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
+          <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th className="px-6 py-2.5" key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr className="bg-white border-b dark:border-gray-700  text-gray-700" key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td className="px-6 py-2.5" key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+/*
+//Footer HTML, just under tbody
+<tfoot>
+            <tr>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-5 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td colSpan="2" className="pt-4">
+                <Paginator />
+              </td>
+            </tr>
+          </tfoot>
+*/
