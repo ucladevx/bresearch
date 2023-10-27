@@ -1,4 +1,3 @@
-//TODO: API call to get all applicants associated with a job
 //TODO: Sidebar, will be used on many pages
 //TODO: Checkboxes, sorting, search
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
@@ -14,6 +13,9 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
 } from '@tanstack/react-table';
 
 import { options } from 'joi';
@@ -100,29 +102,27 @@ export default function ApplicantManager() {
   return (
     <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
       <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
-      <div className="">
-        {/*<ApplicantsCard applicants={applicants} />*/}
-        <ReactTableComponent data={applicants} />
+      <div className="mb-10">
+        <ApplicantTable data={applicants} />
       </div>
     </div>
   );
 }
 
-//React Table Pagination/Filtering with TanStack Version
-//This would get called where Applicants Card gets called
-const ReactTableComponent = (props) => {
+const ApplicantTable = (props) => {
+  const [sorting, setSorting] = useState([]);
   const { data } = props;
   const columns = [
+    //TODO: Double check what the fullName col filters by, should just treat as string
     {
-      header: 'First Name',
-      accessorKey: 'applicant.studentProfile.firstName', //might not work because we literally need the values
+      header: 'Applicant',
+      id: 'fullName',
+      accessorFn: (row) =>
+        `${row.applicant.studentProfile.firstName} ${row.applicant.studentProfile.lastName}`,
     },
+    //TODO: Check how class should be sorted, since it will sort it as a string - ex. Spring 2023 will come before Winter 2023, might need to add a custom sort or do some conversion first
     {
-      header: 'Last Name',
-      accessorKey: 'applicant.studentProfile.lastName',
-    },
-    {
-      header: 'Graduating',
+      header: 'Class',
       accessorKey: 'applicant.studentProfile.graduationDate',
     },
     {
@@ -138,11 +138,13 @@ const ReactTableComponent = (props) => {
       //TODO: Set up resume link
       header: 'Resume',
       accessorKey: 'applicant.studentProfile.id',
+      enableSorting: false,
       cell: ({ getValue }) => <div>name_resume.pdf</div>,
     },
     {
       header: 'Profile',
       accessorKey: 'applicant.studentProfile.id',
+      enableSorting: false,
       cell: ({ getValue }) => (
         <div>
           <Link
@@ -164,21 +166,72 @@ const ReactTableComponent = (props) => {
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
-
+  //TODO: Add Search Bar + Style
+  //TODO: Do we want any onHover behavior for pagination or sort buttons, maybe make the sorting more clear
   return (
-    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-lg shadow-sm ">
-      <div className="relative overflow-x-auto flex flex-col ">
+    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-2xl shadow-md ">
+      <div className="relative overflow-x-auto">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th className="px-6 py-2.5" key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : (
+                      <div
+                        {...{
+                          className: ` flex items-baseline justify-left ${
+                            header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+                          }`,
+                          onClick: header.column.getToggleSortingHandler(),
+                        }}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{
+                          asc: (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="2"
+                              stroke="currentColor"
+                              className="w-auto pl-1 h-3.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
+                              />
+                            </svg>
+                          ),
+                          desc: (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={2}
+                              stroke="currentColor"
+                              className="w-auto pl-1 h-3.5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
+                              />
+                            </svg>
+                          ),
+                        }[header.column.getIsSorted().toString()] ?? null}
+                      </div>
+                    )}
                   </th>
                 ))}
               </tr>
@@ -196,22 +249,45 @@ const ReactTableComponent = (props) => {
             ))}
           </tbody>
         </table>
+        <div className="h-2" />
+        <div className="flex gap-5 pt-3 text-sm items-center justify-end">
+          <span className="-mr-3">Rows Per Page: </span>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value));
+            }}
+          >
+            {[10, 20, 30, 40, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>
+          <span className="flex items-center gap-1">
+            {1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize}-
+            {table.getCanNextPage()
+              ? (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
+              : table.getFilteredRowModel().rows.length}{' '}
+            of {table.getFilteredRowModel().rows.length}
+          </span>
+
+          <button
+            className="rounded"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeftIcon className="h-6 w-6 black opacity-50" />
+          </button>
+          <button
+            className="rounded"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronRightIcon className="h-6 w-6 black opacity-50" />
+          </button>
+        </div>
       </div>
     </div>
   );
 };
-
-/*
-//Footer HTML, just under tbody
-<tfoot>
-            <tr>
-              <td className="px-6 py-4"></td>
-              <td className="px-6 py-4"></td>
-              <td className="px-5 py-4"></td>
-              <td className="px-6 py-4"></td>
-              <td colSpan="2" className="pt-4">
-                <Paginator />
-              </td>
-            </tr>
-          </tfoot>
-*/
