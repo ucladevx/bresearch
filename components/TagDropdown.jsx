@@ -4,22 +4,46 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { useState, useEffect } from 'react';
 
 //TODO:
-//Need to use official colors, requires custom definitions via tailwind
-// - Changing text color on click also
 //Fix: Resizing behavior of tag buttons (buttons mess with padding and resize incorrectly when viewport is reduced)
 //Fix: Dropdown overlap/scroll behavior
-//Could change to a Listbox from HeadlessUI for readability
 //OnClick should call to database to change status for that applicant to that tag
 
-export default function TagDropdown() {
-  const [bgColor, setBgColor] = useState(
-    'bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
-  );
-  const [textColor, setTextColor] = useState('text-[#1E2F97]');
-  const [tag, setTag] = useState('CONSIDERING');
+export default function TagDropdown(props) {
+  const { piStatus } = props;
+  const [bgColor, setBgColor] = useState();
+  const [textColor, setTextColor] = useState();
+  const [tag, setTag] = useState(piStatus);
+  useEffect(() => {
+    switch (tag) {
+      case 'CONSIDERING':
+        setTextColor('text-[#1E2F97]');
+        setBgColor('bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50');
+        break;
+      case 'ACCEPTED':
+        setTextColor('text-[#29570D]');
+        setBgColor('bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60');
+        break;
+      case 'REVIEWING':
+        setBgColor('bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30');
+        setTextColor('text-[#653D00]');
+        break;
+      case 'NOT ACCEPTED':
+        setBgColor('bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40');
+        setTextColor('text-[#570D0D]');
+        break;
+      case 'INTERVIEWING':
+        setBgColor('bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30');
+        setTextColor('text-[#2A0062]');
+        break;
+      case 'JOINED':
+        setBgColor('bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30');
+        setTextColor('text-[#141466]');
+        break;
+    }
+  }, [tag]);
 
   const buttonStyle =
-    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-0.5 text-sm font-semibold shadow-sm';
+    'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold shadow-sm';
 
   return (
     <Menu as="div" className="relative inline-block">
@@ -51,14 +75,26 @@ export default function TagDropdown() {
                   className={`text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50 ${buttonStyle}`}
                   onClick={() => {
                     //Setting color and title
-                    setBgColor(
-                      'bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50'
-                    );
-                    setTextColor('text-[#1E2F97]');
+
                     setTag('CONSIDERING');
                   }}
                 >
                   CONSIDERING
+                </button>
+              )}
+            </Menu.Item>
+            {/*REVIEWING*/}
+            <Menu.Item className="block px-4 py-2 text-sm" as="div">
+              {({ active }) => (
+                <button
+                  className={`text-[#653D00] bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30 ${buttonStyle}`}
+                  onClick={() => {
+                    //Setting color and title
+
+                    setTag('REVIEWING');
+                  }}
+                >
+                  REVIEWING
                 </button>
               )}
             </Menu.Item>
@@ -69,10 +105,6 @@ export default function TagDropdown() {
                 <button
                   className={`text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60 ${buttonStyle}`}
                   onClick={() => {
-                    setBgColor(
-                      'bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60'
-                    );
-                    setTextColor('text-[#29570D]');
                     setTag('ACCEPTED');
                   }}
                 >
@@ -87,8 +119,6 @@ export default function TagDropdown() {
                 <button
                   className={`text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30 ${buttonStyle}`}
                   onClick={() => {
-                    setBgColor('bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30');
-                    setTextColor('text-[#2A0062]');
                     setTag('INTERVIEWING');
                   }}
                 >
@@ -103,8 +133,6 @@ export default function TagDropdown() {
                 <button
                   className={`text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40 ${buttonStyle}`}
                   onClick={() => {
-                    setBgColor('bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40');
-                    setTextColor('text-[#570D0D]');
                     setTag('NOT ACCEPTED');
                   }}
                 >
@@ -119,8 +147,6 @@ export default function TagDropdown() {
                 <button
                   className={`text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30 ${buttonStyle}`}
                   onClick={() => {
-                    setBgColor('bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30');
-                    setTextColor('text-[#141466]');
                     setTag('JOINED');
                   }}
                 >

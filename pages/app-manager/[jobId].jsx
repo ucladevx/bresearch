@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useMemo } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+
 import {
   Table as ReactTable,
   useReactTable,
@@ -112,6 +114,7 @@ export default function ApplicantManager() {
 const ApplicantTable = (props) => {
   const [sorting, setSorting] = useState([]);
   const { data } = props;
+
   const columns = [
     //TODO: Double check what the fullName col filters by, should just treat as string
     {
@@ -127,10 +130,10 @@ const ApplicantTable = (props) => {
     },
     {
       header: 'Tags',
-      id: 'tags',
-      cell: (props) => (
+      accessorKey: 'piStatus',
+      cell: ({ getValue }) => (
         <div className=" py-2.5">
-          <TagDropdown />
+          <TagDropdown piStatus={getValue().toString()} />
         </div>
       ),
     },
@@ -157,10 +160,10 @@ const ApplicantTable = (props) => {
       ),
     },
     {
-      //TODO: Add actual value, is it just dateUpdated?
+      //TODO: Format date correctly, wouldn't understand it as a Date object, thinks its a function
       header: 'Date Applied',
-      id: 'Date Applied',
-      cell: (props) => <div>dateApplied</div>,
+      accessorKey: 'lastUpdated',
+      sortingFn: 'datetime',
     },
   ];
   const table = useReactTable({
@@ -189,7 +192,7 @@ const ApplicantTable = (props) => {
                     {header.isPlaceholder ? null : (
                       <div
                         {...{
-                          className: ` flex items-baseline justify-left ${
+                          className: ` flex items-baseline justify-start ${
                             header.column.getCanSort() ? 'cursor-pointer select-none' : ''
                           }`,
                           onClick: header.column.getToggleSortingHandler(),
@@ -197,38 +200,8 @@ const ApplicantTable = (props) => {
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
-                          asc: (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="2"
-                              stroke="currentColor"
-                              className="w-auto pl-1 h-3.5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
-                              />
-                            </svg>
-                          ),
-                          desc: (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              className="w-auto pl-1 h-3.5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
-                              />
-                            </svg>
-                          ),
+                          asc: <ArrowUpIcon className="w-auto pl-1 h-3.5" />,
+                          desc: <ArrowDownIcon className="w-auto pl-1 h-3.5" />,
                         }[header.column.getIsSorted().toString()] ?? null}
                       </div>
                     )}
