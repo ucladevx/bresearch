@@ -1,14 +1,30 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
 import { Fragment } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
+import { useEffect, useState } from 'react';
 
-export default function NavBar() {
+export default function NavBar({ pathname }) {
   const { data: session } = useSession();
-  const router = useRouter();
-  const { pathname } = router;
+  const [accountType, setAccountType] = useState(null);
+  useEffect(() => {
+    const storedAccountType = localStorage.getItem('accountType');
+    if (storedAccountType === 'researcher' || storedAccountType === 'student') {
+      setAccountType(storedAccountType);
+    } else {
+      async function getAccountType() {
+        try {
+          const accType = (await (await fetch('/api/account-type')).json()).accountType;
+          localStorage.setItem('accountType', accType);
+          setAccountType(accType);
+        } catch (err) {
+          setAccountType('student'); // default to student // TODO: improve this when fetch fails
+        }
+      }
+      getAccountType();
+    }
+  }, []);
+
   return (
     <nav className="h-24 flex px-12 py-6 justify-between items-center text-[1.375rem] leading-7 font-medium bg-white">
       <Link href="/">
@@ -50,12 +66,34 @@ export default function NavBar() {
         </svg>
       </Link>
       <div className="flex gap-x-[3.75rem]">
-        <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
-          Opportunities
-        </Link>
-        <Link href="/apps" className={pathname === '/apps' ? 'text-dark-blue font-extrabold' : ''}>
-          App Tracker
-        </Link>
+        {/* Makes links pop in at same time */}
+        {accountType !== null && (
+          <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
+            Opportunities
+          </Link>
+        )}
+        {accountType !== null &&
+          (accountType === 'researcher' ? (
+            // <Link
+            //   href="/app-manager"
+            //   className={pathname === '/app-manager' ? 'text-dark-blue font-extrabold' : ''}
+            // >
+            //   Apps
+            // </Link>
+            <Link
+              href="/dashboard"
+              className={pathname === '/dashboard' ? 'text-dark-blue font-extrabold' : ''}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/apps"
+              className={pathname === '/apps' ? 'text-dark-blue font-extrabold' : ''}
+            >
+              App Tracker
+            </Link>
+          ))}
       </div>
       <div className="w-12">
         {/* <Image
@@ -69,12 +107,20 @@ export default function NavBar() {
           <Menu as="div" className="relative inline-block text-left">
             <div>
               <Menu.Button className="w-full justify-center rounded-mdtext-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-                <Image
+                {/* <Image
                   src={session.user.image}
                   width={48}
                   height={48}
                   alt="Your Profile Picture"
                   className="rounded-[50%]"
+                  // unoptimized
+                /> */}
+                <img
+                  src={session.user.image}
+                  alt="Your Profile Picture"
+                  className="rounded-[50%]"
+                  referrerPolicy="no-referrer"
+                  // https://stackoverflow.com/questions/40570117/http403-forbidden-error-when-trying-to-load-img-src-with-google-profile-pic
                 />
               </Menu.Button>
             </div>
@@ -87,14 +133,14 @@ export default function NavBar() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Menu.Items className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                 <div className="px-1 py-1 ">
                   <Menu.Item>
                     {({ active }) => (
                       <Link
                         href="/profile"
                         className={`${
-                          active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                          active ? 'bg-dark-blue text-white' : 'text-gray-900'
                         } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
                         My Profile
