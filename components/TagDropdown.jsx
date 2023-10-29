@@ -2,18 +2,38 @@ import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { useState, useEffect } from 'react';
-
+import { useRouter } from 'next/router';
 //TODO:
 //Fix: Resizing behavior of tag buttons (buttons mess with padding and resize incorrectly when viewport is reduced)
 //Fix: Dropdown overlap/scroll behavior
 //OnClick should call to database to change status for that applicant to that tag
 
 export default function TagDropdown(props) {
-  const { piStatus } = props;
+  const { piStatus, applicantEmail } = props;
   const [bgColor, setBgColor] = useState();
   const [textColor, setTextColor] = useState();
   const [tag, setTag] = useState(piStatus);
+  const router = useRouter();
   useEffect(() => {
+    //Run patch request
+    const { jobId } = router.query;
+    fetch(`/api/applications/${jobId}/update`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        applicantEmail: applicantEmail,
+        status: tag,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     switch (tag) {
       case 'CONSIDERING':
         setTextColor('text-[#1E2F97]');

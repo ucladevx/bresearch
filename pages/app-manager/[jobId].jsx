@@ -126,14 +126,22 @@ const ApplicantTable = (props) => {
     //TODO: Check how class should be sorted, since it will sort it as a string - ex. Spring 2023 will come before Winter 2023, might need to add a custom sort or do some conversion first
     {
       header: 'Class',
+      id: 'class',
+
       accessorKey: 'applicant.studentProfile.graduationDate',
     },
+
     {
       header: 'Tags',
+      //accessorFn: (row) => `${row.piStatus} ${row.applicant.email}`,
+
       accessorKey: 'piStatus',
-      cell: ({ getValue }) => (
+      cell: ({ row, getValue }) => (
         <div className=" py-2.5">
-          <TagDropdown piStatus={getValue().toString()} />
+          <TagDropdown
+            applicantEmail={row.original.applicant.email}
+            piStatus={getValue().toString()}
+          />
         </div>
       ),
     },
@@ -141,12 +149,14 @@ const ApplicantTable = (props) => {
       //TODO: Set up resume link
       header: 'Resume',
       accessorKey: 'applicant.studentProfile.id',
+      id: 'resume',
       enableSorting: false,
       cell: ({ getValue }) => <div>name_resume.pdf</div>,
     },
     {
       header: 'Profile',
       accessorKey: 'applicant.studentProfile.id',
+      id: 'profile',
       enableSorting: false,
       cell: ({ getValue }) => (
         <div>
@@ -160,7 +170,7 @@ const ApplicantTable = (props) => {
       ),
     },
     {
-      //TODO: Format date correctly, wouldn't understand it as a Date object, thinks its a function
+      //TODO: Format date correctly, not sure if it understands the Date object
       header: 'Date Applied',
       accessorKey: 'lastUpdated',
       sortingFn: 'datetime',
@@ -169,6 +179,7 @@ const ApplicantTable = (props) => {
   const table = useReactTable({
     data,
     columns,
+
     state: {
       sorting,
     },
