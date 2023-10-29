@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 //TODO:
 //Fix: Resizing behavior of tag buttons (buttons mess with padding and resize incorrectly when viewport is reduced)
 //Fix: Dropdown overlap/scroll behavior
-//OnClick should call to database to change status for that applicant to that tag
+//Fix: Rejected should say Not Accepted, need to make an exception case for it
 
 export default function TagDropdown(props) {
   const { piStatus, applicantEmail } = props;
@@ -35,6 +35,7 @@ export default function TagDropdown(props) {
         console.log(error);
       });
     switch (tag) {
+      //The following text and color are for the dropdown button, might be a better way to set these values but this is simple
       case 'CONSIDERING':
         setTextColor('text-[#1E2F97]');
         setBgColor('bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50');
@@ -47,7 +48,7 @@ export default function TagDropdown(props) {
         setBgColor('bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30');
         setTextColor('text-[#653D00]');
         break;
-      case 'NOT ACCEPTED':
+      case 'REJECTED':
         setBgColor('bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40');
         setTextColor('text-[#570D0D]');
         break;
@@ -60,7 +61,7 @@ export default function TagDropdown(props) {
         setTextColor('text-[#141466]');
         break;
     }
-  }, [tag]);
+  }, [tag, router, applicantEmail]);
 
   const buttonStyle =
     'inline-flex w-full justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold shadow-sm';
@@ -90,12 +91,10 @@ export default function TagDropdown(props) {
           <div className="py-1 ">
             {/*Considering */}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50 ${buttonStyle}`}
                   onClick={() => {
-                    //Setting color and title
-
                     setTag('CONSIDERING');
                   }}
                 >
@@ -105,12 +104,10 @@ export default function TagDropdown(props) {
             </Menu.Item>
             {/*REVIEWING*/}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#653D00] bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30 ${buttonStyle}`}
                   onClick={() => {
-                    //Setting color and title
-
                     setTag('REVIEWING');
                   }}
                 >
@@ -121,7 +118,7 @@ export default function TagDropdown(props) {
 
             {/*Accepted */}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60 ${buttonStyle}`}
                   onClick={() => {
@@ -135,7 +132,7 @@ export default function TagDropdown(props) {
 
             {/*Interviewing */}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30 ${buttonStyle}`}
                   onClick={() => {
@@ -147,23 +144,23 @@ export default function TagDropdown(props) {
               )}
             </Menu.Item>
 
-            {/*Not Accepted*/}
+            {/*Not Accepted/Rejected*/}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40 ${buttonStyle}`}
                   onClick={() => {
-                    setTag('NOT ACCEPTED');
+                    setTag('REJECTED');
                   }}
                 >
-                  NOT ACCEPTED
+                  REJECTED
                 </button>
               )}
             </Menu.Item>
 
             {/*Joined */}
             <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {({ active }) => (
+              {() => (
                 <button
                   className={`text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30 ${buttonStyle}`}
                   onClick={() => {

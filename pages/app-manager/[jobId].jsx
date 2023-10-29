@@ -1,5 +1,4 @@
-//TODO: Sidebar, will be used on many pages
-//TODO: Checkboxes, sorting, search
+//TODO: Checkboxes, search
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 //Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
 import TagDropdown from '../../components/TagDropdown';
@@ -8,7 +7,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useMemo } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
-import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import {
   Table as ReactTable,
@@ -18,58 +17,13 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  sortingFns,
+  FilterFn,
+  SortingFn,
+  FilterFns,
 } from '@tanstack/react-table';
 
 import { options } from 'joi';
-
-//Pagination - will be replaced but keeping now for styling
-const Paginator = (props) => {
-  //TODO: replace with Tanstack Table version of styling
-  return (
-    <div className="flex flex-row justify-end space-x-4 ">
-      <div>
-        <p className="text-xs text-gray-700">
-          <span className="font-medium"> 1</span>-<span className="font-medium">10 </span>
-          of
-          <span className="font-medium"> 97 </span>
-        </p>
-      </div>
-
-      <div className="flex bg-white pl-4 sm:px-6">
-        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-          <div>
-            <nav className="space-x-5" aria-label="Pagination">
-              <a
-                href="#"
-                className="relative inline-flex px-2 text-gray-400 hover:text-gray-500 focus:z-20 focus:outline-offset-0"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="relative inline-flex pl-2 text-gray-400 hover:text-gray-500 focus:z-20 focus:outline-offset-0"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 //Applicant Manager page
 export default function ApplicantManager() {
@@ -114,9 +68,10 @@ export default function ApplicantManager() {
 const ApplicantTable = (props) => {
   const [sorting, setSorting] = useState([]);
   const { data } = props;
-
+  const [globalFilter, setGlobalFilter] = useState('');
+  //TODO: Do we want to add an email column? or just expect PIs to go to their student profile?
   const columns = [
-    //TODO: Double check what the fullName col filters by, should just treat as string
+    //Full name column just sorts by full name as a string, is that okay? Do we want separate first and last name columns?
     {
       header: 'Applicant',
       id: 'fullName',
@@ -132,6 +87,7 @@ const ApplicantTable = (props) => {
     },
 
     {
+      //TODO: Double-check how we want this sorted, rn just string sort so alphanumerical
       header: 'Tags',
       //accessorFn: (row) => `${row.piStatus} ${row.applicant.email}`,
 
@@ -182,17 +138,31 @@ const ApplicantTable = (props) => {
 
     state: {
       sorting,
+      globalFilter,
     },
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  //TODO: Add Search Bar + Style
+
   //TODO: Do we want any onHover behavior for pagination or sort buttons, maybe make the sorting more clear
+  //TODO: Do we want any hover behavior for search bar?
   return (
-    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-2xl shadow-md ">
+    <div className="bg-white mt-4 w-11/12 h-5/6 mx-auto p-12 rounded-2xl shadow-md space-y-6">
+      <div className="flex items-center justify-end">
+        <div className="flex items-center border-b-2 border-[#949494]">
+          <MagnifyingGlassIcon className="stroke-2 h-5 w-5 text-[#707070]" />
+          <DebouncedInput
+            initialValue={globalFilter ?? ''}
+            onChange={(value) => setGlobalFilter(String(value))}
+            className="p-2 text-base text-[#8b8b8b] outline-none"
+            placeholder="Search..."
+          />
+        </div>
+      </div>
       <div className="relative overflow-x-auto">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
@@ -234,8 +204,8 @@ const ApplicantTable = (props) => {
           </tbody>
         </table>
         <div className="h-2" />
-        <div className="flex gap-5 pt-3 text-sm items-center justify-end">
-          <span className="-mr-3">Rows Per Page: </span>
+        <div className="flex gap-6 pt-3 text-sm  items-center justify-end">
+          <span className="-mr-3 text-[#707070]">Rows Per Page: </span>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => {
@@ -275,3 +245,25 @@ const ApplicantTable = (props) => {
     </div>
   );
 };
+
+//Need to debounce the search input so that it filters correctly
+function DebouncedInput(props) {
+  const { initialValue, onChange } = props;
+  const debounce = 300;
+
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(value);
+    }, debounce);
+
+    return () => clearTimeout(timeout);
+  }, [value]);
+
+  return <input {...props} value={value} onChange={(e) => setValue(e.target.value)} />;
+}
