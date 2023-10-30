@@ -3,7 +3,7 @@ import Link from 'next/link';
 import aboutPic1 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic1.svg';
 import aboutPic2 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic2.svg';
 import aboutPic3 from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/aboutPic3.svg';
-import logo from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/logo.png';
+import logo from '/Users/rohangandhi/Downloads/BResearch/bresearch/public/logo.svg';
 
 function Navbar() {
   return (
