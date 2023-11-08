@@ -1,6 +1,7 @@
-//TODO: Checkboxes, search
+//TODO: Checkboxes, rework pagination to be controlled with Tanstack Query, might require a rework for search filtering as well
+//TODO: fix resizing of cols - should only resize for names
+//TODO: Make custom sort function for class/graduation
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
-//Might need to be reorganized to ensure its connecting to the right PI, auth when fetching probably solves that
 import TagDropdown from '../../components/TagDropdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -17,10 +18,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  sortingFns,
-  FilterFn,
-  SortingFn,
-  FilterFns,
 } from '@tanstack/react-table';
 
 import { options } from 'joi';
@@ -78,12 +75,11 @@ const ApplicantTable = (props) => {
       accessorFn: (row) =>
         `${row.applicant.studentProfile.firstName} ${row.applicant.studentProfile.lastName}`,
     },
-    //TODO: Check how class should be sorted, since it will sort it as a string - ex. Spring 2023 will come before Winter 2023, might need to add a custom sort or do some conversion first
     {
       header: 'Class',
       id: 'class',
-
       accessorKey: 'applicant.studentProfile.graduationDate',
+      sortingFn: 'myCustomSorting',
     },
 
     {
@@ -107,7 +103,7 @@ const ApplicantTable = (props) => {
       accessorKey: 'applicant.studentProfile.id',
       id: 'resume',
       enableSorting: false,
-      cell: ({ getValue }) => <div>name_resume.pdf</div>,
+      cell: (props) => <div className="underline">name_resume.pdf</div>, //this will eventually actually fetch and show the name of their pdf
     },
     {
       header: 'Profile',
@@ -126,12 +122,39 @@ const ApplicantTable = (props) => {
       ),
     },
     {
-      //TODO: Format date correctly, not sure if it understands the Date object
+      //TODO: Might need to add a . after the month abbreviation
       header: 'Date Applied',
-      accessorKey: 'lastUpdated',
+      id: 'lastUpdated',
+      accessorFn: (row) =>
+        new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }).format(new Date(row.lastUpdated)), //Change to abbrev month spelled out, then day, and then year
       sortingFn: 'datetime',
     },
   ];
+  const quarter_sort = (rowA, rowB, columnId) => {
+    const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
+    const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
+
+    const year_sort = rowA_split[1] < rowB_split[1] ? -1 : rowA_split[1] == rowB_split[1] ? 0 : 1;
+    //If the years are different, sort by year
+    if (year_sort != 0) return year_sort;
+    //If the years are the same, sort by quarter
+    const quarter_priority = (A) => {
+      A = A.toLowerCase();
+      if (A == 'spring') return 0;
+      if (A == 'summer') return 1;
+      if (A == 'fall') return 2;
+      if (A == 'winter') return 3;
+    };
+    const rowA_quarter = quarter_priority(rowA_split[0]);
+
+    const rowB_quarter = quarter_priority(rowB_split[0]);
+    return rowA_quarter < rowB_quarter ? -1 : rowA_quarter == rowB_quarter ? 0 : 1;
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -139,6 +162,9 @@ const ApplicantTable = (props) => {
     state: {
       sorting,
       globalFilter,
+    },
+    sortingFns: {
+      myCustomSorting: quarter_sort,
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -263,7 +289,7 @@ function DebouncedInput(props) {
     }, debounce);
 
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [value, onChange]);
 
   return <input {...props} value={value} onChange={(e) => setValue(e.target.value)} />;
 }
