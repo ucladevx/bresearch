@@ -81,7 +81,8 @@ model ResearcherProfile {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   researcher     Researcher @relation(fields: [researcherId], references: [id])
   researcherId   String     @unique @db.Uuid
-  name           String     @db.VarChar(161)
+  firstName      String     @db.VarChar(80)
+  lastName       String     @db.VarChar(80)
   profilePicture String?
 }
 
