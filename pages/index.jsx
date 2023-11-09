@@ -462,7 +462,7 @@ function Home({ jobs: originalJobs }) {
               <div className="flex flex-col relative">
                 {/* https://www.w3docs.com/snippets/css/how-to-set-absolute-positioning-relative-to-the-parent-element.html */}
                 <Listbox value={selectedDepartments} onChange={setSelectedDepartments} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:text-black">
                     Department
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -485,7 +485,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedDurations} onChange={setSelectedDurations} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:text-black">
                     Duration
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -508,7 +508,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedPayRanges} onChange={setSelectedPayRanges} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:text-black">
                     Pay
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -531,7 +531,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedLocations} onChange={setSelectedLocations} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:text-black">
                     Locations
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
