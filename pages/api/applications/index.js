@@ -28,7 +28,7 @@ class ApplicationsRoute extends ApiRoute {
     try {
       const result = await prisma.labeledJob.findMany({
         where: {
-          applicantEmail: req.session.user?.email,
+          applicantId: req.session.user?.id,
         },
         select: {
           status: true,

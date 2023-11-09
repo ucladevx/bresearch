@@ -34,9 +34,9 @@ class ApplicationsUpdateRoute extends ApiRoute {
 
       const result = await prisma.labeledJob.update({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.email,
           },
         },
         data: {
@@ -78,9 +78,9 @@ class ApplicationsUpdateRoute extends ApiRoute {
 
       const result = await prisma.labeledJob.upsert({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.id,
           },
         },
         update: {

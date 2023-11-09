@@ -20,9 +20,9 @@ class ApplicationsUnsaveRoute extends ApiRoute {
       // TODO: combine queries into interactive prisma transaction
       const job = await prisma.labeledJob.findUnique({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.id,
           },
         },
       });
@@ -36,9 +36,9 @@ class ApplicationsUnsaveRoute extends ApiRoute {
       }
       await prisma.labeledJob.delete({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.id,
           },
         },
       });

@@ -44,14 +44,14 @@ class StudentResumeRoute extends ApiRoute {
             job: { poster: { email: req.session.user.email } },
             applicant: { studentProfile: { id: profileId } },
           },
-          select: { applicantEmail: true },
+          select: { applicantId: true },
         });
         if (appliedJob === null) {
           return res.status(403).json({
             message: `You cannot view this résumé because this student has not applied to one of your posts.`,
           });
         }
-        resumeId = appliedJob.applicantEmail;
+        resumeId = appliedJob.applicantId;
       } else {
         return res.status(403);
       }

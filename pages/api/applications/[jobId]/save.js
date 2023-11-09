@@ -20,9 +20,9 @@ class ApplicationsSaveRoute extends ApiRoute {
 
       const job = await prisma.labeledJob.findUnique({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.id,
           },
         },
       });
@@ -31,9 +31,9 @@ class ApplicationsSaveRoute extends ApiRoute {
       }
       await prisma.labeledJob.upsert({
         where: {
-          jobId_applicantEmail: {
+          jobId_applicantId: {
             jobId,
-            applicantEmail: req.session.user?.email,
+            applicantId: req.session.user?.id,
           },
         },
         update: { status: 'SAVED', lastUpdated: new Date() },

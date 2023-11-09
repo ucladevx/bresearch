@@ -95,14 +95,14 @@ async function main() {
 
   const trackedJob = await prisma.labeledJob.upsert({
     where: {
-      jobId_applicantEmail: {
+      jobId_applicantId: {
         jobId: job.id,
-        applicantEmail: studentB.email,
+        applicantId: studentB.id,
       },
     },
     create: {
       jobId: job.id,
-      applicantEmail: studentB.email,
+      applicantId: studentB.id,
       bookmarked: true,
       status: 'SAVED',
       piStatus: 'CONSIDERING',
