@@ -66,6 +66,7 @@ model StudentProfile {
   coursework      String?  @db.VarChar(800)
   links           String[] @db.VarChar(200)
   // resume
+  profilePicture  String?
 }
 
 model Researcher {
@@ -77,10 +78,11 @@ model Researcher {
 }
 
 model ResearcherProfile {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  researcher   Researcher @relation(fields: [researcherId], references: [id])
-  researcherId String     @unique @db.Uuid
-  name         String     @db.VarChar(161)
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  researcher     Researcher @relation(fields: [researcherId], references: [id])
+  researcherId   String     @unique @db.Uuid
+  name           String     @db.VarChar(161)
+  profilePicture String?
 }
 
 model Lab {
