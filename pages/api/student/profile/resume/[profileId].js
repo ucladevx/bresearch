@@ -51,7 +51,13 @@ class StudentResumeRoute extends ApiRoute {
             message: `You cannot view this résumé because this student has not applied to one of your posts.`,
           });
         }
-        resumeId = appliedJob.applicantId;
+        const applicantEmail = await prisma.student.findUnique({
+          where: {
+            id: appliedJob.applicantId,
+          },
+          select: { email: true },
+        });
+        resumeId = applicantEmail;
       } else {
         return res.status(403);
       }
