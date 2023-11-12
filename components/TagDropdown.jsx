@@ -4,8 +4,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 //TODO:
-//Fix: Resizing behavior of tag buttons (buttons mess with padding and resize incorrectly when viewport is reduced)
-//Fix: Dropdown overlap/scroll behavior
+//Fix: Dropdown overlap/scroll behavior - probably want to use a portal so it renders over the parent table
 //Fix: Rejected should say Not Accepted, need to make an exception case for it
 
 export default function TagDropdown(props) {
@@ -52,7 +51,6 @@ export default function TagDropdown(props) {
     }
   }
 
-  //TODO: Fix color and background on
   function updateTag(tag) {
     setTag(tag);
     const { jobId } = router.query;

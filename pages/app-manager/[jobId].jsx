@@ -1,6 +1,5 @@
-//TODO: Checkboxes, rework pagination to be controlled with Tanstack Query, might require a rework for search filtering as well
-//TODO: fix resizing of cols - should only resize for names
-//TODO: Check why the page reloads anytime you go off of it - sending too many requests
+//TODO: Checkboxes
+//TODO: Update pagination to cursor-based, add prefetch of next page
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 import TagDropdown from '../../components/TagDropdown';
 import Link from 'next/link';
@@ -22,7 +21,6 @@ import {
   getCoreRowModel,
   flexRender,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
 
@@ -98,7 +96,6 @@ const ApplicantTable = (props) => {
 
   const columns = useMemo(
     () => [
-      //Full name column just sorts by full name as a string, is that okay? Do we want separate first and last name columns?
       {
         header: 'Applicant',
         id: 'fullName',
@@ -189,7 +186,7 @@ const ApplicantTable = (props) => {
   });
 
   //TODO: Update all page sections to use cursor instead, also set pageSize to negative when requesting previous page and abs when setting next page
-  //TODO: Figure out how to pre fetch next page with useQuery
+  //TODO: Add prefetching next page, probably with prefetchQuery or fetchQuery
 
   const router = useRouter();
   const fetchDataOptions = {
@@ -234,7 +231,7 @@ const ApplicantTable = (props) => {
   const defaultData = useMemo(() => [], []);
 
   const table = useReactTable({
-    data: data ?? defaultData, //might need to do data.applicants.applicants
+    data: data ?? defaultData,
     columns,
     pageCount: pageCount ?? 0,
     onPaginationChange: setPagination,
