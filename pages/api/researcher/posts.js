@@ -17,14 +17,14 @@ class PostsRoute extends ApiRoute {
           .json({ message: 'You are not a researcher', accountType: req.token.accountType });
       }
 
-      // TODO: maybe move this to middleware
-      const profile = await prisma.researcher.findUnique({
+      // TODO: maybe move this permission check to middleware
+      const currentResearcher = await prisma.researcher.findUnique({
         where: { email: req.session.user.email },
         select: {
-          researcherProfile: { select: { name: true } },
+          researcherProfile: { select: { id: true } },
         },
       });
-      if (profile === null) {
+      if (currentResearcher === null || !currentResearcher.researcherProfile) {
         return res.status(403).json({
           message: 'You have not created your profile',
         });
