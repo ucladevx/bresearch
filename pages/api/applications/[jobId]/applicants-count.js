@@ -40,10 +40,7 @@ class ApplicationApplicants extends ApiRoute {
    */
   async get(req, res, prisma) {
     try {
-      const result = await prisma.labeledJob.findMany({
-        take: parseInt(req.query?.pageSize),
-        skip: parseInt(req.query?.pageIndex * req.query?.pageSize),
-
+      const result = await prisma.labeledJob.count({
         where: {
           status: 'APPLIED',
           jobId: parseInt(req.query?.jobId),
@@ -55,22 +52,7 @@ class ApplicationApplicants extends ApiRoute {
             },
           },
         },
-        select: {
-          applicant: {
-            select: {
-              id: true,
-              studentProfile: true,
-              email: true,
-            },
-          },
-          piStatus: true,
-          lastUpdated: true,
-        },
-        orderBy: {
-          lastUpdated: 'asc',
-        },
       });
-
       return res.json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
