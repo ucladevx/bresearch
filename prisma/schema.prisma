@@ -305,7 +305,7 @@ model StudentProfile {
   coursework      String?  @db.VarChar(800)
   links           String[] @db.VarChar(200)
   // resume
-  profilePicture  String?
+  profilePicture  String?  @db.VarChar(200)
 }
 
 model Researcher {
@@ -322,7 +322,7 @@ model ResearcherProfile {
   researcherId   String     @unique @db.Uuid
   firstName      String     @db.VarChar(80)
   lastName       String     @db.VarChar(80)
-  profilePicture String?
+  profilePicture String?    @db.VarChar(200)
 }
 
 model Lab {
