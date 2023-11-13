@@ -60,6 +60,7 @@ class ApplicationApplicants extends ApiRoute {
             select: {
               id: true,
               studentProfile: true,
+              email: true,
             },
           },
           piStatus: true,
