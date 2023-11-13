@@ -328,6 +328,7 @@ model ResearcherProfile {
 model Lab {
   id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String       @db.VarChar(50)
+  contactEmail     String       @db.VarChar(100)
   jobs             Job[]
   adminResearchers Researcher[]
 }
