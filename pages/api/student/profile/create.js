@@ -53,6 +53,7 @@ class FirstProfileCreationRoute extends ApiRoute {
         graduationDate,
         gpa,
         majorGpa,
+        showPicture,
       } = value;
 
       //default to null on the first page for values that don't get set
@@ -74,6 +75,7 @@ class FirstProfileCreationRoute extends ApiRoute {
           graduationDate,
           gpa,
           majorGpa,
+          profilePicture: showPicture ? req.token.picture : null,
           student: {
             connect: { email: req.session.user.email },
           },
