@@ -21,7 +21,7 @@ class DashboardRoute extends ApiRoute {
       const profile = await prisma.researcher.findUnique({
         where: { email: req.session.user.email },
         select: {
-          researcherProfile: { select: { name: true } },
+          researcherProfile: { select: { firstName: true, lastName: true } },
         },
       });
       if (profile === null) {
@@ -29,7 +29,7 @@ class DashboardRoute extends ApiRoute {
           message: 'You have not created your profile',
         });
       }
-      const { name } = profile.researcherProfile;
+      const { firstName, lastName } = profile.researcherProfile;
 
       // TODO: maybe use an interactive transaction https://www.prisma.io/docs/concepts/components/prisma-client/transactions#interactive-transactions
 
@@ -37,7 +37,7 @@ class DashboardRoute extends ApiRoute {
         where: {
           poster: { email: req.session.user.email },
           closed: false,
-          OR: [{ closingDate: { equals: null } }, { closingDate: { gt: new Date() } }],
+          closingDate: { gt: new Date() },
         },
         select: {
           id: true,
@@ -58,7 +58,8 @@ class DashboardRoute extends ApiRoute {
         totalApplicationCount: 0,
         activePosts,
         totalPostCount,
-        name,
+        firstName,
+        lastName,
       });
     } catch (e) {
       console.error({ e });
