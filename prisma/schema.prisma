@@ -305,6 +305,7 @@ model StudentProfile {
   coursework      String?  @db.VarChar(800)
   links           String[] @db.VarChar(200)
   // resume
+  profilePicture  String?  @db.VarChar(200)
 }
 
 model Researcher {
@@ -316,15 +317,19 @@ model Researcher {
 }
 
 model ResearcherProfile {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  researcher   Researcher @relation(fields: [researcherId], references: [id])
-  researcherId String     @unique @db.Uuid
-  name         String     @db.VarChar(161)
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  researcher     Researcher @relation(fields: [researcherId], references: [id])
+  researcherId   String     @unique @db.Uuid
+  firstName      String     @db.VarChar(80)
+  lastName       String     @db.VarChar(80)
+  profilePicture String?    @db.VarChar(200)
 }
 
 model Lab {
   id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String       @db.VarChar(50)
+  contactEmail     String       @db.VarChar(100)
+  department       Department
   jobs             Job[]
   adminResearchers Researcher[]
 }
