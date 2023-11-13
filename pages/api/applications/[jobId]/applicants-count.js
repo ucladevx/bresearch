@@ -42,6 +42,7 @@ class ApplicationApplicants extends ApiRoute {
     try {
       const result = await prisma.labeledJob.count({
         where: {
+          status: 'APPLIED',
           jobId: parseInt(req.query?.jobId),
           job: {
             poster: {

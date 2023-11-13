@@ -45,6 +45,7 @@ class ApplicationApplicants extends ApiRoute {
         skip: parseInt(req.query?.pageIndex * req.query?.pageSize),
 
         where: {
+          status: 'APPLIED',
           jobId: parseInt(req.query?.jobId),
           job: {
             poster: {
