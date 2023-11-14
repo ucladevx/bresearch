@@ -81,7 +81,7 @@ function EditJobPosting() {
   const [jobInfo, setJobInfo] = useState(null);
 
   useEffect(() => {
-    async function getLabs() {
+    async function getJobInfo() {
       if (jobId === undefined) {
         return;
       }
@@ -122,8 +122,9 @@ function EditJobPosting() {
         }
       } catch (e) {}
     }
-    getLabs();
+    getJobInfo();
   }, [jobId, setValue]);
+
   async function closeJob() {
     if (isSubmitting) {
       return;

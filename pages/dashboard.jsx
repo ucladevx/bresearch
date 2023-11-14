@@ -10,6 +10,7 @@ function Dashboard() {
     async function getDashboardInfo() {
       try {
         const dashboardInfo = await (await fetch('/api/researcher/dashboard')).json();
+        // console.log({ dashboardInfo });
         setDashboardInfo(dashboardInfo);
       } catch (e) {}
     }
@@ -94,13 +95,20 @@ function Dashboard() {
                   <div>You have no active posts.</div>
                 ) : (
                   dashboardInfo.activePosts.map(
-                    ({ id, lab: { name: labName }, title, closingDate }) => (
+                    ({
+                      id,
+                      lab: { name: labName },
+                      title,
+                      closingDate,
+                      _count: { applicants: applicantCount },
+                    }) => (
                       <ResearcherPostCard
                         key={id}
                         id={id}
                         labName={labName}
                         title={title}
                         closingDate={closingDate}
+                        applicantCount={applicantCount}
                       />
                     )
                   )
