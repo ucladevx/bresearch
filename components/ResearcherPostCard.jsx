@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
-export default function ResearcherPostCard({ id, labName, title, closingDate }) {
+export default function ResearcherPostCard({ id, labName, title, closingDate, applicantCount }) {
   return (
     <div className="bg-white rounded-[1.25rem] p-12 max-w-[68.5rem] flex flex-col">
       <div className="flex justify-between text-[#404040] text-base gap-x-8">
         <div className="font-medium">{labName}</div>
         <div>
-          <span className="font-medium">{0}</span>
+          <span className="font-medium">{applicantCount}</span>
           <span className="font-normal"> Applicants</span>
         </div>
       </div>

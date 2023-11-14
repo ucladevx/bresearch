@@ -41,6 +41,11 @@ class PostsRoute extends ApiRoute {
           title: true,
           closingDate: true,
           lab: { select: { name: true } },
+          _count: {
+            select: {
+              applicants: { where: { status: 'APPLIED' } },
+            },
+          },
         },
         orderBy: [{ closingDate: 'asc' }],
       });
