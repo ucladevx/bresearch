@@ -65,11 +65,27 @@ class JobCreationRoute extends ApiRoute {
         duration,
         departments,
         weeklyHours,
-        credit,
+        creditDescription,
         location,
         lab: labId,
+        applicationType,
         externalLink,
       } = value;
+
+      const lab = await prisma.lab.findUnique({
+        where: { id: labId },
+        select: { contactEmail: true, adminResearchers: { select: { email: true } } },
+      });
+      if (lab === null) {
+        return res.status(404).json({
+          message: 'Lab not found',
+        });
+      }
+      if (!lab.adminResearchers.some((r) => r.email === req.session.user.email)) {
+        return res.status(403).json({
+          message: "You aren't in this lab",
+        });
+      }
 
       // TODO: what if closingDate is not passed in request body
       let closeDate = null;
@@ -77,7 +93,14 @@ class JobCreationRoute extends ApiRoute {
         closeDate = new Date(closingDate);
       }
 
-      // TODO: ensure researcher is in the lab and # of jobs < 50
+      let applicationLink = null;
+      if (applicationType === 'email') {
+        applicationLink = lab.contactEmail;
+      } else if (applicationType === 'external') {
+        applicationLink = externalLink;
+      }
+
+      // TODO: ensure researcher hasn't posted too many jobs
       const result = await prisma.job.create({
         data: {
           closingDate: closeDate,
@@ -95,9 +118,9 @@ class JobCreationRoute extends ApiRoute {
           duration,
           departments,
           weeklyHours,
-          credit,
+          credit: creditDescription ?? null,
           location,
-          externalLink,
+          externalLink: applicationLink,
           startDate,
         },
       });
