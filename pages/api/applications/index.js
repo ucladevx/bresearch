@@ -26,6 +26,9 @@ class ApplicationsRoute extends ApiRoute {
    */
   async get(req, res, prisma) {
     try {
+      if (req.token.accountType === 'researcher') {
+        return res.status(403).json([]);
+      }
       const result = await prisma.labeledJob.findMany({
         where: {
           applicantEmail: req.session.user?.email,
