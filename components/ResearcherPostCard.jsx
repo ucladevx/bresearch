@@ -45,6 +45,12 @@ export default function ResearcherPostCard({ id, labName, title, closingDate }) 
           >
             Edit Post
           </Link>
+          <Link
+            href={`/app-manager/${id}`}
+            className="px-6 py-4 border-[1px] border-dark-blue rounded-xl bg-dark-blue text-white  inline-block"
+          >
+            Manage Applicants
+          </Link>
         </div>
       </div>
     </div>
