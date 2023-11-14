@@ -364,7 +364,7 @@ model Job {
   duration     Duration
   departments  Department[]
   weeklyHours  Int
-  credit       Boolean
+  credit       String?      @db.VarChar(50)
   location     Location
   externalLink String?      @db.VarChar(200)
 }
