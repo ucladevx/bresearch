@@ -23,6 +23,7 @@ class ResearcherLabsRoute extends ApiRoute {
             select: {
               id: true,
               name: true,
+              contactEmail: true,
             },
           },
         },
