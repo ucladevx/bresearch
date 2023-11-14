@@ -13,30 +13,14 @@ export default function ResearcherPostCard({ id, labName, title, closingDate }) 
       <div className="mt-[1.125rem] font-semibold text-2xl">{title}</div>
       <div className="mt-[3.75rem] flex justify-between flex-wrap">
         <div className="text-base font-normal text-[#404040] min-w-fit">
-          {new Date(closingDate).getTime() > Date.now() ? (
-            <>
-              Applications open until{' '}
-              <span className="font-medium text-dark-blue">
-                {new Intl.DateTimeFormat('en-US', {
-                  // year: 'numeric',
-                  // month: 'short',
-                  // day: 'numeric',
-                  // hour: 'numeric',
-                  // minute: '2-digit',
-                  // timeZoneName: 'longGeneric',
-                })
-                  .format(new Date(closingDate))
-                  .replace(',', '')}
-              </span>
-            </>
-          ) : (
-            <>
-              Applications closed on{' '}
-              <span className="font-medium text-dark-blue">
-                {new Intl.DateTimeFormat('en-US').format(new Date(closingDate)).replace(',', '')}
-              </span>
-            </>
-          )}
+          {new Date(closingDate).getTime() > Date.now()
+            ? 'Applications open until '
+            : 'Applications closed on '}
+          <span className="font-medium text-dark-blue">
+            {new Intl.DateTimeFormat('en-US', {
+              dateStyle: 'medium',
+            }).format(new Date(closingDate))}
+          </span>
         </div>
         <div className="font-semibold flex gap-x-4">
           <Link
