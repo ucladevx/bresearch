@@ -3,6 +3,7 @@ import ResearcherSidebar from '../components/ResearcherSidebar';
 import Head from 'next/head';
 import { useSession, signOut } from 'next-auth/react';
 import { Departments } from '@lib/globals';
+import Link from 'next/link';
 
 function ResearcherProfile() {
   const [profileInfo, setProfileInfo] = useState(null);
@@ -69,7 +70,12 @@ function ResearcherProfile() {
                         {`${profileInfo.researcherProfile.firstName} ${profileInfo.researcherProfile.lastName}`}
                       </div>
                     </div>
-                    <button className="invisible">Edit</button>
+                    <Link
+                      href="/researcher/profile/edit"
+                      className="px-9 py-3 border-[1px] bg-white border-[#141466] text-[#141466] font-semibold text-base rounded-xl"
+                    >
+                      Edit
+                    </Link>
                   </>
                 )}
               </div>
