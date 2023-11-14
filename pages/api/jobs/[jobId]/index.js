@@ -1,9 +1,9 @@
 import { Prisma } from 'prisma/prisma-client';
 import ApiRoute from '@lib/ApiRoute';
 
-class DashboardRoute extends ApiRoute {
+class JobInfoRoute extends ApiRoute {
   /**
-   * dashboard endpoint
+   * Job info endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req
    * @param {import('next').NextApiResponse} res
    * @param {import('prisma/prisma-client').PrismaClient} prisma
@@ -36,7 +36,7 @@ class DashboardRoute extends ApiRoute {
         where: {
           id: jobId,
         },
-        include: { lab: { select: { name: true } } },
+        include: { lab: { select: { name: true, contactEmail: true } } },
       });
       if (job === null || job.posterId !== researcher.id) {
         console.error(job?.posterId, researcher.id);
@@ -61,4 +61,4 @@ class DashboardRoute extends ApiRoute {
   }
 }
 
-export default new DashboardRoute().as_handler();
+export default new JobInfoRoute().as_handler();
