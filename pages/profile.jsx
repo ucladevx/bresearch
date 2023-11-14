@@ -73,17 +73,27 @@ function ResearcherProfile() {
                   </>
                 )}
               </div>
-              <div className="bg-white rounded-[1.25rem] flex gap-y-2">
-                {profileInfo !== null &&
-                  profileInfo.labs.map(({ name, id }) => (
-                    <div key={id} className="flex flex-col p-12">
-                      <div className="flex flex-col gap-2">
-                        <div className="font-bold">Lab</div>
-                        <div>{name}</div>
+              {profileInfo !== null &&
+                profileInfo.labs.map(({ id, name, contactEmail, department }) => (
+                  <div key={id} className="flex flex-col p-12 gap-5 bg-white rounded-[1.25rem]">
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">Lab</div>
+                      <div className="font-medium text-[#3F3D3D] text-base">{name}</div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">Department</div>
+                      <div className="font-medium text-[#3F3D3D] text-base">
+                        {Departments.find(({ value }) => value === department).label}
                       </div>
                     </div>
-                  ))}
-              </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">
+                        Lab Contact Email Address
+                      </div>
+                      <div className="font-medium text-[#3F3D3D] text-base">{contactEmail}</div>
+                    </div>
+                  </div>
+                ))}
             </>
           }
           <div className="flex justify-end">
