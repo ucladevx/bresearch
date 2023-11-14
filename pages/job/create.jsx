@@ -49,8 +49,8 @@ function Input({
   );
 }
 
-function DisabledInput({ id, fieldName, value, ...props }) {
-  if (!id || !fieldName || Object.keys(props).length) {
+function DisabledInput({ id, value, ...props }) {
+  if (!id || Object.keys(props).length) {
     throw new Error('Input missing prop or extra prop');
   }
   return (
@@ -514,7 +514,6 @@ function CreateJobPosting() {
                             </div>
                             <DisabledInput
                               id="labContactEmail"
-                              fieldName="labContactEmail"
                               value={
                                 labs.find((lab) => watch('lab') === lab.id)?.contactEmail ?? ''
                               }
