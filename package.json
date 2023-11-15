@@ -34,7 +34,7 @@
     "react-datepicker": "4.17.0",
     "react-dom": "18.2.0",
     "react-dropzone": "14.2.3",
-    "react-hook-form": "7.43.9",
+    "react-hook-form": "7.48.2",
     "react-quill": "2.0.0",
     "react-select": "5.7.3"
   },
