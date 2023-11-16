@@ -4,7 +4,7 @@
     "eqeqeq": "error",
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_+$" }],
     "no-undef": "error",
-    "curly": "warn",
+    "curly": "error",
     "use-isnan": "error"
   },
   "env": {
