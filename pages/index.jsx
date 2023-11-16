@@ -842,12 +842,9 @@ function Home({ jobs: originalJobs }) {
                               className="bg-dark-blue text-white font-extrabold text-base flex gap-3 items-center px-6 py-4 rounded-[32px]"
                               disabled={selectedJob.status === 'APPLIED'}
                               onClick={async () => {
-                                await fetch(
-                                  `http://localhost:3000/api/applications/${selectedJobID}/apply`,
-                                  {
-                                    method: 'PATCH',
-                                  }
-                                );
+                                await fetch(`/api/applications/${selectedJobID}/apply`, {
+                                  method: 'PATCH',
+                                });
 
                                 setJobs(
                                   jobs.map((j) =>
