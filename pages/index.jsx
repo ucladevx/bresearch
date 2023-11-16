@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobSearchValidator } from '@lib/validators';
 import Head from 'next/head';
+import { Departments, Majors } from '@lib/globals';
 
 function ResearcherJobCard({
   id,
@@ -51,7 +52,10 @@ function ResearcherJobCard({
         }
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
@@ -148,7 +152,10 @@ function JobCard({
         )}
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
@@ -248,7 +255,10 @@ function SavedJobCard({
         )}
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
