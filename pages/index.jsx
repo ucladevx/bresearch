@@ -665,18 +665,23 @@ function Home({ jobs: originalJobs }) {
                     </div>
                     <div className="flex flex-wrap gap-4 mt-12 sticky">
                       {[
-                        { field: 'Department', value: selectedJob.departments[0] ?? '' },
+                        {
+                          field: 'Department',
+                          value:
+                            departments.find(({ value }) => value === selectedJob.departments[0])
+                              ?.label ?? '',
+                        },
                         {
                           field: 'Location',
                           value: locations.find(({ value }) => value === selectedJob.location)
                             .label,
                         },
-                        { field: 'Position Type', value: '' },
+                        // { field: 'Position Type', value: '' },
                         {
                           field: 'Desired Start Date',
                           value: toHyphenatedDateString(new Date(selectedJob.startDate)),
                         },
-                        { field: 'Research Area', value: '' },
+                        // { field: 'Research Area', value: '' },
                         {
                           field: 'Duration',
                           value: durations.find(({ value }) => value === selectedJob.duration)
