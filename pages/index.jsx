@@ -818,7 +818,7 @@ function Home({ jobs: originalJobs }) {
                   <Dialog.Title as="div" className="text-lg font-medium leading-6 text-gray-900">
                     All Filters
                   </Dialog.Title>
-                  <div className="flex">
+                  <div className="flex gap-1">
                     <div className="flex-col">
                       <div>Departments</div>
                       {departments.map(({ value, label }) => {
@@ -829,7 +829,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedDepartments, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -838,32 +838,7 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
-                        );
-                      })}
-                    </div>
-                    <div className="flex-col">
-                      <div>Paid</div>
-                      {payRanges.map(({ value, label }) => {
-                        const updateFilter = () =>
-                          setSelectedPayRanges(
-                            selectedPayRanges.includes(value)
-                              ? selectedPayRanges.filter((p) => p !== value)
-                              : [...selectedPayRanges, value]
-                          );
-                        return (
-                          <Fragment key={value}>
-                            <input
-                              type="checkbox"
-                              id={label}
-                              name={label}
-                              checked={selectedPayRanges.includes(value)}
-                              onChange={updateFilter}
-                            />
-                            <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -877,7 +852,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedDurations, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -886,8 +861,32 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex-col">
+                      <div>Pay</div>
+                      {payRanges.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedPayRanges(
+                            selectedPayRanges.includes(value)
+                              ? selectedPayRanges.filter((p) => p !== value)
+                              : [...selectedPayRanges, value]
+                          );
+                        return (
+                          <div key={value} className="flex gap-1">
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedPayRanges.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
                             <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -901,7 +900,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedLocations, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -910,8 +909,7 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -947,12 +945,12 @@ export async function getStaticProps() {
       location: true,
       lab: { select: { name: true } },
       created: true,
+      startDate: true,
       closingDate: true,
       credit: true,
       weeklyHours: true,
       paid: true,
       externalLink: true,
-      startDate: true,
       _count: {
         select: {
           applicants: { where: { status: 'APPLIED' } },
