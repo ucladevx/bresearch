@@ -309,6 +309,7 @@ function Home({ jobs: originalJobs }) {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    cacheTime: 0, // don't cache. TODO: decide on what to to for researchers: maybe don't fetch at all
   });
 
   const [jobs, setJobs] = useState([]);
