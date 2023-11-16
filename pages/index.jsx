@@ -445,15 +445,17 @@ function Home({ jobs: originalJobs }) {
               >
                 <input
                   placeholder="Search"
-                  className="rounded-3xl px-3 h-[3.25rem]"
+                  className="rounded-3xl pl-3 pr-11 h-[3.25rem]"
                   {...register('jobSearchQuery')}
                 />
+                {/* TODO: put svg in button and make it submit form */}
                 <svg
                   width="20"
                   height="26"
                   viewBox="0 0 20 26"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="relative right-11"
                 >
                   <path
                     fillRule="evenodd"
