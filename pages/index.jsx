@@ -290,16 +290,6 @@ const payRanges = [
   { value: false, label: 'Unpaid' },
 ];
 
-function toHyphenatedDateString(date) {
-  return (
-    date.getFullYear() +
-    '-' +
-    (date.getMonth() + 1).toString(10).padStart(2, '0') +
-    '-' +
-    date.getDate().toString(10).padStart(2, '0')
-  );
-}
-
 function Home({ jobs: originalJobs }) {
   const { isLoading, isError, data, status } = useQuery({
     queryKey: ['applications'],
@@ -679,7 +669,9 @@ function Home({ jobs: originalJobs }) {
                         // { field: 'Position Type', value: '' },
                         {
                           field: 'Desired Start Date',
-                          value: toHyphenatedDateString(new Date(selectedJob.startDate)),
+                          value: new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+                            new Date(selectedJob.startDate)
+                          ),
                         },
                         // { field: 'Research Area', value: '' },
                         {
