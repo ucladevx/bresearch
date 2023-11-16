@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobSearchValidator } from '@lib/validators';
 import Head from 'next/head';
+import { Departments, Majors } from '@lib/globals';
 
 function ResearcherJobCard({
   id,
@@ -51,7 +52,10 @@ function ResearcherJobCard({
         }
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
@@ -148,7 +152,10 @@ function JobCard({
         )}
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
@@ -248,7 +255,10 @@ function SavedJobCard({
         )}
       </div>
       <div className="font-semibold text-xl">{title}</div>
-      <ul className="flex font-medium text-sm">
+      <ul className="flex font-medium text-sm gap-2">
+        <li className="px-[.625rem] py-2 bg-[#A1DDFF] rounded-[30px]">
+          {Departments.find(({ value }) => value === departments[0]).label}
+        </li>
         <li className="px-[.625rem] py-2 bg-[#D8F9C4] rounded-[30px]">
           {locations.find(({ value }) => value === location).label}
         </li>
@@ -280,16 +290,6 @@ const payRanges = [
   { value: false, label: 'Unpaid' },
 ];
 
-function toHyphenatedDateString(date) {
-  return (
-    date.getFullYear() +
-    '-' +
-    (date.getMonth() + 1).toString(10).padStart(2, '0') +
-    '-' +
-    date.getDate().toString(10).padStart(2, '0')
-  );
-}
-
 function Home({ jobs: originalJobs }) {
   const { isLoading, isError, data, status } = useQuery({
     queryKey: ['applications'],
@@ -299,9 +299,10 @@ function Home({ jobs: originalJobs }) {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    cacheTime: 0, // don't cache. TODO: decide on what to to for researchers: maybe don't fetch at all
   });
 
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState(null);
   const [selectedDepartments, setSelectedDepartments] = useState([]);
   const [selectedDurations, setSelectedDurations] = useState([]);
   const [selectedPayRanges, setSelectedPayRanges] = useState([]);
@@ -339,7 +340,7 @@ function Home({ jobs: originalJobs }) {
     const markedJobs = data.map(({ job: { id } }) => id);
     const unmarkedJobs = originalJobs
       .filter(({ id }) => !markedJobs.includes(id))
-      .map((j) => ({ ...j, saved: false }));
+      .map((j) => ({ ...j, status: null })); // .map((j) => ({ ...j, saved: false }));
     setJobs(unmarkedJobs);
     setSelectedJobID(unmarkedJobs[0]?.id);
   }, [data, status, originalJobs]);
@@ -380,7 +381,7 @@ function Home({ jobs: originalJobs }) {
     }
   }, [errors]);
 
-  let filteredJobs = [...jobs];
+  let filteredJobs = jobs ? [...jobs] : [];
   if (selectedPayRanges.length !== 0 && selectedPayRanges.length !== departments.length) {
     filteredJobs = filteredJobs.filter(({ paid }) => selectedPayRanges.includes(paid));
   }
@@ -399,7 +400,7 @@ function Home({ jobs: originalJobs }) {
     filteredJobs.reverse();
   }
 
-  const selectedJob = jobs.find(({ id }) => id === selectedJobID);
+  const selectedJob = jobs && jobs.find(({ id }) => id === selectedJobID);
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -434,15 +435,17 @@ function Home({ jobs: originalJobs }) {
               >
                 <input
                   placeholder="Search"
-                  className="rounded-3xl px-3 h-[3.25rem]"
+                  className="rounded-3xl pl-3 pr-11 h-[3.25rem]"
                   {...register('jobSearchQuery')}
                 />
+                {/* TODO: put svg in button and make it submit form */}
                 <svg
                   width="20"
                   height="26"
                   viewBox="0 0 20 26"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="relative right-11"
                 >
                   <path
                     fillRule="evenodd"
@@ -560,7 +563,7 @@ function Home({ jobs: originalJobs }) {
               </button>
             </div>
           </div>
-          {!isLoading && !isError && (
+          {jobs !== null && !isLoading && !isError && (
             <div className="flex gap-10">
               <div className="flex flex-col gap-6 w-[28.5rem]">
                 {/* TODO: maybe add overflow-y-scroll and correct height above */}
@@ -573,7 +576,7 @@ function Home({ jobs: originalJobs }) {
                       duration,
                       location,
                       lab: { name: labName },
-                      saved,
+                      status,
                     }) => {
                       if (accountType === 'researcher') {
                         return (
@@ -593,12 +596,12 @@ function Home({ jobs: originalJobs }) {
                           />
                         );
                       }
-                      return saved ? (
+                      return status === 'SAVED' ? (
                         <SavedJobCard
                           key={id}
                           id={id}
                           updateJob={() =>
-                            setJobs(jobs.map((j) => (j.id === id ? { ...j, saved: false } : j)))
+                            setJobs(jobs.map((j) => (j.id === id ? { ...j, status: null } : j)))
                           }
                           labName={labName}
                           title={title}
@@ -616,7 +619,7 @@ function Home({ jobs: originalJobs }) {
                           key={id}
                           id={id}
                           updateJob={() =>
-                            setJobs(jobs.map((j) => (j.id === id ? { ...j, saved: true } : j)))
+                            setJobs(jobs.map((j) => (j.id === id ? { ...j, status: 'SAVED' } : j)))
                           }
                           labName={labName}
                           title={title}
@@ -652,24 +655,34 @@ function Home({ jobs: originalJobs }) {
                     </div>
                     <div className="flex flex-wrap gap-4 mt-12 sticky">
                       {[
-                        { field: 'Department', value: selectedJob.departments[0] ?? '' },
+                        {
+                          field: 'Department',
+                          value:
+                            departments.find(({ value }) => value === selectedJob.departments[0])
+                              ?.label ?? '',
+                        },
                         {
                           field: 'Location',
                           value: locations.find(({ value }) => value === selectedJob.location)
                             .label,
                         },
-                        { field: 'Position Type', value: '' },
+                        // { field: 'Position Type', value: '' },
                         {
                           field: 'Desired Start Date',
-                          value: toHyphenatedDateString(new Date(selectedJob.startDate)),
+                          value: new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+                            new Date(selectedJob.startDate)
+                          ),
                         },
-                        { field: 'Research Area', value: '' },
+                        // { field: 'Research Area', value: '' },
                         {
                           field: 'Duration',
                           value: durations.find(({ value }) => value === selectedJob.duration)
                             .label,
                         },
-                        { field: 'Approved for Credit', value: selectedJob.credit ? 'Yes' : 'No' },
+                        {
+                          field: 'Approved for Credit',
+                          value: selectedJob.credit === null ? 'No' : selectedJob.credit || 'Yes',
+                        },
                       ].map(({ field, value }) => (
                         <div className="flex flex-col w-[13.75rem] gap-1" key={field}>
                           <div className="text-base font-bold">{field}</div>
@@ -679,36 +692,99 @@ function Home({ jobs: originalJobs }) {
                     </div>
                     {accountType === 'student' && (
                       <div className="flex items-center gap-4 mt-12">
-                        <button className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center">
-                          <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 22 22"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        {selectedJob.status === 'SAVED' ? (
+                          <button
+                            className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center"
+                            aria-label="Unsave Selected Job"
+                            onClick={async () => {
+                              // TODO:react-query
+                              await fetch(`/api/applications/${selectedJobID}/unsave`, {
+                                method: 'DELETE',
+                              });
+                              setJobs(
+                                jobs.map((j) =>
+                                  j.id === selectedJobID ? { ...j, status: null } : j
+                                )
+                              );
+                            }}
                           >
-                            <g clipPath="url(#clip0_2065_43)">
-                              <path
-                                d="M15.2427 2.01038H6.75747C4.88262 2.01038 3.35986 3.54194 3.35986 5.40798V17.8101C3.35986 19.3945 4.49533 20.0634 5.88606 19.2977L10.1815 16.9123C10.6392 16.657 11.3786 16.657 11.8275 16.9123L16.1229 19.2977C17.5136 20.0723 18.6491 19.4033 18.6491 17.8101V5.40798C18.6403 3.54194 17.1175 2.01038 15.2427 2.01038Z"
-                                stroke="#1E2F97"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_2065_43">
-                                <rect
-                                  width="21.125"
-                                  height="21.125"
-                                  fill="white"
-                                  transform="translate(0.4375 0.25)"
+                            <svg
+                              width="52"
+                              height="52"
+                              viewBox="0 0 52 52"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect width="52" height="52" rx="26" fill="#F3F3F3" />
+                              <g clip-path="url(#clip0_2196_3219)">
+                                <path
+                                  d="M30.2427 18.0104H21.7575C19.8826 18.0104 18.3599 19.5419 18.3599 21.408V33.8101C18.3599 35.3945 19.4953 36.0634 20.8861 35.2977L25.1815 32.9123C25.6392 32.657 26.3786 32.657 26.8275 32.9123L31.1229 35.2977C32.5136 36.0723 33.6491 35.4033 33.6491 33.8101V21.408C33.6403 19.5419 32.1175 18.0104 30.2427 18.0104Z"
+                                  fill="#1E2F97"
+                                  stroke="#1E2F97"
+                                  stroke-width="2.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
                                 />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </button>
-                        {selectedJob.externalLink && (
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_2196_3219">
+                                  <rect
+                                    width="21.125"
+                                    height="21.125"
+                                    fill="white"
+                                    transform="translate(15.4375 16.25)"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </button>
+                        ) : (
+                          <button
+                            className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center"
+                            aria-label="Save Selected Job"
+                            onClick={async () => {
+                              await fetch(`/api/applications/${selectedJobID}/save`, {
+                                method: 'PUT',
+                              });
+
+                              setJobs(
+                                jobs.map((j) =>
+                                  j.id === selectedJobID ? { ...j, status: 'SAVED' } : j
+                                )
+                              );
+                            }}
+                          >
+                            <svg
+                              width="52"
+                              height="52"
+                              viewBox="0 0 52 52"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect width="52" height="52" rx="26" fill="#F3F3F3" />
+                              <g clip-path="url(#clip0_2196_3218)">
+                                <path
+                                  d="M30.2427 18.0104H21.7575C19.8826 18.0104 18.3599 19.5419 18.3599 21.408V33.8101C18.3599 35.3945 19.4953 36.0634 20.8861 35.2977L25.1815 32.9123C25.6392 32.657 26.3786 32.657 26.8275 32.9123L31.1229 35.2977C32.5136 36.0723 33.6491 35.4033 33.6491 33.8101V21.408C33.6403 19.5419 32.1175 18.0104 30.2427 18.0104Z"
+                                  stroke="#1E2F97"
+                                  stroke-width="2.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_2196_3218">
+                                  <rect
+                                    width="21.125"
+                                    height="21.125"
+                                    fill="white"
+                                    transform="translate(15.4375 16.25)"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </button>
+                        )}
+                        {selectedJob.externalLink ? (
                           <>
                             <button
                               onClick={() => {
@@ -717,26 +793,38 @@ function Home({ jobs: originalJobs }) {
                               }}
                               className="bg-dark-blue text-white font-extrabold text-base flex gap-3 items-center px-6 py-4 rounded-[32px]"
                             >
-                              Apply Externally
-                              <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.1667 9.16663L18 2.33329M18.6667 5.66663V1.66663H14.6667M9.5 1.66663H7.83333C3.66667 1.66663 2 3.33329 2 7.49996V12.5C2 16.6666 3.66667 18.3333 7.83333 18.3333H12.8333C17 18.3333 18.6667 16.6666 18.6667 12.5V10.8333"
-                                  stroke="white"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                              {/* TODO: use email validator */}
+                              {selectedJob.externalLink.startsWith('http')
+                                ? 'Apply Externally'
+                                : 'Copy Contact Email'}
+                              {selectedJob.externalLink.startsWith('http') ? (
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M11.1667 9.16663L18 2.33329M18.6667 5.66663V1.66663H14.6667M9.5 1.66663H7.83333C3.66667 1.66663 2 3.33329 2 7.49996V12.5C2 16.6666 3.66667 18.3333 7.83333 18.3333H12.8333C17 18.3333 18.6667 16.6666 18.6667 12.5V10.8333"
+                                    stroke="white"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              ) : (
+                                // TODO: add icon
+                                <></>
+                              )}
                             </button>
                             {copiedExternalLink && (
                               <div className="flex gap-2 h-14 items-center">
-                                <div>Copied Application Link. Did you apply?</div>
+                                <div>
+                                  Copied Application{' '}
+                                  {selectedJob.externalLink.startsWith('http') ? 'Link' : 'Email'}.
+                                  Did you apply?
+                                </div>
                                 <button
                                   onClick={() => {
                                     appliedMutation.mutate();
@@ -747,6 +835,26 @@ function Home({ jobs: originalJobs }) {
                                 </button>
                               </div>
                             )}
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="bg-dark-blue text-white font-extrabold text-base flex gap-3 items-center px-6 py-4 rounded-[32px]"
+                              disabled={selectedJob.status === 'APPLIED'}
+                              onClick={async () => {
+                                await fetch(`/api/applications/${selectedJobID}/apply`, {
+                                  method: 'PATCH',
+                                });
+
+                                setJobs(
+                                  jobs.map((j) =>
+                                    j.id === selectedJobID ? { ...j, status: 'APPLIED' } : j
+                                  )
+                                );
+                              }}
+                            >
+                              Apply Internally
+                            </button>
                           </>
                         )}
                       </div>
@@ -802,7 +910,7 @@ function Home({ jobs: originalJobs }) {
                   <Dialog.Title as="div" className="text-lg font-medium leading-6 text-gray-900">
                     All Filters
                   </Dialog.Title>
-                  <div className="flex">
+                  <div className="flex gap-1">
                     <div className="flex-col">
                       <div>Departments</div>
                       {departments.map(({ value, label }) => {
@@ -813,7 +921,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedDepartments, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -822,32 +930,7 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
-                        );
-                      })}
-                    </div>
-                    <div className="flex-col">
-                      <div>Paid</div>
-                      {payRanges.map(({ value, label }) => {
-                        const updateFilter = () =>
-                          setSelectedPayRanges(
-                            selectedPayRanges.includes(value)
-                              ? selectedPayRanges.filter((p) => p !== value)
-                              : [...selectedPayRanges, value]
-                          );
-                        return (
-                          <Fragment key={value}>
-                            <input
-                              type="checkbox"
-                              id={label}
-                              name={label}
-                              checked={selectedPayRanges.includes(value)}
-                              onChange={updateFilter}
-                            />
-                            <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -861,7 +944,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedDurations, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -870,8 +953,32 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex-col">
+                      <div>Pay</div>
+                      {payRanges.map(({ value, label }) => {
+                        const updateFilter = () =>
+                          setSelectedPayRanges(
+                            selectedPayRanges.includes(value)
+                              ? selectedPayRanges.filter((p) => p !== value)
+                              : [...selectedPayRanges, value]
+                          );
+                        return (
+                          <div key={value} className="flex gap-1">
+                            <input
+                              type="checkbox"
+                              id={label}
+                              name={label}
+                              checked={selectedPayRanges.includes(value)}
+                              onChange={updateFilter}
+                            />
+                            <label htmlFor={label}>{label}</label>
                             <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -885,7 +992,7 @@ function Home({ jobs: originalJobs }) {
                               : [...selectedLocations, value]
                           );
                         return (
-                          <Fragment key={value}>
+                          <div key={value} className="flex gap-1">
                             <input
                               type="checkbox"
                               id={label}
@@ -894,8 +1001,7 @@ function Home({ jobs: originalJobs }) {
                               onChange={updateFilter}
                             />
                             <label htmlFor={label}>{label}</label>
-                            <br />
-                          </Fragment>
+                          </div>
                         );
                       })}
                     </div>
@@ -931,12 +1037,12 @@ export async function getStaticProps() {
       location: true,
       lab: { select: { name: true } },
       created: true,
+      startDate: true,
       closingDate: true,
       credit: true,
       weeklyHours: true,
       paid: true,
       externalLink: true,
-      startDate: true,
       _count: {
         select: {
           applicants: { where: { status: 'APPLIED' } },

@@ -14,7 +14,7 @@ class ApplicationsUnsaveRoute extends ApiRoute {
     try {
       const jobId = parseInt(req.query.jobId, 10);
 
-      if (jobId === NaN) {
+      if (Number.isNaN(jobId)) {
         return res.status(400).json({ message: 'invalid request' });
       }
       // TODO: combine queries into interactive prisma transaction
