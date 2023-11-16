@@ -312,7 +312,7 @@ function Home({ jobs: originalJobs }) {
     cacheTime: 0, // don't cache. TODO: decide on what to to for researchers: maybe don't fetch at all
   });
 
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState(null);
   const [selectedDepartments, setSelectedDepartments] = useState([]);
   const [selectedDurations, setSelectedDurations] = useState([]);
   const [selectedPayRanges, setSelectedPayRanges] = useState([]);
@@ -391,7 +391,7 @@ function Home({ jobs: originalJobs }) {
     }
   }, [errors]);
 
-  let filteredJobs = [...jobs];
+  let filteredJobs = jobs ? [...jobs] : [];
   if (selectedPayRanges.length !== 0 && selectedPayRanges.length !== departments.length) {
     filteredJobs = filteredJobs.filter(({ paid }) => selectedPayRanges.includes(paid));
   }
@@ -410,7 +410,7 @@ function Home({ jobs: originalJobs }) {
     filteredJobs.reverse();
   }
 
-  const selectedJob = jobs.find(({ id }) => id === selectedJobID);
+  const selectedJob = jobs && jobs.find(({ id }) => id === selectedJobID);
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -573,7 +573,7 @@ function Home({ jobs: originalJobs }) {
               </button>
             </div>
           </div>
-          {!isLoading && !isError && (
+          {jobs !== null && !isLoading && !isError && (
             <div className="flex gap-10">
               <div className="flex flex-col gap-6 w-[28.5rem]">
                 {/* TODO: maybe add overflow-y-scroll and correct height above */}
