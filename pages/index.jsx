@@ -350,7 +350,7 @@ function Home({ jobs: originalJobs }) {
     const markedJobs = data.map(({ job: { id } }) => id);
     const unmarkedJobs = originalJobs
       .filter(({ id }) => !markedJobs.includes(id))
-      .map((j) => ({ ...j, saved: false }));
+      .map((j) => ({ ...j, status: null })); // .map((j) => ({ ...j, saved: false }));
     setJobs(unmarkedJobs);
     setSelectedJobID(unmarkedJobs[0]?.id);
   }, [data, status, originalJobs]);
@@ -586,7 +586,7 @@ function Home({ jobs: originalJobs }) {
                       duration,
                       location,
                       lab: { name: labName },
-                      saved,
+                      status,
                     }) => {
                       if (accountType === 'researcher') {
                         return (
@@ -606,12 +606,12 @@ function Home({ jobs: originalJobs }) {
                           />
                         );
                       }
-                      return saved ? (
+                      return status === 'SAVED' ? (
                         <SavedJobCard
                           key={id}
                           id={id}
                           updateJob={() =>
-                            setJobs(jobs.map((j) => (j.id === id ? { ...j, saved: false } : j)))
+                            setJobs(jobs.map((j) => (j.id === id ? { ...j, status: null } : j)))
                           }
                           labName={labName}
                           title={title}
@@ -629,7 +629,7 @@ function Home({ jobs: originalJobs }) {
                           key={id}
                           id={id}
                           updateJob={() =>
-                            setJobs(jobs.map((j) => (j.id === id ? { ...j, saved: true } : j)))
+                            setJobs(jobs.map((j) => (j.id === id ? { ...j, status: 'SAVED' } : j)))
                           }
                           labName={labName}
                           title={title}
@@ -695,36 +695,99 @@ function Home({ jobs: originalJobs }) {
                     </div>
                     {accountType === 'student' && (
                       <div className="flex items-center gap-4 mt-12">
-                        <button className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center">
-                          <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 22 22"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        {selectedJob.status === 'SAVED' ? (
+                          <button
+                            className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center"
+                            aria-label="Unsave Selected Job"
+                            onClick={async () => {
+                              // TODO:react-query
+                              await fetch(`/api/applications/${selectedJobID}/unsave`, {
+                                method: 'DELETE',
+                              });
+                              setJobs(
+                                jobs.map((j) =>
+                                  j.id === selectedJobID ? { ...j, status: null } : j
+                                )
+                              );
+                            }}
                           >
-                            <g clipPath="url(#clip0_2065_43)">
-                              <path
-                                d="M15.2427 2.01038H6.75747C4.88262 2.01038 3.35986 3.54194 3.35986 5.40798V17.8101C3.35986 19.3945 4.49533 20.0634 5.88606 19.2977L10.1815 16.9123C10.6392 16.657 11.3786 16.657 11.8275 16.9123L16.1229 19.2977C17.5136 20.0723 18.6491 19.4033 18.6491 17.8101V5.40798C18.6403 3.54194 17.1175 2.01038 15.2427 2.01038Z"
-                                stroke="#1E2F97"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_2065_43">
-                                <rect
-                                  width="21.125"
-                                  height="21.125"
-                                  fill="white"
-                                  transform="translate(0.4375 0.25)"
+                            <svg
+                              width="52"
+                              height="52"
+                              viewBox="0 0 52 52"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect width="52" height="52" rx="26" fill="#F3F3F3" />
+                              <g clip-path="url(#clip0_2196_3219)">
+                                <path
+                                  d="M30.2427 18.0104H21.7575C19.8826 18.0104 18.3599 19.5419 18.3599 21.408V33.8101C18.3599 35.3945 19.4953 36.0634 20.8861 35.2977L25.1815 32.9123C25.6392 32.657 26.3786 32.657 26.8275 32.9123L31.1229 35.2977C32.5136 36.0723 33.6491 35.4033 33.6491 33.8101V21.408C33.6403 19.5419 32.1175 18.0104 30.2427 18.0104Z"
+                                  fill="#1E2F97"
+                                  stroke="#1E2F97"
+                                  stroke-width="2.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
                                 />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </button>
-                        {selectedJob.externalLink && (
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_2196_3219">
+                                  <rect
+                                    width="21.125"
+                                    height="21.125"
+                                    fill="white"
+                                    transform="translate(15.4375 16.25)"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </button>
+                        ) : (
+                          <button
+                            className="rounded-[50%] bg-[#F3F3F3] w-14 h-14 flex items-center justify-center"
+                            aria-label="Save Selected Job"
+                            onClick={async () => {
+                              await fetch(`/api/applications/${selectedJobID}/save`, {
+                                method: 'PUT',
+                              });
+
+                              setJobs(
+                                jobs.map((j) =>
+                                  j.id === selectedJobID ? { ...j, status: 'SAVED' } : j
+                                )
+                              );
+                            }}
+                          >
+                            <svg
+                              width="52"
+                              height="52"
+                              viewBox="0 0 52 52"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect width="52" height="52" rx="26" fill="#F3F3F3" />
+                              <g clip-path="url(#clip0_2196_3218)">
+                                <path
+                                  d="M30.2427 18.0104H21.7575C19.8826 18.0104 18.3599 19.5419 18.3599 21.408V33.8101C18.3599 35.3945 19.4953 36.0634 20.8861 35.2977L25.1815 32.9123C25.6392 32.657 26.3786 32.657 26.8275 32.9123L31.1229 35.2977C32.5136 36.0723 33.6491 35.4033 33.6491 33.8101V21.408C33.6403 19.5419 32.1175 18.0104 30.2427 18.0104Z"
+                                  stroke="#1E2F97"
+                                  stroke-width="2.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_2196_3218">
+                                  <rect
+                                    width="21.125"
+                                    height="21.125"
+                                    fill="white"
+                                    transform="translate(15.4375 16.25)"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </button>
+                        )}
+                        {selectedJob.externalLink ? (
                           <>
                             <button
                               onClick={() => {
@@ -760,7 +823,11 @@ function Home({ jobs: originalJobs }) {
                             </button>
                             {copiedExternalLink && (
                               <div className="flex gap-2 h-14 items-center">
-                                <div>Copied Application Link. Did you apply?</div>
+                                <div>
+                                  Copied Application{' '}
+                                  {selectedJob.externalLink.startsWith('http') ? 'Link' : 'Email'}.
+                                  Did you apply?
+                                </div>
                                 <button
                                   onClick={() => {
                                     appliedMutation.mutate();
@@ -771,6 +838,29 @@ function Home({ jobs: originalJobs }) {
                                 </button>
                               </div>
                             )}
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="bg-dark-blue text-white font-extrabold text-base flex gap-3 items-center px-6 py-4 rounded-[32px]"
+                              disabled={selectedJob.status === 'APPLIED'}
+                              onClick={async () => {
+                                await fetch(
+                                  `http://localhost:3000/api/applications/${selectedJobID}/apply`,
+                                  {
+                                    method: 'PATCH',
+                                  }
+                                );
+
+                                setJobs(
+                                  jobs.map((j) =>
+                                    j.id === selectedJobID ? { ...j, status: 'APPLIED' } : j
+                                  )
+                                );
+                              }}
+                            >
+                              Apply Internally
+                            </button>
                           </>
                         )}
                       </div>
