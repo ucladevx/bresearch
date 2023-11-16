@@ -733,22 +733,30 @@ function Home({ jobs: originalJobs }) {
                               }}
                               className="bg-dark-blue text-white font-extrabold text-base flex gap-3 items-center px-6 py-4 rounded-[32px]"
                             >
-                              Apply Externally
-                              <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.1667 9.16663L18 2.33329M18.6667 5.66663V1.66663H14.6667M9.5 1.66663H7.83333C3.66667 1.66663 2 3.33329 2 7.49996V12.5C2 16.6666 3.66667 18.3333 7.83333 18.3333H12.8333C17 18.3333 18.6667 16.6666 18.6667 12.5V10.8333"
-                                  stroke="white"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                              {/* TODO: use email validator */}
+                              {selectedJob.externalLink.startsWith('http')
+                                ? 'Apply Externally'
+                                : 'Copy Contact Email'}
+                              {selectedJob.externalLink.startsWith('http') ? (
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M11.1667 9.16663L18 2.33329M18.6667 5.66663V1.66663H14.6667M9.5 1.66663H7.83333C3.66667 1.66663 2 3.33329 2 7.49996V12.5C2 16.6666 3.66667 18.3333 7.83333 18.3333H12.8333C17 18.3333 18.6667 16.6666 18.6667 12.5V10.8333"
+                                    stroke="white"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              ) : (
+                                // TODO: add icon
+                                <></>
+                              )}
                             </button>
                             {copiedExternalLink && (
                               <div className="flex gap-2 h-14 items-center">
