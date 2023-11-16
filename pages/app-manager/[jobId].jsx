@@ -163,21 +163,31 @@ const ApplicantTable = (props) => {
     const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
     const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
 
-    const year_sort = rowA_split[1] < rowB_split[1] ? -1 : rowA_split[1] == rowB_split[1] ? 0 : 1;
+    const year_sort = rowA_split[1] < rowB_split[1] ? -1 : rowA_split[1] === rowB_split[1] ? 0 : 1;
     //If the years are different, sort by year
-    if (year_sort != 0) return year_sort;
+    if (year_sort !== 0) {
+      return year_sort;
+    }
     //If the years are the same, sort by quarter
     const quarter_priority = (A) => {
       A = A.toLowerCase();
-      if (A == 'spring') return 0;
-      if (A == 'summer') return 1;
-      if (A == 'fall') return 2;
-      if (A == 'winter') return 3;
+      if (A === 'spring') {
+        return 0;
+      }
+      if (A === 'summer') {
+        return 1;
+      }
+      if (A === 'fall') {
+        return 2;
+      }
+      if (A === 'winter') {
+        return 3;
+      }
     };
     const rowA_quarter = quarter_priority(rowA_split[0]);
 
     const rowB_quarter = quarter_priority(rowB_split[0]);
-    return rowA_quarter < rowB_quarter ? -1 : rowA_quarter == rowB_quarter ? 0 : 1;
+    return rowA_quarter < rowB_quarter ? -1 : rowA_quarter === rowB_quarter ? 0 : 1;
   };
 
   const [{ pageIndex, pageSize }, setPagination] = useState({
@@ -225,7 +235,9 @@ const ApplicantTable = (props) => {
       setApplicantCount(applicantQuery?.data);
       setPageCount(Math.ceil(applicantQuery?.data / pageSize));
     }
-    if (applicantCount && pageCount) setPageCount(Math.ceil(applicantCount / pageSize));
+    if (applicantCount && pageCount) {
+      setPageCount(Math.ceil(applicantCount / pageSize));
+    }
   }, [applicantQuery, pageSize]);
 
   const defaultData = useMemo(() => [], []);
