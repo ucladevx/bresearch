@@ -682,7 +682,10 @@ function Home({ jobs: originalJobs }) {
                           value: durations.find(({ value }) => value === selectedJob.duration)
                             .label,
                         },
-                        { field: 'Approved for Credit', value: selectedJob.credit ? 'Yes' : 'No' },
+                        {
+                          field: 'Approved for Credit',
+                          value: selectedJob.credit === null ? 'No' : selectedJob.credit || 'Yes',
+                        },
                       ].map(({ field, value }) => (
                         <div className="flex flex-col w-[13.75rem] gap-1" key={field}>
                           <div className="text-base font-bold">{field}</div>
