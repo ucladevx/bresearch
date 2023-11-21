@@ -337,7 +337,10 @@ const ApplicantTable = (props) => {
             ))}
           </select>
           <span className="flex items-center gap-1">
-            {1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize}-
+            {applicantCount > 0
+              ? 1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize
+              : '0'}
+            -
             {table.getCanNextPage() ? (
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
             ) : applicantQuery?.isLoading ? (
