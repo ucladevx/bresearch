@@ -11,8 +11,9 @@ import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/reac
 import {
   useQuery,
   keepPreviousData,
+  QueryClient,
   useQueryClient,
-  useInfiniteQuery,
+  QueryClientProvider,
 } from '@tanstack/react-query';
 
 import {
@@ -45,7 +46,7 @@ async function fetchApplicants(router, pageIndex, pageSize) {
     if (res.status === 200) {
     }
     const data = await res.json();
-
+    console.log(data);
     return data;
   } catch (e) {
     throw e;
@@ -73,26 +74,73 @@ async function fetchApplicantCount(router) {
     throw e;
   }
 }
-
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: false,
+      staleTime: 1000 * 60 * 60, //1 hour -- could make it more or less
+    },
+  },
+});
 //Applicant Manager page
 export default function ApplicantManager() {
   //Main page display
   //ml-28 mt-8 mb-8
   return (
-    <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
-      <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
-      <div className="mb-10">
-        <ApplicantTable />
+    <QueryClientProvider client={queryClient}>
+      <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
+        <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
+        <div className="mb-10">
+          <ApplicantTable />
+        </div>
       </div>
-    </div>
+    </QueryClientProvider>
   );
 }
 
 const ApplicantTable = (props) => {
-  //const { applicantCount } = props;
-  const [sorting, setSorting] = useState([]);
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const [applicantCount, setApplicantCount] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [data, setData] = useState([]);
+  const [sorting, setSorting] = useState([]);
+
   const [globalFilter, setGlobalFilter] = useState('');
+  const [{ pageIndex, pageSize }, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
+  //TODO: Update all page sections to use cursor instead, also set pageSize to negative when requesting previous page and abs when setting next page
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  );
+
+  const applicantCountQuery = useQuery({
+    queryKey: ['applicants-count', router],
+    queryFn: () => fetchApplicantCount(router),
+    keepPreviousData: true,
+    staleTime: Infinity,
+  });
+
+  // /{ status, data, error, isFetching, isPlaceholderData, isPreviousData }
+
+  const applicantQuery = useQuery({
+    queryKey: ['applicants', router, pageIndex, pageSize],
+    queryFn: () => fetchApplicants(router, pageIndex, pageSize),
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 60 * 1000,
+    keepPreviousData: true,
+    enabled: !!applicantCount,
+  });
 
   const columns = useMemo(
     () => [
@@ -111,15 +159,30 @@ const ApplicantTable = (props) => {
 
       {
         header: 'Tags',
+        id: 'tags',
         accessorKey: 'piStatus',
-        cell: ({ row, getValue }) => (
-          <div className="py-2.5 -mr-4">
-            <TagDropdown
-              applicantEmail={row.original.applicant.email}
-              piStatus={getValue().toString()}
-            />
-          </div>
-        ),
+        cell: function EditableCell({ getValue, row, column }) {
+          const initialValue = getValue();
+          const [value, setValue] = useState(initialValue);
+
+          const onChangeValue = (newValue) => {
+            table.options.meta.updateMyData(router, pageIndex, pageSize);
+          };
+
+          useEffect(() => {
+            setValue(initialValue);
+          }, [initialValue]);
+
+          return (
+            <div className="py-2.5 -mr-4">
+              <TagDropdown
+                applicantEmail={row.original.applicant.email}
+                piStatus={value}
+                onChangeValue={onChangeValue}
+              />
+            </div>
+          );
+        },
       },
       {
         //TODO: Set up resume link
@@ -153,7 +216,7 @@ const ApplicantTable = (props) => {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
-          }).format(new Date(row.lastUpdated)), //Change to abbrev month spelled out, then day, and then year
+          }).format(new Date(row.lastUpdated)),
         sortingFn: 'datetime',
       },
     ],
@@ -180,68 +243,40 @@ const ApplicantTable = (props) => {
     return rowA_quarter < rowB_quarter ? -1 : rowA_quarter == rowB_quarter ? 0 : 1;
   };
 
-  const [{ pageIndex, pageSize }, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 5,
-  });
-
-  //TODO: Update all page sections to use cursor instead, also set pageSize to negative when requesting previous page and abs when setting next page
-  //TODO: Add prefetching next page, probably with prefetchQuery or fetchQuery
-
-  const router = useRouter();
-  const fetchDataOptions = {
-    router,
-    pageIndex,
-    pageSize,
-  };
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
-
-  const applicantQuery = useQuery({
-    queryKey: ['applicants-count', router],
-    queryFn: () => fetchApplicantCount(router),
-    keepPreviousData: true,
-    staleTime: Infinity,
-  });
-
-  const [applicantCount, setApplicantCount] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
-
-  const { status, data, error, isFetching, isPlaceholderData, isPreviousData } = useQuery({
-    queryKey: ['applicants', fetchDataOptions],
-    queryFn: () => fetchApplicants(router, pageIndex, pageSize),
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-    enabled: !!applicantCount,
-  });
-
   useEffect(() => {
+    if (applicantQuery.data) setData(applicantQuery.data);
     if (!applicantCount && !pageCount) {
-      setApplicantCount(applicantQuery?.data);
-      setPageCount(Math.ceil(applicantQuery?.data / pageSize));
+      setApplicantCount(applicantCountQuery?.data);
+      setPageCount(Math.ceil(applicantCountQuery?.data / pageSize));
     }
     if (applicantCount && pageCount) setPageCount(Math.ceil(applicantCount / pageSize));
-  }, [applicantQuery, pageSize]);
+  }, [applicantCountQuery, pageSize, applicantQuery]);
 
   const defaultData = useMemo(() => [], []);
-
   const table = useReactTable({
     data: data ?? defaultData,
     columns,
     pageCount: pageCount ?? 0,
     onPaginationChange: setPagination,
     manualPagination: true,
+    autoResetFilters: false,
+    autoResetSortBy: false,
     state: {
       pagination,
       sorting,
       globalFilter,
       applicantCount,
       pageCount,
+    },
+    meta: {
+      updateMyData: (router, pageIndex, pageSize) => {
+        console.log('Updating...');
+        applicantQuery.refetch(); //manually trigger refetch of current page if the data updated
+        // queryClient.invalidateQueries({
+        //   queryKey: ['applicants', router, pageIndex, pageSize], //pretty sure invalidateQueries had issues because of the 'enabled' condition
+        //   refetchType: 'active',
+        // });
+      },
     },
     autoResetPage: false,
     sortingFns: {
@@ -300,10 +335,10 @@ const ApplicantTable = (props) => {
             ))}
           </thead>
           <tbody>
-            {status === 'pending' ? (
+            {applicantQuery.status === 'pending' ? (
               <div>Loading...</div>
-            ) : status === 'error' ? (
-              <div>Error: {error.message}</div>
+            ) : applicantQuery.status === 'error' ? (
+              <div>Error: {applicantQuery.error.message}</div>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <tr
@@ -343,12 +378,12 @@ const ApplicantTable = (props) => {
             -
             {table.getCanNextPage() ? (
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
-            ) : applicantQuery?.isLoading ? (
+            ) : applicantCountQuery?.isLoading ? (
               <div>Loading...</div>
             ) : (
               applicantCount
             )}{' '}
-            of {applicantQuery?.isLoading ? <div>Loading...</div> : applicantCount}
+            of {applicantCountQuery?.isLoading ? <div>Loading...</div> : applicantCount}
           </span>
 
           <button

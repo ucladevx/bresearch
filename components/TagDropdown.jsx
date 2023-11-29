@@ -8,12 +8,26 @@ import { useRouter } from 'next/router';
 //Fix: Rejected should say Not Accepted, need to make an exception case for it
 
 export default function TagDropdown(props) {
-  const { piStatus, applicantEmail } = props;
+  const { piStatus, applicantEmail, onChangeValue } = props;
   const [bgColor, setBgColor] = useState(updateTextColor(piStatus));
   const [textColor, setTextColor] = useState(updateBgColor(piStatus));
   const [tag, setTag] = useState(piStatus);
-  const router = useRouter();
 
+  const router = useRouter();
+  // useEffect(() => {
+  //   setBgColor(updateTextColor(piStatus));
+  //   setTextColor(updateBgColor(piStatus));
+  //   setTag(piStatus);
+  //   console.log('piStatus changed for child to: ', piStatus);
+  //   //onChangeValue(tag);
+  // }, [piStatus]);
+  useEffect(() => {
+    setBgColor(updateTextColor(piStatus));
+    setTextColor(updateBgColor(piStatus));
+    setTag(piStatus);
+    console.log('piStatus changed for child to: ', piStatus);
+    //onChangeValue(tag);
+  }, [piStatus]);
   //Run patch request
   function updateTextColor(tag) {
     switch (tag) {
@@ -51,10 +65,9 @@ export default function TagDropdown(props) {
     }
   }
 
-  function updateTag(tag) {
-    setTag(tag);
+  async function updateTag(tag) {
     const { jobId } = router.query;
-    fetch(`/api/applications/${jobId}/update`, {
+    const data = await fetch(`/api/applications/${jobId}/update`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -67,12 +80,14 @@ export default function TagDropdown(props) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setTextColor(updateTextColor(tag));
+        setBgColor(updateBgColor(tag));
+        setTag(tag);
+        onChangeValue(tag);
       })
       .catch((error) => {
         console.log(error);
       });
-    setTextColor(updateTextColor(tag));
-    setBgColor(updateBgColor(tag));
   }
 
   const buttonStyle =
