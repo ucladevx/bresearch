@@ -90,7 +90,7 @@ export default function ApplicantManager() {
   //ml-28 mt-8 mb-8
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
+      <div className="z-1 w-full h-full m-0 bg-cover bg-neutral-100 overflow-y-auto">
         <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
         <div className="mb-10">
           <ApplicantTable />
@@ -294,7 +294,7 @@ const ApplicantTable = (props) => {
   //TODO: Do we want any hover behavior for search bar?
   //TODO: what do we want to show for loading/error behavior? (where should message show, styling)
   return (
-    <div className="overflow-visible bg-white mt-4 w-11/12 h-5/6 mx-auto p-14 rounded-2xl shadow-md space-y-6">
+    <div className="overflow-hidden bg-white mt-4 w-11/12 h-5/6 mx-auto p-14 rounded-2xl shadow-md space-y-6">
       <div className="flex items-center justify-end">
         <div className="flex items-center border-b-2 border-[#949494]">
           <MagnifyingGlassIcon className="stroke-2 h-5 w-5 text-[#707070]" />
@@ -306,7 +306,7 @@ const ApplicantTable = (props) => {
           />
         </div>
       </div>
-      <div className="relative overflow-x-auto ">
+      <div className="relative overflow-x-auto">
         <table className="table-fixed min-w-[950px] w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             {table.getHeaderGroups().map((headerGroup) => (
