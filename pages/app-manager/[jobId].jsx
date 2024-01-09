@@ -27,6 +27,7 @@ import {
 
 import { options } from 'joi';
 import { data } from 'autoprefixer';
+import { SecondUpdateProfileValidator } from '@lib/validators';
 
 async function fetchApplicants(router, pageIndex, pageSize) {
   if (!router.isReady) {
@@ -46,7 +47,28 @@ async function fetchApplicants(router, pageIndex, pageSize) {
     if (res.status === 200) {
     }
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
+    return data;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function fetchResume(router, profileId) {
+  if (!router.isReady) {
+    return;
+  }
+  try {
+    const res = await fetch(`/api/student/profile/resume/${profileId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.status === 200) {
+    }
+    const data = await res.json();
+    //console.log(data);
     return data;
   } catch (e) {
     throw e;
@@ -68,7 +90,7 @@ async function fetchApplicantCount(router) {
     if (res.status === 200) {
     }
     const data = await res.json();
-    console.log({ data });
+    // console.log({ data });
     return data;
   } catch (e) {
     throw e;
@@ -107,14 +129,15 @@ const ApplicantTable = (props) => {
   const [pageCount, setPageCount] = useState(0);
   const [data, setData] = useState([]);
   const [sorting, setSorting] = useState([]);
-
+  const [profileId, setProfileId] = useState(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const [{ pageIndex, pageSize }, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
   });
+  //const [profileId, setProfileId] = useState(null);
 
-  //TODO: Update all page sections to use cursor instead, also set pageSize to negative when requesting previous page and abs when setting next page
+  //TODO: Update all page sections to use cursor instead, set pageSize to negative when requesting previous page and abs when setting next page
 
   const pagination = useMemo(
     () => ({
@@ -131,8 +154,6 @@ const ApplicantTable = (props) => {
     staleTime: Infinity,
   });
 
-  // /{ status, data, error, isFetching, isPlaceholderData, isPreviousData }
-
   const applicantQuery = useQuery({
     queryKey: ['applicants', router, pageIndex, pageSize],
     queryFn: () => fetchApplicants(router, pageIndex, pageSize),
@@ -140,6 +161,15 @@ const ApplicantTable = (props) => {
     staleTime: 60 * 60 * 1000,
     keepPreviousData: true,
     enabled: !!applicantCount,
+  });
+
+  const resumeQuery = useQuery({
+    queryKey: ['resume', router, profileId],
+    queryFn: () => fetchResume(router, profileId),
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 60 * 1000,
+    keepPreviousData: true,
+    enabled: !!profileId,
   });
 
   const columns = useMemo(
@@ -165,8 +195,8 @@ const ApplicantTable = (props) => {
           const initialValue = getValue();
           const [value, setValue] = useState(initialValue);
 
-          const onChangeValue = (newValue) => {
-            table.options.meta.updateMyData(router, pageIndex, pageSize);
+          const onChangeValue = () => {
+            table.options.meta.refetchData();
           };
 
           useEffect(() => {
@@ -185,13 +215,47 @@ const ApplicantTable = (props) => {
         },
       },
       {
-        //TODO: Set up resume link
+        //Resume link works by setting a profile ID on mouse click, fetching (if never previously accessed) or getting cached URL associated with that profile ID, then the table data updates to include the resumeURL for current hovered applicant
+        //Tanstack Query ensures URL associated with each profile is cached and does not need to be refetched from database after the first fetch
+        //The link won't update in the table unless the table is reloaded, so that's why it manually makes an update Data call
+        //TODO: See if the number of table updates can be reduced
+        //TODO: Currently initial table reload (after first fetching url) will only trigger on a double click of "Load Resume", see if this can be fixed
         header: 'Resume',
-        accessorKey: 'applicant.studentProfile.id',
         id: 'resume',
+        accessorKey: 'applicant.studentProfile.resumeURL',
         enableSorting: false,
-        cell: (props) => <div className="underline">name_resume.pdf</div>, //this will eventually actually fetch and show the name of their pdf
+        cell: function EditableResumeCell({ row, column }) {
+          const [resumeLink, setResumeLink] = useState(null);
+          useEffect(() => {
+            //Note: getValue() via the accessorKey is not updating properly even though the data is, so accessing the resumeURL the manual way via the row information
+            setResumeLink(row.original.applicant.studentProfile.resumeURL);
+          }, [row.original.applicant.studentProfile.resumeURL]);
+          return (
+            <div
+              onClick={() => {
+                setProfileId(row.original.applicant.studentProfile.id.toString());
+                table.options.meta?.updateData(row.index, column.id, resumeLink);
+              }}
+              className="underline"
+            >
+              {!!resumeLink ? (
+                <Link
+                  locale={false}
+                  href={resumeLink}
+                  rel="noreferrer"
+                  target="_blank"
+                  className="underline"
+                >
+                  View Resume
+                </Link>
+              ) : (
+                <div>Load Resume</div>
+              )}
+            </div>
+          );
+        },
       },
+
       {
         header: 'Profile',
         accessorKey: 'applicant.studentProfile.id',
@@ -222,7 +286,7 @@ const ApplicantTable = (props) => {
     ],
     []
   );
-  const quarter_sort = (rowA, rowB, columnId) => {
+  const quarter_sort = (rowA, rowB) => {
     const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
     const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
 
@@ -244,13 +308,27 @@ const ApplicantTable = (props) => {
   };
 
   useEffect(() => {
-    if (applicantQuery.data) setData(applicantQuery.data);
+    if (applicantQuery.data) {
+      //set data to the applicant data concatenated with a pdf url for each applicant
+      let dataForTable = applicantQuery.data;
+      dataForTable.forEach((applicant) => {
+        //Checks if it is currently fetching so it will not display data from a different applicant -- waits until new data is fetched
+        if (
+          applicant.applicant.studentProfile.id == profileId &&
+          resumeQuery.fetchStatus != 'fetching' &&
+          resumeQuery.data
+        )
+          applicant.applicant.studentProfile.resumeURL = resumeQuery.data.url;
+        else applicant.applicant.studentProfile.resumeURL = '';
+      });
+      setData(dataForTable);
+    }
     if (!applicantCount && !pageCount) {
       setApplicantCount(applicantCountQuery?.data);
       setPageCount(Math.ceil(applicantCountQuery?.data / pageSize));
     }
     if (applicantCount && pageCount) setPageCount(Math.ceil(applicantCount / pageSize));
-  }, [applicantCountQuery, pageSize, applicantQuery]);
+  }, [applicantCountQuery, pageSize, applicantQuery, resumeQuery, profileId]);
 
   const defaultData = useMemo(() => [], []);
   const table = useReactTable({
@@ -261,6 +339,7 @@ const ApplicantTable = (props) => {
     manualPagination: true,
     autoResetFilters: false,
     autoResetSortBy: false,
+    debugTable: true,
     state: {
       pagination,
       sorting,
@@ -269,13 +348,22 @@ const ApplicantTable = (props) => {
       pageCount,
     },
     meta: {
-      updateMyData: (router, pageIndex, pageSize) => {
-        console.log('Updating...');
+      refetchData: () => {
         applicantQuery.refetch(); //manually trigger refetch of current page if the data updated
-        // queryClient.invalidateQueries({
-        //   queryKey: ['applicants', router, pageIndex, pageSize], //pretty sure invalidateQueries had issues because of the 'enabled' condition
-        //   refetchType: 'active',
-        // });
+      },
+
+      updateData: (rowIndex, columnId, value) => {
+        setData((old) =>
+          old.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...old[rowIndex],
+                [columnId]: value,
+              };
+            }
+            return row;
+          })
+        );
       },
     },
     autoResetPage: false,
