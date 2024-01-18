@@ -324,12 +324,14 @@ const ApplicantTable = (props) => {
       dataForTable.forEach((applicant) => {
         //Checks if it is currently fetching so it will not display data from a different applicant -- waits until new data is fetched
         if (
-          applicant.applicant.studentProfile.id == profileId &&
-          resumeQuery.fetchStatus != 'fetching' &&
+          applicant.applicant.studentProfile.id === profileId &&
+          resumeQuery.fetchStatus !== 'fetching' &&
           resumeQuery.data
-        )
+        ) {
           applicant.applicant.studentProfile.resumeURL = resumeQuery.data.url;
-        else applicant.applicant.studentProfile.resumeURL = '';
+        } else {
+          applicant.applicant.studentProfile.resumeURL = '';
+        }
       });
       setData(dataForTable);
     }
