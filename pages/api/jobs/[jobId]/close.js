@@ -1,33 +1,22 @@
 import { Prisma } from 'prisma/prisma-client';
 import ApiRoute from '@lib/ApiRoute';
 
-class JobInfoRoute extends ApiRoute {
+class CloseJobRoute extends ApiRoute {
   /**
-   * Job info endpoint
+   * close job endpoint
    * @param {import('next').NextApiRequest & { session: import('next-auth').Session?}} req
    * @param {import('next').NextApiResponse} res
    * @param {import('prisma/prisma-client').PrismaClient} prisma
    * @returns
    */
-  async get(req, res, prisma) {
+  async patch(req, res, prisma) {
     try {
       if (req.token.accountType !== 'researcher') {
         return res
           .status(403)
           .json({ message: 'You are not a researcher', accountType: req.token.accountType });
       }
-      // TODO: maybe move this to middleware
-      const researcher = await prisma.researcher.findUnique({
-        where: { email: req.session.user.email },
-        select: {
-          id: true,
-        },
-      });
-      if (researcher === null) {
-        return res.status(403).json({
-          message: 'You have not created your profile',
-        });
-      }
+
       const jobId = parseInt(req.query.jobId, 10);
 
       // TODO: maybe use an interactive transaction https://www.prisma.io/docs/concepts/components/prisma-client/transactions#interactive-transactions
@@ -36,13 +25,30 @@ class JobInfoRoute extends ApiRoute {
         where: {
           id: jobId,
         },
-        include: { lab: { select: { name: true, contactEmail: true } } },
+        select: { poster: { select: { email: true } }, closed: true },
       });
-      if (job === null || job.posterId !== researcher.id) {
-        console.error(job?.posterId, researcher.id);
+      if (job === null || job.poster.email !== req.session.user.email) {
         return res.status(400).json({ message: '' });
       }
-      res.status(200).json(job);
+      if (job.closed) {
+        return res.status(400).json({ message: 'Job is already closed' });
+      }
+
+      const updatedJob = await prisma.job.update({
+        where: {
+          id: jobId,
+        },
+        // data: value.closed ? { closed: true, closingDate: new Date() } : value,
+        data: {
+          closingDate: new Date(),
+          closed: true,
+        },
+      });
+
+      await res.revalidate(`/job/${updatedJob.id}`);
+      await res.revalidate('/');
+
+      res.status(200).json(updatedJob);
     } catch (e) {
       console.error({ e });
       // check for Node.js errors (data integrity, etc)
@@ -61,4 +67,4 @@ class JobInfoRoute extends ApiRoute {
   }
 }
 
-export default new JobInfoRoute().as_handler();
+export default new CloseJobRoute().as_handler();

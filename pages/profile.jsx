@@ -3,6 +3,7 @@ import ResearcherSidebar from '../components/ResearcherSidebar';
 import Head from 'next/head';
 import { useSession, signOut } from 'next-auth/react';
 import { Departments } from '@lib/globals';
+import Link from 'next/link';
 
 function ResearcherProfile() {
   const [profileInfo, setProfileInfo] = useState(null);
@@ -69,21 +70,36 @@ function ResearcherProfile() {
                         {`${profileInfo.researcherProfile.firstName} ${profileInfo.researcherProfile.lastName}`}
                       </div>
                     </div>
-                    <button className="invisible">Edit</button>
+                    <Link
+                      href="/researcher/profile/edit"
+                      className="px-9 py-3 border-[1px] bg-white border-[#141466] text-[#141466] font-semibold text-base rounded-xl"
+                    >
+                      Edit
+                    </Link>
                   </>
                 )}
               </div>
-              <div className="bg-white rounded-[1.25rem] flex gap-y-2">
-                {profileInfo !== null &&
-                  profileInfo.labs.map(({ name, id }) => (
-                    <div key={id} className="flex flex-col p-12">
-                      <div className="flex flex-col gap-2">
-                        <div className="font-bold">Lab</div>
-                        <div>{name}</div>
+              {profileInfo !== null &&
+                profileInfo.labs.map(({ id, name, contactEmail, department }) => (
+                  <div key={id} className="flex flex-col p-12 gap-5 bg-white rounded-[1.25rem]">
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">Lab</div>
+                      <div className="font-medium text-[#3F3D3D] text-base">{name}</div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">Department</div>
+                      <div className="font-medium text-[#3F3D3D] text-base">
+                        {Departments.find(({ value }) => value === department).label}
                       </div>
                     </div>
-                  ))}
-              </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="font-bold text-[#404040] text-base">
+                        Lab Contact Email Address
+                      </div>
+                      <div className="font-medium text-[#3F3D3D] text-base">{contactEmail}</div>
+                    </div>
+                  </div>
+                ))}
             </>
           }
           <div className="flex justify-end">

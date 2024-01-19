@@ -8,6 +8,7 @@ import 'react-quill/dist/quill.snow.css';
 import ResearcherSidebar from '../../components/ResearcherSidebar';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Departments, Durations } from '@lib/globals';
 
 // https://github.com/zenoamaro/react-quill/issues/718#issuecomment-873541445
 // https://github.com/zenoamaro/react-quill/issues/596#issuecomment-1207420071
@@ -48,6 +49,20 @@ function Input({
   );
 }
 
+function DisabledInput({ id, value, ...props }) {
+  if (!id || Object.keys(props).length) {
+    throw new Error('Input missing prop or extra prop');
+  }
+  return (
+    <input
+      id={id}
+      className="border-solid border-2 h-11 text-base px-3 nocommonligs border-black"
+      value={value}
+      disabled
+    ></input>
+  );
+}
+
 function CreateJobPosting() {
   const router = useRouter();
 
@@ -60,7 +75,15 @@ function CreateJobPosting() {
     setValue,
   } = useForm({
     resolver: joiResolver(JobCreationFormValidator),
-    defaultValues: { description: '<p><br></p>', credit: true, external: false },
+    defaultValues: {
+      description: '<p><br></p>',
+      credit: true,
+      applicationType: 'internal',
+      paid: false,
+      // autofilling for testing
+      // title: Math.ceil(Math.random() * 100).toString(10),
+      // weeklyHours: Math.ceil(Math.random() * 20).toString(10),
+    },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,11 +106,14 @@ function CreateJobPosting() {
       return;
     }
     setIsSubmitting(true);
-    const { department, external } = data;
+    const { department, applicationType, credit } = data;
     delete data.department;
-    delete data.external;
-    if (!external) {
+    delete data.credit;
+    if (applicationType === 'internal' || applicationType === 'email') {
       delete data.externalLink;
+    }
+    if (!credit) {
+      delete data.creditDescription;
     }
 
     try {
@@ -95,9 +121,7 @@ function CreateJobPosting() {
         method: 'POST',
         body: JSON.stringify({
           ...data,
-          duration: 'QUARTERLY',
           departments: [department],
-          paid: true,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -109,6 +133,7 @@ function CreateJobPosting() {
     } catch (e) {}
     setIsSubmitting(false);
   }
+  console.log({ errors });
 
   return (
     <>
@@ -135,7 +160,9 @@ function CreateJobPosting() {
                     </label>
                     <select
                       id="lab"
-                      className="border-solid border-2 border-black h-11"
+                      className={`border-solid border-2 h-11 text-base px-3 nocommonligs ${
+                        errors.lab ? 'border-red-600' : 'border-black'
+                      }`}
                       {...register('lab', {})}
                     >
                       {labs.map(({ id, name }) => (
@@ -160,14 +187,21 @@ function CreateJobPosting() {
                 </div>
                 <div className="flex justify-between gap-x-10 mb-9">
                   <div className="flex flex-col basis-1/2 gap-y-3">
-                    <label className="font-bold text-base">Area (General)*</label>
-                    <Input
-                      id="jobArea"
-                      register={register}
-                      error={errors.department}
-                      fieldName="department"
-                      maxLength={50}
-                    ></Input>
+                    <label className="font-bold text-base">Department (General)*</label>
+                    <select
+                      id="department"
+                      // className="h-8 mb-2 text-black bg-white border border-black rounded-sm pl-2"
+                      className={`border-solid border-2 h-11 text-base px-3 nocommonligs ${
+                        errors.department ? 'border-red-600' : 'border-black'
+                      }`}
+                      {...register('department', {})}
+                    >
+                      {Departments.map(({ value, label }) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="flex flex-col basis-1/2 gap-y-3">
                     <label htmlFor="location" className="font-bold text-base">
@@ -175,7 +209,7 @@ function CreateJobPosting() {
                     </label>
                     <select
                       id="location"
-                      className={`border-solid border-2 h-11 text-base px-3 focus:outline-none nocommonligs ${
+                      className={`border-solid border-2 h-11 text-base px-3 nocommonligs ${
                         errors.location ? 'border-red-600' : 'border-black'
                       }`}
                       {...register('location')}
@@ -239,7 +273,7 @@ function CreateJobPosting() {
                     <label htmlFor="credit" className="font-bold text-base">
                       Research Credit Available*
                     </label>
-                    <div>
+                    <div className="flex flex-col gap-2 ">
                       <Controller
                         control={control}
                         name="credit"
@@ -247,32 +281,106 @@ function CreateJobPosting() {
                           // console.log({ field, errors }, field.ref.toString());
                           return (
                             <>
-                              <input
-                                type="radio"
-                                id="creditAvailable"
-                                onBlur={field.onBlur}
-                                onChange={() => field.onChange(true)}
-                                checked={field.value === true}
-                                ref={field.ref}
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="radio"
+                                  id="creditAvailable"
+                                  onBlur={field.onBlur}
+                                  onChange={() => field.onChange(true)}
+                                  checked={field.value === true}
+                                  ref={field.ref}
 
-                                //   className="hidden checked:bg-dark-blue checked:border-solid checked:border-2"
-                              />
-                              <label htmlFor="creditAvailable" className="checked:bg-black">
-                                Yes
-                              </label>
+                                  //   className="hidden checked:bg-dark-blue checked:border-solid checked:border-2"
+                                />
+                                <label htmlFor="creditAvailable">Yes</label>
+                                <Input
+                                  id="creditDescription"
+                                  // className="flex-grow"
+                                  register={register}
+                                  fieldName="creditDescription"
+                                  maxLength={40}
+                                  placeholder="Ex. Course: SRP 99"
+                                />
+                              </div>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="radio"
+                                  id="creditUnavailable"
+                                  onBlur={field.onBlur}
+                                  onChange={() => field.onChange(false)}
+                                  checked={field.value === false}
+                                  ref={field.ref}
+                                  // className={`border-solid border-2 h-11 text-base px-3 focus:outline-none nocommonligs ${
+                                  //   errors.credit ? 'border-red-600' : 'border-black'
+                                  // }`}
+                                />
+                                <label htmlFor="creditUnavailable">No</label>
+                              </div>
+                            </>
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between gap-x-10 mb-9">
+                  <div className="flex flex-col basis-1/2 gap-y-3">
+                    <label htmlFor="duration" className="font-bold text-base">
+                      Duration*
+                    </label>
+                    <select
+                      id="duration"
+                      className={`border-solid border-2 h-11 text-base px-3 nocommonligs ${
+                        errors.duration ? 'border-red-600' : 'border-black'
+                      }`}
+                      {...register('duration', {})}
+                    >
+                      {Durations.map(({ value, label }) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col basis-1/2 gap-y-3">
+                    <label htmlFor="paid" className="font-bold text-base">
+                      Paid
+                    </label>
+                    <div className="flex gap-2 h-full">
+                      <Controller
+                        control={control}
+                        name="paid"
+                        render={({ field }) => {
+                          // console.log({ field, errors }, field.ref.toString());
+                          return (
+                            <>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="radio"
+                                  id="paidPosition"
+                                  onBlur={field.onBlur}
+                                  onChange={() => field.onChange(true)}
+                                  checked={field.value === true}
+                                  ref={field.ref}
 
-                              <input
-                                type="radio"
-                                id="creditUnavailable"
-                                onBlur={field.onBlur}
-                                onChange={() => field.onChange(false)}
-                                checked={field.value === false}
-                                ref={field.ref}
-                                // className={`border-solid border-2 h-11 text-base px-3 focus:outline-none nocommonligs ${
-                                //   errors.credit ? 'border-red-600' : 'border-black'
-                                // }`}
-                              />
-                              <label htmlFor="creditUnavailable">No</label>
+                                  //   className="hidden checked:bg-dark-blue checked:border-solid checked:border-2"
+                                />
+                                <label htmlFor="paidPosition">Yes</label>
+                              </div>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="radio"
+                                  id="unpaidPosition"
+                                  onBlur={field.onBlur}
+                                  onChange={() => field.onChange(false)}
+                                  checked={field.value === false}
+                                  ref={field.ref}
+                                  // className={`border-solid border-2 h-11 text-base px-3 focus:outline-none nocommonligs ${
+                                  //   errors.credit ? 'border-red-600' : 'border-black'
+                                  // }`}
+                                />
+                                <label htmlFor="unpaidPosition">No</label>
+                              </div>
                             </>
                           );
                         }}
@@ -350,38 +458,38 @@ function CreateJobPosting() {
                     Step 2: How would you like to receive applications?*
                   </h2>
                 </div>
-                <div className="flex flex-col gap-9">
+                <div className="flex flex-col gap-4">
                   <Controller
                     control={control}
-                    name="external"
+                    name="applicationType"
                     render={({ field }) => {
                       // console.log({ field, errors }, field.ref.toString());
                       return (
                         <>
-                          <div>
+                          <div className="flex gap-2 items-center">
                             <input
                               type="radio"
-                              id="internal"
+                              id="internalApplication"
                               onBlur={field.onBlur}
-                              onChange={() => field.onChange(false)}
-                              checked={field.value === false}
+                              onChange={() => field.onChange('internal')}
+                              checked={field.value === 'internal'}
                               ref={field.ref}
                             />
-                            <label htmlFor="internal" className="checked:bg-black">
+                            <label htmlFor="internalApplication" className="checked:bg-black">
                               Through bResearch
                             </label>
                           </div>
                           <div className="flex flex-col gap-4">
-                            <div>
+                            <div className="flex gap-2 items-center">
                               <input
                                 type="radio"
-                                id="external"
+                                id="externalApplication"
                                 onBlur={field.onBlur}
-                                onChange={() => field.onChange(true)}
-                                checked={field.value === true}
+                                onChange={() => field.onChange('external')}
+                                checked={field.value === 'external'}
                                 ref={field.ref}
                               />
-                              <label htmlFor="external">
+                              <label htmlFor="externalApplication">
                                 Direct Applicants to An External Link To Apply
                               </label>
                             </div>
@@ -391,6 +499,25 @@ function CreateJobPosting() {
                               fieldName="externalLink"
                               maxLength={200}
                             ></Input>
+                          </div>
+                          <div className="flex flex-col gap-4">
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="radio"
+                                id="emailApplication"
+                                onBlur={field.onBlur}
+                                onChange={() => field.onChange('email')}
+                                checked={field.value === 'email'}
+                                ref={field.ref}
+                              />
+                              <label htmlFor="emailApplication">Lab Contact Email Address</label>
+                            </div>
+                            <DisabledInput
+                              id="labContactEmail"
+                              value={
+                                labs.find((lab) => watch('lab') === lab.id)?.contactEmail ?? ''
+                              }
+                            ></DisabledInput>
                           </div>
                         </>
                       );

@@ -12,6 +12,7 @@ function ResearcherPosts() {
     async function getPosts() {
       try {
         const posts = await (await fetch('/api/researcher/posts')).json();
+        // console.log({ posts });
         setPosts(posts);
       } catch (e) {}
     }
@@ -57,15 +58,24 @@ function ResearcherPosts() {
             {posts.length === 0 ? (
               <div>You have no posts.</div>
             ) : (
-              posts.map(({ id, lab: { name: labName }, title, closingDate }) => (
-                <ResearcherPostCard
-                  key={id}
-                  id={id}
-                  labName={labName}
-                  title={title}
-                  closingDate={closingDate}
-                />
-              ))
+              posts.map(
+                ({
+                  id,
+                  lab: { name: labName },
+                  title,
+                  closingDate,
+                  _count: { applicants: applicantCount },
+                }) => (
+                  <ResearcherPostCard
+                    key={id}
+                    id={id}
+                    labName={labName}
+                    title={title}
+                    closingDate={closingDate}
+                    applicantCount={applicantCount}
+                  />
+                )
+              )
             )}
           </div>
         )}
