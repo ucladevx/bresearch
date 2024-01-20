@@ -8,14 +8,7 @@ import { useState, useEffect, useMemo } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import {
-  useQuery,
-  useQueries,
-  keepPreviousData,
-  QueryClient,
-  useQueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
+import { useQuery, QueryClient, useQueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import {
   Table as ReactTable,
@@ -25,11 +18,6 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-
-import { options } from 'joi';
-import { data } from 'autoprefixer';
-import { SecondUpdateProfileValidator } from '@lib/validators';
-import { set } from 'react-hook-form';
 
 async function fetchApplicants(router, pageIndex, pageSize) {
   if (!router.isReady) {
@@ -124,14 +112,13 @@ export default function ApplicantManager() {
   );
 }
 
-const ApplicantTable = (props) => {
+const ApplicantTable = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [applicantCount, setApplicantCount] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [data, setData] = useState([]);
   const [sorting, setSorting] = useState([]);
-  const [profileId, setProfileId] = useState(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const [{ pageIndex, pageSize }, setPagination] = useState({
     pageIndex: 0,
@@ -183,7 +170,7 @@ const ApplicantTable = (props) => {
         header: 'Tags',
         id: 'tags',
         accessorKey: 'piStatus',
-        cell: function EditableCell({ getValue, row, column }) {
+        cell: function EditableCell({ getValue, row }) {
           const initialValue = getValue();
           const [value, setValue] = useState(initialValue);
 
@@ -211,7 +198,7 @@ const ApplicantTable = (props) => {
         id: 'resume',
         accessorKey: 'applicant.studentProfile.resumeURL',
         enableSorting: false,
-        cell: function ResumeCell({ row, column }) {
+        cell: function ResumeCell({ row }) {
           const [resumeLink, setResumeLink] = useState(null);
           //Will show Load Resume if Resume Link not working, useful for debugging
           useEffect(() => {
@@ -272,21 +259,31 @@ const ApplicantTable = (props) => {
     const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
     const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
 
-    const year_sort = rowA_split[1] < rowB_split[1] ? -1 : rowA_split[1] == rowB_split[1] ? 0 : 1;
+    const year_sort = rowA_split[1] < rowB_split[1] ? -1 : rowA_split[1] === rowB_split[1] ? 0 : 1;
     //If the years are different, sort by year
-    if (year_sort != 0) return year_sort;
+    if (year_sort !== 0) {
+      return year_sort;
+    }
     //If the years are the same, sort by quarter
     const quarter_priority = (A) => {
       A = A.toLowerCase();
-      if (A == 'spring') return 0;
-      if (A == 'summer') return 1;
-      if (A == 'fall') return 2;
-      if (A == 'winter') return 3;
+      if (A === 'spring') {
+        return 0;
+      }
+      if (A === 'summer') {
+        return 1;
+      }
+      if (A === 'fall') {
+        return 2;
+      }
+      if (A === 'winter') {
+        return 3;
+      }
     };
     const rowA_quarter = quarter_priority(rowA_split[0]);
 
     const rowB_quarter = quarter_priority(rowB_split[0]);
-    return rowA_quarter < rowB_quarter ? -1 : rowA_quarter == rowB_quarter ? 0 : 1;
+    return rowA_quarter < rowB_quarter ? -1 : rowA_quarter === rowB_quarter ? 0 : 1;
   };
 
   const profileIds = {}; //object to hold 'profileId': 'resumeLink' pairs
@@ -300,13 +297,13 @@ const ApplicantTable = (props) => {
         queryFn: () => fetchResume(router, id),
       });
       //Ensure Profile IDs and Resumes are 1:1 matched
-      if (profileIds[id] == null) {
+      if (profileIds[id] === null) {
         profileIds[id] = resumeData.url;
         resumesRetrieved += 1;
       }
     }
     //Check retrieving resumes finished
-    if (resumesRetrieved == pageSize) {
+    if (resumesRetrieved === pageSize) {
       //Looping back over applicants to add Resume Link
       dataForTable.forEach((applicant) => {
         const applicantID = applicant.applicant.studentProfile.id;
@@ -329,7 +326,7 @@ const ApplicantTable = (props) => {
 
       const profileIdKeysArray = Object.keys(profileIds);
       const numProfileIds = profileIdKeysArray.length;
-      if (numProfileIds == pageSize) {
+      if (numProfileIds === pageSize) {
         fetchResumesFromIDs(dataForTable);
       }
     }
@@ -340,8 +337,10 @@ const ApplicantTable = (props) => {
       setPageCount(Math.ceil(applicantCountQuery?.data / pageSize));
     }
     //Setting page count based on applicants and page size
-    if (applicantCount && pageCount) setPageCount(Math.ceil(applicantCount / pageSize));
-  }, [applicantCountQuery, pageSize, applicantQuery, profileId]);
+    if (applicantCount && pageCount) {
+      setPageCount(Math.ceil(applicantCount / pageSize));
+    }
+  }, [applicantCountQuery, pageSize, applicantQuery]);
 
   const defaultData = useMemo(() => [], []);
   const table = useReactTable({
