@@ -10,6 +10,7 @@ import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import {
   useQuery,
+  useQueries,
   keepPreviousData,
   QueryClient,
   useQueryClient,
@@ -28,6 +29,7 @@ import {
 import { options } from 'joi';
 import { data } from 'autoprefixer';
 import { SecondUpdateProfileValidator } from '@lib/validators';
+import { set } from 'react-hook-form';
 
 async function fetchApplicants(router, pageIndex, pageSize) {
   if (!router.isReady) {
@@ -135,7 +137,6 @@ const ApplicantTable = (props) => {
     pageIndex: 0,
     pageSize: 5,
   });
-  //const [profileId, setProfileId] = useState(null);
 
   //TODO: Update all page sections to use cursor instead, set pageSize to negative when requesting previous page and abs when setting next page
 
@@ -161,15 +162,6 @@ const ApplicantTable = (props) => {
     staleTime: 60 * 60 * 1000,
     keepPreviousData: true,
     enabled: !!applicantCount,
-  });
-
-  const resumeQuery = useQuery({
-    queryKey: ['resume', router, profileId],
-    queryFn: () => fetchResume(router, profileId),
-    refetchOnWindowFocus: false,
-    staleTime: 60 * 60 * 1000,
-    keepPreviousData: true,
-    enabled: !!profileId,
   });
 
   const columns = useMemo(
@@ -215,29 +207,18 @@ const ApplicantTable = (props) => {
         },
       },
       {
-        //Resume link works by setting a profile ID on mouse click, fetching (if never previously accessed) or getting cached URL associated with that profile ID, then the table data updates to include the resumeURL for current hovered applicant
-        //Tanstack Query ensures URL associated with each profile is cached and does not need to be refetched from database after the first fetch
-        //The link won't update in the table unless the table is reloaded, so that's why it manually makes an update Data call
-        //TODO: See if the number of table updates can be reduced
-        //TODO: Currently initial table reload (after first fetching url) will only trigger on a double click of "Load Resume", see if this can be fixed
         header: 'Resume',
         id: 'resume',
         accessorKey: 'applicant.studentProfile.resumeURL',
         enableSorting: false,
-        cell: function EditableResumeCell({ row, column }) {
+        cell: function ResumeCell({ row, column }) {
           const [resumeLink, setResumeLink] = useState(null);
+          //Will show Load Resume if Resume Link not working, useful for debugging
           useEffect(() => {
-            //Note: getValue() via the accessorKey is not updating properly even though the data is, so accessing the resumeURL the manual way via the row information
-            setResumeLink(row.original.applicant.studentProfile.resumeURL);
-          }, [row.original.applicant.studentProfile.resumeURL]);
+            setResumeLink(row.original.applicant.studentProfile.resumeLink);
+          }, [row.original.applicant.studentProfile.resumeLink]);
           return (
-            <div
-              onClick={() => {
-                setProfileId(row.original.applicant.studentProfile.id.toString());
-                table.options.meta?.updateData(row.index, column.id, resumeLink);
-              }}
-              className="underline"
-            >
+            <div className="underline">
               {!!resumeLink ? (
                 <Link
                   locale={false}
@@ -286,6 +267,7 @@ const ApplicantTable = (props) => {
     ],
     []
   );
+  //Sort by quarters for grad dates
   const quarter_sort = (rowA, rowB) => {
     const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
     const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
@@ -307,28 +289,59 @@ const ApplicantTable = (props) => {
     return rowA_quarter < rowB_quarter ? -1 : rowA_quarter == rowB_quarter ? 0 : 1;
   };
 
-  useEffect(() => {
-    if (applicantQuery.data) {
-      //set data to the applicant data concatenated with a pdf url for each applicant
-      let dataForTable = applicantQuery.data;
-      dataForTable.forEach((applicant) => {
-        //Checks if it is currently fetching so it will not display data from a different applicant -- waits until new data is fetched
-        if (
-          applicant.applicant.studentProfile.id == profileId &&
-          resumeQuery.fetchStatus != 'fetching' &&
-          resumeQuery.data
-        )
-          applicant.applicant.studentProfile.resumeURL = resumeQuery.data.url;
-        else applicant.applicant.studentProfile.resumeURL = '';
+  const profileIds = {}; //object to hold 'profileId': 'resumeLink' pairs
+  var resumesRetrieved = 0;
+  const fetchResumesFromIDs = async (dataForTable) => {
+    const profileIdKeys = Object.keys(profileIds);
+    //Going through all profileIds and fetching their resume link from cache or server
+    for (const id of profileIdKeys) {
+      const resumeData = await queryClient.ensureQueryData({
+        queryKey: ['resume', router, id],
+        queryFn: () => fetchResume(router, id),
       });
+      //Ensure Profile IDs and Resumes are 1:1 matched
+      if (profileIds[id] == null) {
+        profileIds[id] = resumeData.url;
+        resumesRetrieved += 1;
+      }
+    }
+    //Check retrieving resumes finished
+    if (resumesRetrieved == pageSize) {
+      //Looping back over applicants to add Resume Link
+      dataForTable.forEach((applicant) => {
+        const applicantID = applicant.applicant.studentProfile.id;
+        applicant.applicant.studentProfile.resumeLink = profileIds[applicantID];
+      });
+      //Only set table data once all resume links retrieved
       setData(dataForTable);
     }
+  };
+
+  useEffect(() => {
+    if (applicantQuery.data) {
+      let dataForTable = applicantQuery.data;
+      /*Fetching Resume Links from Profile IDs and add to applicant data for table */
+      //Loop to get all profile IDs
+      dataForTable.forEach((applicant) => {
+        const key = applicant.applicant.studentProfile.id;
+        profileIds[key] = null;
+      });
+
+      const profileIdKeysArray = Object.keys(profileIds);
+      const numProfileIds = profileIdKeysArray.length;
+      if (numProfileIds == pageSize) {
+        fetchResumesFromIDs(dataForTable);
+      }
+    }
+
+    /*Setting number of applicants and page count on first table load */
     if (!applicantCount && !pageCount) {
       setApplicantCount(applicantCountQuery?.data);
       setPageCount(Math.ceil(applicantCountQuery?.data / pageSize));
     }
+    //Setting page count based on applicants and page size
     if (applicantCount && pageCount) setPageCount(Math.ceil(applicantCount / pageSize));
-  }, [applicantCountQuery, pageSize, applicantQuery, resumeQuery, profileId]);
+  }, [applicantCountQuery, pageSize, applicantQuery, profileId]);
 
   const defaultData = useMemo(() => [], []);
   const table = useReactTable({
@@ -443,6 +456,7 @@ const ApplicantTable = (props) => {
             )}
           </tbody>
         </table>
+
         <div className="h-2" />
         <div className="flex gap-6 pt-3 text-sm  items-center justify-end">
           <span className="-mr-3 text-[#707070]">Rows Per Page: </span>
@@ -476,7 +490,9 @@ const ApplicantTable = (props) => {
 
           <button
             className="rounded"
-            onClick={() => table.previousPage()}
+            onClick={() => {
+              table.previousPage();
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <ChevronLeftIcon className="h-6 w-6 black opacity-50" />
@@ -485,7 +501,9 @@ const ApplicantTable = (props) => {
 
           <button
             className="rounded"
-            onClick={() => table.nextPage()}
+            onClick={() => {
+              table.nextPage();
+            }}
             disabled={!table.getCanNextPage()}
           >
             <ChevronRightIcon className="h-6 w-6 black opacity-50" />
