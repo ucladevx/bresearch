@@ -26,29 +26,53 @@ class ResearcherProfileCreationRoute extends ApiRoute {
 
       const { firstName, lastName, labName, showPicture, labContactEmail, department } = value;
       // TODO: combine queries into a prisma transaction
-
-      await prisma.lab.create({
-        data: {
-          name: labName,
-          contactEmail: labContactEmail,
-          department,
-          adminResearchers: {
-            connect: {
-              email: req.session.user.email,
+      const result = await prisma.$transaction([
+        prisma.lab.create({
+          data: {
+            name: labName,
+            contactEmail: labContactEmail,
+            department,
+            adminResearchers: {
+              connect: {
+                email: req.session.user.email,
+              },
             },
           },
-        },
-      });
-      const result = await prisma.researcherProfile.create({
-        data: {
-          firstName,
-          lastName,
-          profilePicture: showPicture ? req.token.picture : null,
-          researcher: {
-            connect: { email: req.session.user.email },
+        }),
+        prisma.researcherProfile.create({
+          data: {
+            firstName,
+            lastName,
+            profilePicture: showPicture ? req.token.picture : null,
+            researcher: {
+              connect: { email: req.session.user.email },
+            },
           },
-        },
-      });
+        }),
+      ])
+
+      // await prisma.lab.create({
+      //   data: {
+      //     name: labName,
+      //     contactEmail: labContactEmail,
+      //     department,
+      //     adminResearchers: {
+      //       connect: {
+      //         email: req.session.user.email,
+      //       },
+      //     },
+      //   },
+      // });
+      // const result = await prisma.researcherProfile.create({
+      //   data: {
+      //     firstName,
+      //     lastName,
+      //     profilePicture: showPicture ? req.token.picture : null,
+      //     researcher: {
+      //       connect: { email: req.session.user.email },
+      //     },
+      //   },
+      // });
 
       res.status(200).json(result);
     } catch (e) {
