@@ -51,29 +51,6 @@ class ResearcherProfileCreationRoute extends ApiRoute {
         }),
       ])
 
-      // await prisma.lab.create({
-      //   data: {
-      //     name: labName,
-      //     contactEmail: labContactEmail,
-      //     department,
-      //     adminResearchers: {
-      //       connect: {
-      //         email: req.session.user.email,
-      //       },
-      //     },
-      //   },
-      // });
-      // const result = await prisma.researcherProfile.create({
-      //   data: {
-      //     firstName,
-      //     lastName,
-      //     profilePicture: showPicture ? req.token.picture : null,
-      //     researcher: {
-      //       connect: { email: req.session.user.email },
-      //     },
-      //   },
-      // });
-
       res.status(200).json(result);
     } catch (e) {
       // check for Node.js errors (data integrity, etc)
