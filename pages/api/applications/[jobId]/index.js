@@ -24,7 +24,9 @@ class ApplicationsUpdateRoute extends ApiRoute {
     try {
       const { error, value } = UpdateApplicationValidator.validate(req.body);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       const jobId = parseInt(req.query.jobId, 10);
 
@@ -68,7 +70,9 @@ class ApplicationsUpdateRoute extends ApiRoute {
     try {
       const { error, value } = UpdateApplicationValidator.validate(req.body);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       const jobId = parseInt(req.query.jobId, 10);
 

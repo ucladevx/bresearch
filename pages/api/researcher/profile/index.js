@@ -21,7 +21,7 @@ class ResearcherProfileRoute extends ApiRoute {
       const profile = await prisma.researcher.findUnique({
         where: { email: req.session.user.email },
         select: {
-          researcherProfile: { select: { name: true } },
+          researcherProfile: true,
           labs: true,
         },
       });

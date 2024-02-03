@@ -1,7 +1,5 @@
 import { Prisma } from 'prisma/prisma-client';
-
 import { JobCreationValidator, isValidationError } from '@lib/validators';
-// import { sanitize } from 'isomorphic-dompurify';
 import { JSDOM } from 'jsdom';
 import DOMPurify from 'dompurify';
 
@@ -20,7 +18,7 @@ import ApiRoute from '@lib/ApiRoute';
         "ENGINEERING"
     ],
     "weeklyHours": 30,
-    "credit": true
+    "credit": "SRP-99"
 }
 */
 
@@ -51,6 +49,9 @@ class JobCreationRoute extends ApiRoute {
         KEEP_CONTENT: false,
       });
       if (sanitizedHTML !== req.body.description) {
+        console.log(
+          `${req.session.user.email} tried creating a job with this invalid description:\n${req.body.description}`
+        );
         return res.status(400).json({
           message: 'Invalid job description',
         });
@@ -65,19 +66,38 @@ class JobCreationRoute extends ApiRoute {
         duration,
         departments,
         weeklyHours,
-        credit,
+        creditDescription,
         location,
         lab: labId,
+        applicationType,
         externalLink,
       } = value;
 
-      // TODO: what if closingDate is not passed in request body
-      let closeDate = null;
-      if (closingDate) {
-        closeDate = new Date(closingDate);
+      const lab = await prisma.lab.findUnique({
+        where: { id: labId },
+        select: { contactEmail: true, adminResearchers: { select: { email: true } } },
+      });
+      if (lab === null) {
+        return res.status(404).json({
+          message: 'Lab not found',
+        });
+      }
+      if (!lab.adminResearchers.some((r) => r.email === req.session.user.email)) {
+        return res.status(403).json({
+          message: "You aren't in this lab",
+        });
       }
 
-      // TODO: ensure researcher is in the lab and # of jobs < 50
+      const closeDate = new Date(closingDate);
+
+      let applicationLink = null;
+      if (applicationType === 'email') {
+        applicationLink = lab.contactEmail;
+      } else if (applicationType === 'external') {
+        applicationLink = externalLink;
+      }
+
+      // TODO: ensure researcher hasn't posted too many jobs
       const result = await prisma.job.create({
         data: {
           closingDate: closeDate,
@@ -95,9 +115,9 @@ class JobCreationRoute extends ApiRoute {
           duration,
           departments,
           weeklyHours,
-          credit,
+          credit: creditDescription ?? null,
           location,
-          externalLink,
+          externalLink: applicationLink,
           startDate,
         },
       });

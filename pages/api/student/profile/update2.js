@@ -3,14 +3,6 @@ import { Prisma } from 'prisma/prisma-client';
 import { SecondUpdateProfileValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
 
-/* example PATCH request body
-{
-  
-}
-
-Request body can contain one or both of the fields, but not neither.
-*/
-
 class SecondProfileUpdateRoute extends ApiRoute {
   /**
    * profile update endpoint
@@ -23,7 +15,9 @@ class SecondProfileUpdateRoute extends ApiRoute {
     try {
       const { error, value } = SecondUpdateProfileValidator.validate(req.body);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       const { experience, coursework, links } = value;
 

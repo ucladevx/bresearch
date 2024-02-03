@@ -10,6 +10,7 @@ function Dashboard() {
     async function getDashboardInfo() {
       try {
         const dashboardInfo = await (await fetch('/api/researcher/dashboard')).json();
+        // console.log({ dashboardInfo });
         setDashboardInfo(dashboardInfo);
       } catch (e) {}
     }
@@ -39,7 +40,7 @@ function Dashboard() {
         ) : (
           <>
             <h1 className="mt-16 font-semibold text-[2rem] leading-10">
-              Hello {dashboardInfo.name}
+              Hello {dashboardInfo.firstName} {dashboardInfo.lastName}
             </h1>
             <div className="mt-9 flex gap-7 flex-wrap">
               {
@@ -51,7 +52,7 @@ function Dashboard() {
                     </span>
                     <br />
                     <span className="text-2xl font-semibold mt-9 inline-block">
-                      New Applications
+                      New Application{dashboardInfo.newApplicationCount !== 1 && 's'}
                     </span>
                   </div>
                   <div className="h-52 w-64 text-center bg-white rounded-[1.25rem]">
@@ -61,7 +62,7 @@ function Dashboard() {
                     </span>
                     <br />
                     <span className="text-2xl font-semibold mt-9 inline-block">
-                      Total Applications
+                      Total Application{dashboardInfo.totalApplicationCount !== 1 && 's'}
                     </span>
                   </div>
                   <div className="h-52 w-64 text-center bg-white rounded-[1.25rem]">
@@ -70,7 +71,9 @@ function Dashboard() {
                       {dashboardInfo.activePosts.length}
                     </span>
                     <br />
-                    <span className="text-2xl font-semibold mt-9 inline-block">Active Posts</span>
+                    <span className="text-2xl font-semibold mt-9 inline-block">
+                      Active Post{dashboardInfo.activePosts.length !== 1 && 's'}
+                    </span>
                   </div>
                   <div className="h-52 w-64 text-center bg-white rounded-[1.25rem]">
                     {/* TODO: find better way to do below */}
@@ -78,7 +81,9 @@ function Dashboard() {
                       {dashboardInfo.totalPostCount}
                     </span>
                     <br />
-                    <span className="text-2xl font-semibold mt-9 inline-block">Total Posts</span>
+                    <span className="text-2xl font-semibold mt-9 inline-block">
+                      Total Post{dashboardInfo.totalPostCount !== 1 && 's'}
+                    </span>
                   </div>
                 </>
               }
@@ -90,13 +95,20 @@ function Dashboard() {
                   <div>You have no active posts.</div>
                 ) : (
                   dashboardInfo.activePosts.map(
-                    ({ id, lab: { name: labName }, title, closingDate }) => (
+                    ({
+                      id,
+                      lab: { name: labName },
+                      title,
+                      closingDate,
+                      _count: { applicants: applicantCount },
+                    }) => (
                       <ResearcherPostCard
                         key={id}
                         id={id}
                         labName={labName}
                         title={title}
                         closingDate={closingDate}
+                        applicantCount={applicantCount}
                       />
                     )
                   )
