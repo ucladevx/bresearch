@@ -303,7 +303,11 @@ const ApplicantTable = () => {
       }
     }
     //Check retrieving resumes finished
-    if (resumesRetrieved === pageSize) {
+    let desiredCount = Math.min(applicantCount, pageSize);
+    if (!table.getCanNextPage()) {
+      desiredCount = applicantCount % pageSize;
+    }
+    if (resumesRetrieved === desiredCount) {
       //Looping back over applicants to add Resume Link
       dataForTable.forEach((applicant) => {
         const applicantID = applicant.applicant.studentProfile.id;
@@ -326,7 +330,12 @@ const ApplicantTable = () => {
 
       const profileIdKeysArray = Object.keys(profileIds);
       const numProfileIds = profileIdKeysArray.length;
-      if (numProfileIds === pageSize) {
+
+      let desiredCount = Math.min(applicantCount, pageSize);
+      if (!table.getCanNextPage()) {
+        desiredCount = applicantCount % pageSize;
+      }
+      if (numProfileIds === desiredCount) {
         fetchResumesFromIDs(dataForTable);
       }
     }
@@ -399,7 +408,7 @@ const ApplicantTable = () => {
         <div className="flex items-center border-b-2 border-[#949494]">
           <MagnifyingGlassIcon className="stroke-2 h-5 w-5 text-[#707070]" />
           <DebouncedInput
-            initialValue={globalFilter ?? ''}
+            initialvalue={globalFilter ?? ''}
             onChange={(value) => setGlobalFilter(String(value))}
             className="p-2 text-base text-[#8b8b8b] outline-none"
             placeholder="Search..."
@@ -516,14 +525,14 @@ const ApplicantTable = () => {
 
 //Need to debounce the search input so that it filters correctly
 function DebouncedInput(props) {
-  const { initialValue, onChange } = props;
+  const { initialvalue, onChange } = props;
   const debounce = 300;
 
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(initialvalue);
 
   useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+    setValue(initialvalue);
+  }, [initialvalue]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
