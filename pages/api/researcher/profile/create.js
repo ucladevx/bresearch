@@ -25,7 +25,6 @@ class ResearcherProfileCreationRoute extends ApiRoute {
       }
 
       const { firstName, lastName, labName, showPicture, labContactEmail, department } = value;
-      // TODO: combine queries into a prisma transaction
       const result = await prisma.$transaction([
         prisma.lab.create({
           data: {
@@ -49,7 +48,7 @@ class ResearcherProfileCreationRoute extends ApiRoute {
             },
           },
         }),
-      ])
+      ]);
 
       res.status(200).json(result);
     } catch (e) {
