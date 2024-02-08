@@ -40,28 +40,34 @@ class ApplicationApplicants extends ApiRoute {
    */
   async get(req, res, prisma) {
     try {
-      const result = await prisma.job.findFirst({
+      const result = await prisma.labeledJob.findMany({
+        take: parseInt(req.query?.pageSize),
+        skip: parseInt(req.query?.pageIndex * req.query?.pageSize),
+
         where: {
-          id: parseInt(req.query?.jobId),
-          poster: {
-            is: {
-              email: req.session.user.email,
+          status: 'APPLIED',
+          jobId: parseInt(req.query?.jobId),
+          job: {
+            poster: {
+              is: {
+                email: req.session.user.email,
+              },
             },
           },
         },
         select: {
-          applicants: {
+          applicant: {
             select: {
-              applicant: {
-                select: {
-                  id: true,
-                  studentProfile: true,
-                },
-              },
-              piStatus: true,
-              lastUpdated: true,
+              id: true,
+              studentProfile: true,
+              email: true,
             },
           },
+          piStatus: true,
+          lastUpdated: true,
+        },
+        orderBy: {
+          lastUpdated: 'asc',
         },
       });
 

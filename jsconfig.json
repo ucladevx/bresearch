@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@lib/*": ["lib/*"]
-    }
+    },
+    "strictNullChecks": true
   }
 }

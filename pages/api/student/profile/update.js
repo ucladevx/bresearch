@@ -23,7 +23,9 @@ class ProfileUpdateRoute extends ApiRoute {
     try {
       const { error, value } = UpdateProfileValidator.validate(req.body);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       const {
         firstName,

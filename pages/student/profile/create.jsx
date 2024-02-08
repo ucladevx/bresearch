@@ -1,20 +1,11 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { ProfileCreationValidator } from '@lib/validators';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, Fragment } from 'react';
+import { Majors, Minors } from '@lib/globals';
 
-// function Input(props) {
-//   return (
-//     <input
-//       {...props}
-//       className={`border-solid border-2 border-black h-11 text-base px-3 nocommonligs${
-//         props.className ? ` ${props.className}` : ''
-//       }`}
-//     ></input>
-//   );
-// }
 function DisabledInput({ id, value, ...props }) {
   if (!id || value === undefined || Object.keys(props).length) {
     throw new Error('Input missing prop or extra prop');
@@ -24,6 +15,7 @@ function DisabledInput({ id, value, ...props }) {
       id={id}
       value={value}
       className="border-solid border-2 h-11 text-base px-3 focus:outline-none nocommonligs border-black"
+      // TODO: add bg-color
       disabled
     ></input>
   );
@@ -64,9 +56,13 @@ function CreateProfile() {
     formState: { errors },
     watch,
     setValue,
+    control,
   } = useForm({ resolver: joiResolver(ProfileCreationValidator) });
   if (watch('major', true) === watch('additionalMajor', '')) {
     setValue('additionalMajor', '');
+  }
+  if (watch('minor', true) !== '' && watch('minor', true) === watch('additionalMinor', '')) {
+    setValue('additionalMinor', '');
   }
   const userSession = useSession();
 
@@ -79,6 +75,7 @@ function CreateProfile() {
     }
     setIsSubmitting(true);
     try {
+      localStorage.setItem('showPicture', data.showPicture);
       const res = await fetch('/api/student/profile/create', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -92,11 +89,6 @@ function CreateProfile() {
     } catch (e) {}
     setIsSubmitting(false);
   }
-  const majors = [
-    { major: 'COGNITIVE_SCIENCE', text: 'Cognitive Science' },
-    { major: 'COMPUTER_SCIENCE', text: 'Computer Science' },
-  ];
-  const minors = [{ minor: 'LINGUISTICS', text: 'Linguistics' }];
 
   return (
     <div className="flex flex-col items-center">
@@ -141,7 +133,7 @@ function CreateProfile() {
             </div>
             <div className="flex flex-col basis-1/5 shrink-[3] min-w-[6rem] max-w-[15rem] gap-y-3">
               <label htmlFor="pronouns" className="font-bold text-base">
-                Pronouns
+                Pronouns*
               </label>
               <select
                 id="pronouns"
@@ -201,10 +193,40 @@ function CreateProfile() {
                 </small>
               )}
             </div>
-            <input
-              className="basis-1/2 invisible border-solid border-2 border-black"
-              aria-hidden="true"
-            ></input>
+            <div className="flex flex-col basis-1/2">
+              <label className="font-bold text-base">Show Google Profile Picture</label>
+              <div className="flex gap-2 basis-1/2 items-center">
+                <Controller
+                  control={control}
+                  name="showPicture"
+                  render={({ field }) => {
+                    return (
+                      <>
+                        <input
+                          type="radio"
+                          id="showProfilePicture"
+                          onBlur={field.onBlur}
+                          onChange={() => field.onChange(true)}
+                          checked={field.value === true}
+                          ref={field.ref}
+                        />
+                        <label htmlFor="showProfilePicture">Yes</label>
+
+                        <input
+                          type="radio"
+                          id="hideProfilePicture"
+                          onBlur={field.onBlur}
+                          onChange={() => field.onChange(false)}
+                          checked={field.value === false}
+                          ref={field.ref}
+                        />
+                        <label htmlFor="hideProfilePicture">No</label>
+                      </>
+                    );
+                  }}
+                />
+              </div>
+            </div>
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
@@ -232,7 +254,7 @@ function CreateProfile() {
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="major" className="font-bold text-base">
-                Major
+                Major*
               </label>
               <select
                 id="major"
@@ -241,9 +263,9 @@ function CreateProfile() {
                 }`}
                 {...register('major')}
               >
-                {majors.map(({ major, text }) => (
-                  <option value={major} key={major}>
-                    {text}
+                {Majors.map(({ value, label }) => (
+                  <option value={value} key={value}>
+                    {label}
                   </option>
                 ))}
               </select>
@@ -260,13 +282,13 @@ function CreateProfile() {
                 {...register('additionalMajor')}
               >
                 <option value=""></option>
-                {majors.map(({ major, text }) =>
-                  major !== watch('major') ? (
-                    <option value={major} key={major}>
-                      {text}
+                {Majors.map(({ value, label }) =>
+                  value !== watch('major') ? (
+                    <option value={value} key={value}>
+                      {label}
                     </option>
                   ) : (
-                    <Fragment key={major} />
+                    <Fragment key={value} />
                   )
                 )}
               </select>
@@ -285,9 +307,9 @@ function CreateProfile() {
                 {...register('minor')}
               >
                 <option value=""></option>
-                {minors.map(({ minor, text }) => (
-                  <option value={minor} key={minor}>
-                    {text}
+                {Minors.map(({ value, label }) => (
+                  <option value={value} key={value}>
+                    {label}
                   </option>
                 ))}
               </select>
@@ -304,18 +326,22 @@ function CreateProfile() {
                 {...register('additionalMinor')}
               >
                 <option value=""></option>
-                {minors.map(({ minor, text }) => (
-                  <option value={minor} key={minor}>
-                    {text}
-                  </option>
-                ))}
+                {Minors.map(({ value, label }) =>
+                  value !== watch('minor') ? (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ) : (
+                    <Fragment key={value} />
+                  )
+                )}
               </select>
             </div>
           </div>
           <div className="flex justify-between gap-x-10 mb-9">
             <div className="flex flex-col basis-1/2 gap-y-3">
               <label htmlFor="graduationDate" className="font-bold text-base">
-                Expected Graduation
+                Expected Graduation*
               </label>
               {/* <Input
                 id="graduationDate"
@@ -331,13 +357,18 @@ function CreateProfile() {
                 }`}
                 {...register('graduationDate')}
               >
-                {['Select an Option', 'Spring 2023', 'Summer 2023', 'Fall 2023', 'Winter 2024'].map(
-                  (minor) => (
-                    <option value={minor} key={minor}>
-                      {minor}
-                    </option>
-                  )
-                )}
+                {[
+                  'Select an Option',
+                  'Spring 2023',
+                  'Summer 2023',
+                  'Fall 2023',
+                  'Winter 2024',
+                  'Spring 2024',
+                ].map((minor) => (
+                  <option value={minor} key={minor}>
+                    {minor}
+                  </option>
+                ))}
               </select>
             </div>
             <input

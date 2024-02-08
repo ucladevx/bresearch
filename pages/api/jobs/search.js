@@ -20,6 +20,8 @@ class JobSearchRoute extends ApiRoute {
 
       const result = await prisma.job.findMany({
         where: {
+          closed: false,
+          closingDate: { gt: new Date() },
           title: {
             contains: jobSearchQuery,
             mode: 'insensitive',
@@ -34,10 +36,17 @@ class JobSearchRoute extends ApiRoute {
           location: true,
           lab: { select: { name: true } },
           created: true,
+          startDate: true,
           closingDate: true,
           credit: true,
           weeklyHours: true,
           paid: true,
+          externalLink: true,
+          _count: {
+            select: {
+              applicants: { where: { status: 'APPLIED' } },
+            },
+          },
         },
         take: 50,
       });
