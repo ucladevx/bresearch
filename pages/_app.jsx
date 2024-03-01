@@ -3,6 +3,7 @@ import { SessionProvider } from 'next-auth/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient();
 import { Kumbh_Sans } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 
 const kumbhSans = Kumbh_Sans({
   subsets: ['latin'],
@@ -14,9 +15,11 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
-        <div className={`${kumbhSans.variable} font-sans`}>
-          <Component {...pageProps} />
-        </div>
+        <ThemeProvider>
+          <div className={`${kumbhSans.variable} font-sans`}>
+            <Component {...pageProps} />
+          </div>
+        </ThemeProvider>
       </QueryClientProvider>
     </SessionProvider>
   );
