@@ -9,7 +9,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery, QueryClient, useQueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import ResearcherSidebar from '../../components/ResearcherSidebar.jsx';
 import {
   Table as ReactTable,
   useReactTable,
@@ -18,7 +18,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-
+//&pageSize=${pageSize}
 async function fetchApplicants(router, pageIndex, pageSize) {
   if (!router.isReady) {
     return;
@@ -35,15 +35,15 @@ async function fetchApplicants(router, pageIndex, pageSize) {
       }
     );
     if (res.status === 200) {
+      const data = await res.json();
+      // console.log(data);
+      return data;
     }
-    const data = await res.json();
-    // console.log(data);
-    return data;
   } catch (e) {
-    throw e;
+    throw new Promise.reject(Error('Network response was not OK'));
   }
 }
-
+//${profileId}
 async function fetchResume(router, profileId) {
   if (!router.isReady) {
     return;
@@ -56,15 +56,15 @@ async function fetchResume(router, profileId) {
       },
     });
     if (res.status === 200) {
+      const data = await res.json();
+      //console.log(data);
+      return data;
     }
-    const data = await res.json();
-    //console.log(data);
-    return data;
   } catch (e) {
     throw e;
   }
 }
-
+//${jobId}/
 async function fetchApplicantCount(router) {
   if (!router.isReady) {
     return;
@@ -78,10 +78,10 @@ async function fetchApplicantCount(router) {
       },
     });
     if (res.status === 200) {
+      const data = await res.json();
+      //console.log(data);
+      return data;
     }
-    const data = await res.json();
-    // console.log({ data });
-    return data;
   } catch (e) {
     throw e;
   }
@@ -90,7 +90,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+      refetchOnMount: true,
       retry: false,
       staleTime: 1000 * 60 * 60, //1 hour -- could make it more or less
     },
@@ -98,17 +98,22 @@ const queryClient = new QueryClient({
 });
 //Applicant Manager page
 export default function ApplicantManager() {
-  //Main page display
-  //ml-28 mt-8 mb-8
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="z-1 w-full h-full m-0 bg-cover bg-neutral-100 overflow-y-auto">
-        <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
-        <div className="mb-10">
-          <ApplicantTable />
+    <>
+      <QueryClientProvider client={queryClient}>
+        <div className="min-h-screen w-full flex flex-col ">
+          <ResearcherSidebar />
+          <div className="min-h-screen pl-64 bg-cover bg-neutral-100 pl-10 overflow-y-auto">
+            <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">
+              Manage Applicants
+            </h1>
+            <div className="mb-10">
+              <ApplicantTable />
+            </div>
+          </div>
         </div>
-      </div>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </>
   );
 }
 
@@ -124,6 +129,7 @@ const ApplicantTable = () => {
     pageIndex: 0,
     pageSize: 5,
   });
+  const defaultData = useMemo(() => [], []);
 
   //TODO: Update all page sections to use cursor instead, set pageSize to negative when requesting previous page and abs when setting next page
 
@@ -138,8 +144,8 @@ const ApplicantTable = () => {
   const applicantCountQuery = useQuery({
     queryKey: ['applicants-count', router],
     queryFn: () => fetchApplicantCount(router),
-    keepPreviousData: true,
     staleTime: Infinity,
+    placeholderData: 0,
   });
 
   const applicantQuery = useQuery({
@@ -149,6 +155,7 @@ const ApplicantTable = () => {
     staleTime: 60 * 60 * 1000,
     keepPreviousData: true,
     enabled: !!applicantCount,
+    placeholderData: defaultData,
   });
 
   const columns = useMemo(
@@ -297,7 +304,10 @@ const ApplicantTable = () => {
         queryFn: () => fetchResume(router, id),
       });
       //Ensure Profile IDs and Resumes are 1:1 matched
-      if (profileIds[id] === null) {
+      if (!resumeData) {
+        //add toast error
+      }
+      if (profileIds[id] === null && resumeData) {
         profileIds[id] = resumeData.url;
         resumesRetrieved += 1;
       }
@@ -319,7 +329,14 @@ const ApplicantTable = () => {
   };
 
   useEffect(() => {
-    if (applicantQuery.data) {
+    if (applicantQuery.status === 'error') {
+      queryClient.setQueryData(['applicants', router, pageIndex, pageSize], defaultData); //TODO: add toast
+    }
+    if (applicantCountQuery.status === 'error') {
+      queryClient.setQueryData(['applicants-count', router], 0); //TODO: add toast
+    }
+    if (applicantQuery.status === 'success') {
+      //console.log(applicantQuery);
       let dataForTable = applicantQuery.data;
       /*Fetching Resume Links from Profile IDs and add to applicant data for table */
       //Loop to get all profile IDs
@@ -351,7 +368,6 @@ const ApplicantTable = () => {
     }
   }, [applicantCountQuery, pageSize, applicantQuery]);
 
-  const defaultData = useMemo(() => [], []);
   const table = useReactTable({
     data: data ?? defaultData,
     columns,
@@ -410,14 +426,14 @@ const ApplicantTable = () => {
           <DebouncedInput
             initialvalue={globalFilter ?? ''}
             onChange={(value) => setGlobalFilter(String(value))}
-            className="p-2 text-base text-[#8b8b8b] outline-none"
+            className="p-2 text-lg text-[#8b8b8b] outline-none"
             placeholder="Search..."
           />
         </div>
       </div>
       <div className="relative overflow-x-auto">
-        <table className="table-fixed min-w-[950px] w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
-          <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
+        <table className="table-fixed min-w-[950px] w-full text-base text-left text-gray-500 dark:text-gray-400 ">
+          <thead className="text-xl font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -486,14 +502,12 @@ const ApplicantTable = () => {
               ? 1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize
               : '0'}
             -
-            {table.getCanNextPage() ? (
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
-            ) : applicantCountQuery?.isLoading ? (
-              <div>Loading...</div>
-            ) : (
-              applicantCount
-            )}{' '}
-            of {applicantCountQuery?.isLoading ? <div>Loading...</div> : applicantCount}
+            {table.getCanNextPage()
+              ? (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
+              : applicantCountQuery?.isError
+              ? 0
+              : applicantCount}{' '}
+            of {applicantCountQuery?.isError ? 0 : applicantCount}
           </span>
 
           <button
