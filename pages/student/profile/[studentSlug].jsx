@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Head from 'next/head';
 import { UUIDV4Validator } from '@lib/validators';
 import prisma from '@lib/prisma';
 import NavBar from '../../../components/NavBar';
@@ -23,8 +24,14 @@ function StudentProfile({ profile }) {
     }
     getPDFURL();
   }, [profile.id]);
+
   return (
     <div className="flex flex-col min-h-screen">
+      <Head>
+        <title>
+          {profile.firstName} {profile.lastName}&apos;s Profile
+        </title>
+      </Head>
       <NavBar />
       <div className="flex flex-col items-center pt-[3.25rem] bg-light-gray w-full flex-grow">
         <main className="w-[80%] max-w-6xl flex gap-10">
@@ -153,7 +160,7 @@ export async function getStaticProps(context) {
     return { notFound: true };
   }
 
-  const profile = await prisma.StudentProfile.findUnique({
+  const profile = await prisma.studentProfile.findUnique({
     select: {
       id: true,
       firstName: true,
@@ -199,7 +206,7 @@ export async function getStaticProps(context) {
 }
 
 export async function getStaticPaths() {
-  const profiles = await prisma.StudentProfile.findMany({
+  const profiles = await prisma.studentProfile.findMany({
     select: {
       id: true,
     },

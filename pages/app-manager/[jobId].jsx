@@ -2,6 +2,7 @@
 //TODO: Update pagination to cursor-based, add prefetch of next page
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 import TagDropdown from '../../components/TagDropdown';
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useMemo } from 'react';
@@ -102,6 +103,9 @@ export default function ApplicantManager() {
   //ml-28 mt-8 mb-8
   return (
     <QueryClientProvider client={queryClient}>
+      <Head>
+        <title>Manage Applicants</title>
+      </Head>
       <div className="z-1 w-full h-full m-0 bg-cover bg-neutral-100 overflow-y-auto">
         <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
         <div className="mb-10">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
@@ -59,6 +60,9 @@ function EditResearcherProfilePage() {
   };
   return (
     <div className="grid grid-cols-1 justify-items-center">
+      <Head>
+        <title>Edit Profile</title>
+      </Head>
       <h1 className="flex gap-3 justify-center my-4 font-bold text-[2rem]">Edit Your Profile</h1>
       <div className="w-1/2">
         <form

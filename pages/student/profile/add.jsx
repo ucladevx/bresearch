@@ -3,6 +3,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { SecondProfileCreationValidator } from '@lib/validators';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import CreatableSelect from 'react-select/creatable';
 import { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -133,6 +134,10 @@ function AddToProfile() {
   });
 
   return (
+    <>
+      <Head>
+        <title>Add to Profile</title>
+      </Head>
     <div className="flex flex-col items-center">
       {/* <main className="max-w-5xl min-w-[80%]"> */}
       <main className="w-[80%] max-w-6xl">
@@ -383,6 +388,7 @@ function AddToProfile() {
         </form>
       </main>
     </div>
+    </>
   );
 }
 
