@@ -35,10 +35,11 @@ export default async function handler(req) {
     });
   }
   const client = new S3Client({
-    region: process.env.RESUMES_BUCKET_REGION,
+    region: 'auto',
+    endpoint: `https://${process.env.RESUMES_BUCKET_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: process.env.ACCESS_KEY_ID,
-      secretAccessKey: process.env.SECRET_ACCESS_KEY,
+      accessKeyId: process.env.RESUMES_BUCKET_ACCESS_KEY_ID,
+      secretAccessKey: process.env.RESUMES_BUCKET_SECRET_ACCESS_KEY,
     },
   });
   const command = new PutObjectCommand({
