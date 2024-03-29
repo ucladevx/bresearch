@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
@@ -51,6 +52,9 @@ function AccountType() {
 
   return (
     <div>
+      <Head>
+        <title>Account Type</title>
+      </Head>
       <h1 className="flex gap-3 justify-center my-20 font-bold text-[2rem]">
         Welcome to
         <svg
