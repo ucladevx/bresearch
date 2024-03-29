@@ -2,18 +2,14 @@
 //TODO: Update pagination to cursor-based, add prefetch of next page
 //Note: This page is dynamic under a [jobId] because each job will have its own applicant view for a PI
 import TagDropdown from '../../components/TagDropdown';
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useMemo } from 'react';
 //Need to fix SVGs to just use icons instead
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import {
-  useQuery,
-  keepPreviousData,
-  useQueryClient,
-  useInfiniteQuery,
-} from '@tanstack/react-query';
+import { useQuery, QueryClient, useQueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import {
   Table as ReactTable,
@@ -23,9 +19,6 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-
-import { options } from 'joi';
-import { data } from 'autoprefixer';
 
 async function fetchApplicants(router, pageIndex, pageSize) {
   if (!router.isReady) {
@@ -45,7 +38,28 @@ async function fetchApplicants(router, pageIndex, pageSize) {
     if (res.status === 200) {
     }
     const data = await res.json();
+    // console.log(data);
+    return data;
+  } catch (e) {
+    throw e;
+  }
+}
 
+async function fetchResume(router, profileId) {
+  if (!router.isReady) {
+    return;
+  }
+  try {
+    const res = await fetch(`/api/student/profile/resume/${profileId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.status === 200) {
+    }
+    const data = await res.json();
+    //console.log(data);
     return data;
   } catch (e) {
     throw e;
@@ -67,32 +81,79 @@ async function fetchApplicantCount(router) {
     if (res.status === 200) {
     }
     const data = await res.json();
-    console.log({ data });
+    // console.log({ data });
     return data;
   } catch (e) {
     throw e;
   }
 }
-
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: false,
+      staleTime: 1000 * 60 * 60, //1 hour -- could make it more or less
+    },
+  },
+});
 //Applicant Manager page
 export default function ApplicantManager() {
   //Main page display
   //ml-28 mt-8 mb-8
   return (
-    <div className="z-1 w-full h-full absolute bg-neutral-100 overflow-y-auto">
-      <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
-      <div className="mb-10">
-        <ApplicantTable />
+    <QueryClientProvider client={queryClient}>
+      <Head>
+        <title>Manage Applicants</title>
+      </Head>
+      <div className="z-1 w-full h-full m-0 bg-cover bg-neutral-100 overflow-y-auto">
+        <h1 className="text-2xl font-bold justify-self-left ml-28 mt-8 mb-8">Manage Applicants</h1>
+        <div className="mb-10">
+          <ApplicantTable />
+        </div>
       </div>
-    </div>
+    </QueryClientProvider>
   );
 }
 
-const ApplicantTable = (props) => {
-  //const { applicantCount } = props;
-  const [sorting, setSorting] = useState([]);
+const ApplicantTable = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const [applicantCount, setApplicantCount] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [data, setData] = useState([]);
+  const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [{ pageIndex, pageSize }, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
+  //TODO: Update all page sections to use cursor instead, set pageSize to negative when requesting previous page and abs when setting next page
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  );
+
+  const applicantCountQuery = useQuery({
+    queryKey: ['applicants-count', router],
+    queryFn: () => fetchApplicantCount(router),
+    keepPreviousData: true,
+    staleTime: Infinity,
+  });
+
+  const applicantQuery = useQuery({
+    queryKey: ['applicants', router, pageIndex, pageSize],
+    queryFn: () => fetchApplicants(router, pageIndex, pageSize),
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 60 * 1000,
+    keepPreviousData: true,
+    enabled: !!applicantCount,
+  });
 
   const columns = useMemo(
     () => [
@@ -111,24 +172,62 @@ const ApplicantTable = (props) => {
 
       {
         header: 'Tags',
+        id: 'tags',
         accessorKey: 'piStatus',
-        cell: ({ row, getValue }) => (
-          <div className="py-2.5 -mr-4">
-            <TagDropdown
-              applicantEmail={row.original.applicant.email}
-              piStatus={getValue().toString()}
-            />
-          </div>
-        ),
+        cell: function EditableCell({ getValue, row }) {
+          const initialValue = getValue();
+          const [value, setValue] = useState(initialValue);
+
+          const onChangeValue = () => {
+            table.options.meta.refetchData();
+          };
+
+          useEffect(() => {
+            setValue(initialValue);
+          }, [initialValue]);
+
+          return (
+            <div className="py-2.5 -mr-4">
+              <TagDropdown
+                applicantEmail={row.original.applicant.email}
+                piStatus={value}
+                onChangeValue={onChangeValue}
+              />
+            </div>
+          );
+        },
       },
       {
-        //TODO: Set up resume link
         header: 'Resume',
-        accessorKey: 'applicant.studentProfile.id',
         id: 'resume',
+        accessorKey: 'applicant.studentProfile.resumeURL',
         enableSorting: false,
-        cell: (props) => <div className="underline">name_resume.pdf</div>, //this will eventually actually fetch and show the name of their pdf
+        cell: function ResumeCell({ row }) {
+          const [resumeLink, setResumeLink] = useState(null);
+          //Will show Load Resume if Resume Link not working, useful for debugging
+          useEffect(() => {
+            setResumeLink(row.original.applicant.studentProfile.resumeLink);
+          }, [row.original.applicant.studentProfile.resumeLink]);
+          return (
+            <div className="underline">
+              {!!resumeLink ? (
+                <Link
+                  locale={false}
+                  href={resumeLink}
+                  rel="noreferrer"
+                  target="_blank"
+                  className="underline"
+                >
+                  View Resume
+                </Link>
+              ) : (
+                <div>Load Resume</div>
+              )}
+            </div>
+          );
+        },
       },
+
       {
         header: 'Profile',
         accessorKey: 'applicant.studentProfile.id',
@@ -153,13 +252,14 @@ const ApplicantTable = (props) => {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
-          }).format(new Date(row.lastUpdated)), //Change to abbrev month spelled out, then day, and then year
+          }).format(new Date(row.lastUpdated)),
         sortingFn: 'datetime',
       },
     ],
     []
   );
-  const quarter_sort = (rowA, rowB, columnId) => {
+  //Sort by quarters for grad dates
+  const quarter_sort = (rowA, rowB) => {
     const rowA_split = rowA.original.applicant.studentProfile.graduationDate.split(' ');
     const rowB_split = rowB.original.applicant.studentProfile.graduationDate.split(' ');
 
@@ -190,70 +290,106 @@ const ApplicantTable = (props) => {
     return rowA_quarter < rowB_quarter ? -1 : rowA_quarter === rowB_quarter ? 0 : 1;
   };
 
-  const [{ pageIndex, pageSize }, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 5,
-  });
-
-  //TODO: Update all page sections to use cursor instead, also set pageSize to negative when requesting previous page and abs when setting next page
-  //TODO: Add prefetching next page, probably with prefetchQuery or fetchQuery
-
-  const router = useRouter();
-  const fetchDataOptions = {
-    router,
-    pageIndex,
-    pageSize,
+  const profileIds = {}; //object to hold 'profileId': 'resumeLink' pairs
+  var resumesRetrieved = 0;
+  const fetchResumesFromIDs = async (dataForTable) => {
+    const profileIdKeys = Object.keys(profileIds);
+    //Going through all profileIds and fetching their resume link from cache or server
+    for (const id of profileIdKeys) {
+      const resumeData = await queryClient.ensureQueryData({
+        queryKey: ['resume', router, id],
+        queryFn: () => fetchResume(router, id),
+      });
+      //Ensure Profile IDs and Resumes are 1:1 matched
+      if (profileIds[id] === null) {
+        profileIds[id] = resumeData.url;
+        resumesRetrieved += 1;
+      }
+    }
+    //Check retrieving resumes finished
+    let desiredCount = Math.min(applicantCount, pageSize);
+    if (!table.getCanNextPage()) {
+      desiredCount = applicantCount % pageSize;
+    }
+    if (resumesRetrieved === desiredCount) {
+      //Looping back over applicants to add Resume Link
+      dataForTable.forEach((applicant) => {
+        const applicantID = applicant.applicant.studentProfile.id;
+        applicant.applicant.studentProfile.resumeLink = profileIds[applicantID];
+      });
+      //Only set table data once all resume links retrieved
+      setData(dataForTable);
+    }
   };
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
-
-  const applicantQuery = useQuery({
-    queryKey: ['applicants-count', router],
-    queryFn: () => fetchApplicantCount(router),
-    keepPreviousData: true,
-    staleTime: Infinity,
-  });
-
-  const [applicantCount, setApplicantCount] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
-
-  const { status, data, error, isFetching, isPlaceholderData, isPreviousData } = useQuery({
-    queryKey: ['applicants', fetchDataOptions],
-    queryFn: () => fetchApplicants(router, pageIndex, pageSize),
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-    enabled: !!applicantCount,
-  });
 
   useEffect(() => {
-    if (!applicantCount && !pageCount) {
-      setApplicantCount(applicantQuery?.data);
-      setPageCount(Math.ceil(applicantQuery?.data / pageSize));
+    if (applicantQuery.data) {
+      let dataForTable = applicantQuery.data;
+      /*Fetching Resume Links from Profile IDs and add to applicant data for table */
+      //Loop to get all profile IDs
+      dataForTable.forEach((applicant) => {
+        const key = applicant.applicant.studentProfile.id;
+        profileIds[key] = null;
+      });
+
+      const profileIdKeysArray = Object.keys(profileIds);
+      const numProfileIds = profileIdKeysArray.length;
+
+      let desiredCount = Math.min(applicantCount, pageSize);
+      if (!table.getCanNextPage()) {
+        desiredCount = applicantCount % pageSize;
+      }
+      if (numProfileIds === desiredCount) {
+        fetchResumesFromIDs(dataForTable);
+      }
     }
+
+    /*Setting number of applicants and page count on first table load */
+    if (!applicantCount && !pageCount) {
+      setApplicantCount(applicantCountQuery?.data);
+      setPageCount(Math.ceil(applicantCountQuery?.data / pageSize));
+    }
+    //Setting page count based on applicants and page size
     if (applicantCount && pageCount) {
       setPageCount(Math.ceil(applicantCount / pageSize));
     }
-  }, [applicantQuery, pageSize]);
+  }, [applicantCountQuery, pageSize, applicantQuery]);
 
   const defaultData = useMemo(() => [], []);
-
   const table = useReactTable({
     data: data ?? defaultData,
     columns,
     pageCount: pageCount ?? 0,
     onPaginationChange: setPagination,
     manualPagination: true,
+    autoResetFilters: false,
+    autoResetSortBy: false,
+    debugTable: true,
     state: {
       pagination,
       sorting,
       globalFilter,
       applicantCount,
       pageCount,
+    },
+    meta: {
+      refetchData: () => {
+        applicantQuery.refetch(); //manually trigger refetch of current page if the data updated
+      },
+
+      updateData: (rowIndex, columnId, value) => {
+        setData((old) =>
+          old.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...old[rowIndex],
+                [columnId]: value,
+              };
+            }
+            return row;
+          })
+        );
+      },
     },
     autoResetPage: false,
     sortingFns: {
@@ -271,19 +407,19 @@ const ApplicantTable = (props) => {
   //TODO: Do we want any hover behavior for search bar?
   //TODO: what do we want to show for loading/error behavior? (where should message show, styling)
   return (
-    <div className="overflow-visible bg-white mt-4 w-11/12 h-5/6 mx-auto p-14 rounded-2xl shadow-md space-y-6">
+    <div className="overflow-hidden bg-white mt-4 w-11/12 h-5/6 mx-auto p-14 rounded-2xl shadow-md space-y-6">
       <div className="flex items-center justify-end">
         <div className="flex items-center border-b-2 border-[#949494]">
           <MagnifyingGlassIcon className="stroke-2 h-5 w-5 text-[#707070]" />
           <DebouncedInput
-            initialValue={globalFilter ?? ''}
+            initialvalue={globalFilter ?? ''}
             onChange={(value) => setGlobalFilter(String(value))}
             className="p-2 text-base text-[#8b8b8b] outline-none"
             placeholder="Search..."
           />
         </div>
       </div>
-      <div className="relative overflow-x-auto ">
+      <div className="relative overflow-x-auto">
         <table className="table-fixed min-w-[950px] w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <thead className="text-base font-medium text-gray-700 border-b bg-white dark:bg-gray-700 dark:text-gray-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -312,10 +448,10 @@ const ApplicantTable = (props) => {
             ))}
           </thead>
           <tbody>
-            {status === 'pending' ? (
+            {applicantQuery.status === 'pending' ? (
               <div>Loading...</div>
-            ) : status === 'error' ? (
-              <div>Error: {error.message}</div>
+            ) : applicantQuery.status === 'error' ? (
+              <div>Error: {applicantQuery.error.message}</div>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <tr
@@ -332,6 +468,7 @@ const ApplicantTable = (props) => {
             )}
           </tbody>
         </table>
+
         <div className="h-2" />
         <div className="flex gap-6 pt-3 text-sm  items-center justify-end">
           <span className="-mr-3 text-[#707070]">Rows Per Page: </span>
@@ -349,20 +486,25 @@ const ApplicantTable = (props) => {
             ))}
           </select>
           <span className="flex items-center gap-1">
-            {1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize}-
+            {applicantCount > 0
+              ? 1 + table.getState().pagination.pageIndex * table.getState().pagination.pageSize
+              : '0'}
+            -
             {table.getCanNextPage() ? (
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize
-            ) : applicantQuery?.isLoading ? (
+            ) : applicantCountQuery?.isLoading ? (
               <div>Loading...</div>
             ) : (
               applicantCount
             )}{' '}
-            of {applicantQuery?.isLoading ? <div>Loading...</div> : applicantCount}
+            of {applicantCountQuery?.isLoading ? <div>Loading...</div> : applicantCount}
           </span>
 
           <button
             className="rounded"
-            onClick={() => table.previousPage()}
+            onClick={() => {
+              table.previousPage();
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <ChevronLeftIcon className="h-6 w-6 black opacity-50" />
@@ -371,7 +513,9 @@ const ApplicantTable = (props) => {
 
           <button
             className="rounded"
-            onClick={() => table.nextPage()}
+            onClick={() => {
+              table.nextPage();
+            }}
             disabled={!table.getCanNextPage()}
           >
             <ChevronRightIcon className="h-6 w-6 black opacity-50" />
@@ -385,14 +529,14 @@ const ApplicantTable = (props) => {
 
 //Need to debounce the search input so that it filters correctly
 function DebouncedInput(props) {
-  const { initialValue, onChange } = props;
+  const { initialvalue, onChange } = props;
   const debounce = 300;
 
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(initialvalue);
 
   useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+    setValue(initialvalue);
+  }, [initialvalue]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

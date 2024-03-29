@@ -1,6 +1,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobCreationFormValidator } from '@lib/validators';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
@@ -178,6 +179,9 @@ function EditJobPosting() {
 
   return (
     <>
+      <Head>
+        <title>Edit Post</title>
+      </Head>
       <ResearcherSidebar />
       <div className="flex flex-col items-center ml-[15.5rem] bg-light-gray">
         {/* <main className="max-w-5xl min-w-[80%]"> */}

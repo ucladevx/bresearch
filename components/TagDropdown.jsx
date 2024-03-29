@@ -1,19 +1,51 @@
-import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useRouter } from 'next/router';
+import { usePopper } from 'react-popper';
+import { createPortal } from 'react-dom';
+//import { Portal } from 'react-portal';
+
 //TODO:
 //Fix: Dropdown overlap/scroll behavior - probably want to use a portal so it renders over the parent table
 //Fix: Rejected should say Not Accepted, need to make an exception case for it
 
 export default function TagDropdown(props) {
-  const { piStatus, applicantEmail } = props;
+  const { piStatus, applicantEmail, onChangeValue } = props;
   const [bgColor, setBgColor] = useState(updateTextColor(piStatus));
   const [textColor, setTextColor] = useState(updateBgColor(piStatus));
   const [tag, setTag] = useState(piStatus);
-  const router = useRouter();
+  //Dropdown overflow behavior using Popper
+  const popperElRef = useRef(null);
+  const [targetElement, setTargetElement] = useState(null);
+  const [popperElement, setPopperElement] = useState(null);
+  const { styles, attributes } = usePopper(targetElement, popperElement, {
+    placement: 'bottom',
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [-60, 0],
+        },
+      },
+    ],
+  });
 
+  const router = useRouter();
+  // useEffect(() => {
+  //   setBgColor(updateTextColor(piStatus));
+  //   setTextColor(updateBgColor(piStatus));
+  //   setTag(piStatus);
+  //   console.log('piStatus changed for child to: ', piStatus);
+  //   //onChangeValue(tag);
+  // }, [piStatus]);
+  useEffect(() => {
+    setBgColor(updateTextColor(piStatus));
+    setTextColor(updateBgColor(piStatus));
+    setTag(piStatus);
+    //console.log('piStatus changed for child to: ', piStatus);
+    //onChangeValue(tag);
+  }, [piStatus]);
   //Run patch request
   function updateTextColor(tag) {
     switch (tag) {
@@ -51,10 +83,9 @@ export default function TagDropdown(props) {
     }
   }
 
-  function updateTag(tag) {
-    setTag(tag);
+  async function updateTag(tag) {
     const { jobId } = router.query;
-    fetch(`/api/applications/${jobId}/update`, {
+    const data = await fetch(`/api/applications/${jobId}/update`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -67,19 +98,21 @@ export default function TagDropdown(props) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setTextColor(updateTextColor(tag));
+        setBgColor(updateBgColor(tag));
+        setTag(tag);
+        onChangeValue(tag);
       })
       .catch((error) => {
         console.log(error);
       });
-    setTextColor(updateTextColor(tag));
-    setBgColor(updateBgColor(tag));
   }
 
   const buttonStyle =
     'inline-flex  justify-center gap-x-1.5 rounded-full px-3 py-1 text-sm font-semibold shadow-sm';
 
   return (
-    <Menu as="div" className="relative inline-block">
+    <Menu as="div" ref={setTargetElement} id="menu-top" className="relative inline-block">
       <Menu.Button
         //Changing button color based on the current selection
         className={`${textColor} ${bgColor} ${buttonStyle} w-full `}
@@ -92,103 +125,111 @@ export default function TagDropdown(props) {
       </Menu.Button>
 
       {/*Transition behavior */}
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        {/*Dropdown Items */}
-        <Menu.Items className="flex absolute justify-center z-10 mt-2 w-52 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1 ">
-            {/*Considering */}
-            <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('CONSIDERING');
-                  }}
-                >
-                  CONSIDERING
-                </button>
-              )}
-            </Menu.Item>
-            {/*REVIEWING*/}
-            <Menu.Item className="block px-4  py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#653D00] bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('REVIEWING');
-                  }}
-                >
-                  REVIEWING
-                </button>
-              )}
-            </Menu.Item>
+      {createPortal(
+        <div ref={popperElRef} style={styles.popper} {...attributes.popper}>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+            beforeEnter={() => setPopperElement(popperElRef.current)}
+            afterLeave={() => setPopperElement(null)}
+          >
+            {/*Dropdown Items */}
 
-            {/*Accepted */}
-            <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('ACCEPTED');
-                  }}
-                >
-                  ACCEPTED
-                </button>
-              )}
-            </Menu.Item>
+            <Menu.Items className="flex absolute py-2 justify-center z-10 mt-2 w-52 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <div className="py-1 ">
+                {/*Considering */}
+                <Menu.Item className="block px-4 py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#1E2F97] bg-light-blue bg-opacity-30 hover:bg-light-blue hover:bg-opacity-50 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('CONSIDERING');
+                      }}
+                    >
+                      CONSIDERING
+                    </button>
+                  )}
+                </Menu.Item>
+                {/*REVIEWING*/}
+                <Menu.Item className="block px-4  py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#653D00] bg-[#fea31c] bg-opacity-20 hover:bg-[#fea31c] hover:bg-opacity-30 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('REVIEWING');
+                      }}
+                    >
+                      REVIEWING
+                    </button>
+                  )}
+                </Menu.Item>
 
-            {/*Interviewing */}
-            <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('INTERVIEWING');
-                  }}
-                >
-                  INTERVIEWING
-                </button>
-              )}
-            </Menu.Item>
+                {/*Accepted */}
+                <Menu.Item className="block px-4 py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#29570D] bg-light-green bg-opacity-40 hover:bg-light-green hover:bg-opacity-60 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('ACCEPTED');
+                      }}
+                    >
+                      ACCEPTED
+                    </button>
+                  )}
+                </Menu.Item>
 
-            {/*Not Accepted/Rejected*/}
-            <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('REJECTED');
-                  }}
-                >
-                  REJECTED
-                </button>
-              )}
-            </Menu.Item>
+                {/*Interviewing */}
+                <Menu.Item className="block px-4 py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#2A0062] bg-[#6f32be] bg-opacity-20 hover:bg-[#6f32be] hover:bg-opacity-30 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('INTERVIEWING');
+                      }}
+                    >
+                      INTERVIEWING
+                    </button>
+                  )}
+                </Menu.Item>
 
-            {/*Joined */}
-            <Menu.Item className="block px-4 py-2 text-sm" as="div">
-              {() => (
-                <button
-                  className={`text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30 ${buttonStyle}`}
-                  onClick={() => {
-                    updateTag('JOINED');
-                  }}
-                >
-                  JOINED
-                </button>
-              )}
-            </Menu.Item>
-          </div>
-        </Menu.Items>
-      </Transition>
+                {/*Not Accepted/Rejected*/}
+                <Menu.Item className="block px-4 py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#570D0D] bg-[#E53939] bg-opacity-20 hover:bg-[#E53939] hover:bg-opacity-40 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('REJECTED');
+                      }}
+                    >
+                      REJECTED
+                    </button>
+                  )}
+                </Menu.Item>
+
+                {/*Joined */}
+                <Menu.Item className="block px-4 py-2 text-sm" as="div">
+                  {() => (
+                    <button
+                      className={`text-[#141466] bg-[#1E2F97] bg-opacity-20 hover:bg-[#1E2F97] hover:bg-opacity-30 ${buttonStyle}`}
+                      onClick={() => {
+                        updateTag('JOINED');
+                      }}
+                    >
+                      JOINED
+                    </button>
+                  )}
+                </Menu.Item>
+              </div>
+            </Menu.Items>
+          </Transition>
+        </div>,
+        document.body
+      )}
     </Menu>
   );
 }
