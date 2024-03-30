@@ -5,8 +5,7 @@ updates:
     # Look for `package.json` and `lock` files in the `root` directory
     directory: '/'
     schedule:
-      # `daily` = checks the npm registry for updates every weekday
-      interval: 'daily'
+      interval: 'weekly'
     groups:
       prisma:
         patterns:
