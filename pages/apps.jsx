@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
@@ -109,6 +110,9 @@ export default function Apps() {
 
   return (
     <div className="fixed bg-neutral-100 h-screen w-screen">
+      <Head>
+        <title>Manage Apps</title>
+      </Head>
       <header>
         <NavBar pathname="/apps" />
       </header>
