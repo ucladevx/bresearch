@@ -11,18 +11,19 @@ export async function middleware(req) {
     '/api/auth/signin/google',
     '/api/auth/callback/google',
     '/api/auth/error',
+    '/auth/signin',
   ];
   const publicPaths = ['/_next', '/favicon.ico'];
   const { pathname, basePath, origin, search } = req.nextUrl;
 
-  if (signinPaths.includes(pathname) || publicPaths.some((p) => pathname.startsWith(p))) {
+  if (signinPaths.includes(pathname) || publicPaths.some((p) => pathname.startsWith(p)) || pathname.startsWith('/api/auth')) {
     return NextResponse.next();
   }
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
-    const signInPage = '/api/auth/signin';
-    const signInUrl = new URL(`${basePath}${signInPage}`, origin);
-    signInUrl.searchParams.append('callbackUrl', `${basePath}${pathname}${search}`);
+    const signInPage = '/auth/signin';
+    const signInUrl = new URL(`${ basePath }${ signInPage }`, origin);
+    signInUrl.searchParams.append('callbackUrl', `${ basePath }${ pathname }${ search }`);
     return NextResponse.redirect(signInUrl);
   }
   const url = req.nextUrl.clone();

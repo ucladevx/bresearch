@@ -42,25 +42,25 @@ export const authOptions = {
 
         const currentStudent = process.env.USE_SUPABASE
           ? (await supabase.from('Student').select().eq('email', token.email).limit(1).single())
-              ?.data
+            ?.data
           : await prisma.student.findUnique({
-              where: { email: token.email },
-            });
+            where: { email: token.email },
+          });
         if (currentStudent) {
           token.accountType = 'student';
         } else {
           const currentResearcher = process.env.USE_SUPABASE
             ? (
-                await supabase
-                  .from('Researcher')
-                  .select()
-                  .eq('email', token.email)
-                  .limit(1)
-                  .single()
-              )?.data
+              await supabase
+                .from('Researcher')
+                .select()
+                .eq('email', token.email)
+                .limit(1)
+                .single()
+            )?.data
             : await prisma.researcher.findUnique({
-                where: { email: token.email },
-              });
+              where: { email: token.email },
+            });
           if (currentResearcher) {
             token.accountType = 'researcher';
           } else {
@@ -71,5 +71,8 @@ export const authOptions = {
       return token;
     },
   },
+  pages: {
+    signIn: '/login'
+  }
 };
 export default NextAuth(authOptions);
