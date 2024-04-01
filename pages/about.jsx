@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
 import aboutPic1 from '../public/aboutPic1.svg';
 import aboutPic2 from '../public/aboutPic2.svg';
 import aboutPic3 from '../public/aboutPic3.svg';
@@ -24,6 +25,9 @@ function Navbar() {
 function LandingPage() {
   return (
     <div className="container">
+      <Head>
+        <title>About bResearch</title>
+      </Head>
       <header>
         <Navbar>{/* Navigation bar with BResearch logo and Login/Signup button */}</Navbar>
       </header>

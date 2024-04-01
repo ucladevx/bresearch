@@ -1,9 +1,13 @@
+import Head from 'next/head';
 import prisma from '@lib/prisma';
 import 'react-quill/dist/quill.snow.css';
 
 function Job(props) {
   return (
     <div className="max-w-full min-h-screen justify-items-center text-center mx-auto bg-blue-500 shadow-md flex flex-col items-center space-x-4">
+      <Head>
+        <title>{props.job.title}</title>
+      </Head>
       <JobWrapper job={props.job} />
       <ActionMenu />
     </div>
