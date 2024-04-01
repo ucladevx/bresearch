@@ -15,7 +15,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+        <ThemeProvider attribute="class">
           <div className={`${kumbhSans.variable} font-sans`}>
             <Component {...pageProps} />
           </div>
