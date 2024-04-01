@@ -30,7 +30,7 @@ export default function NavBar({ pathname }) {
   }, []);
 
   return (
-    <nav className="h-24 flex px-12 py-6 justify-between items-center text-[1.375rem] leading-7 font-medium bg-white">
+    <nav className="h-24 flex px-12 py-6 justify-between items-center text-[1.375rem] leading-7 font-medium bg-white dark:bg-black">
       <Link href="/">
         <svg
           width="201"

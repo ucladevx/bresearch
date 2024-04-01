@@ -14,6 +14,7 @@ module.exports = {
         'header-black': '#242429',
         'text-black': '#404040',
         'light-gray': '#F5F5F5',
+        'dark-gray': '#3B3B3B',
       },
       fontFamily: {
         sans: ['var(--font-kumbh-sans)'],

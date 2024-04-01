@@ -414,7 +414,7 @@ function Home({ jobs: originalJobs }) {
         <title>bResearch</title>
       </Head>
       <NavBar pathname="/" />
-      <main className="min-h-screen bg-light-gray pt-9 pl-[3.75rem]">
+      <main className="min-h-screen bg-light-gray dark:bg-black dark:text-white pt-9 pl-[3.75rem]">
         <div className="flex gap-9 flex-col">
           <div className="flex">
             <div className="flex gap-x-6 flex-wrap gap-y-6">
@@ -465,7 +465,7 @@ function Home({ jobs: originalJobs }) {
               <div className="flex flex-col relative">
                 {/* https://www.w3docs.com/snippets/css/how-to-set-absolute-positioning-relative-to-the-parent-element.html */}
                 <Listbox value={selectedDepartments} onChange={setSelectedDepartments} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:bg-dark-gray">
                     Department
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -474,7 +474,9 @@ function Home({ jobs: originalJobs }) {
                         {({ active, selected }) => (
                           <li
                             className={`flex min-w-max px-1 ${
-                              active ? 'bg-blue-500 text-white' : 'bg-white text-black'
+                              active
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white text-black dark:bg-dark-gray dark:text-white'
                             }`}
                           >
                             <CheckIcon className={`h-6 w-6${selected ? '' : ' invisible'}`} />
@@ -488,7 +490,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedDurations} onChange={setSelectedDurations} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:bg-dark-gray">
                     Duration
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -497,7 +499,9 @@ function Home({ jobs: originalJobs }) {
                         {({ active, selected }) => (
                           <li
                             className={`flex min-w-max px-1 ${
-                              active ? 'bg-blue-500 text-white' : 'bg-white text-black'
+                              active
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white text-black dark:bg-dark-gray dark:text-white'
                             }`}
                           >
                             <CheckIcon className={`h-6 w-6${selected ? '' : ' invisible'}`} />
@@ -511,7 +515,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedPayRanges} onChange={setSelectedPayRanges} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:bg-dark-gray">
                     Pay
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -520,7 +524,9 @@ function Home({ jobs: originalJobs }) {
                         {({ active, selected }) => (
                           <li
                             className={`flex min-w-max px-1 ${
-                              active ? 'bg-blue-500 text-white' : 'bg-white text-black'
+                              active
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white text-black dark:bg-dark-gray dark:text-white'
                             }`}
                           >
                             <CheckIcon className={`h-6 w-6${selected ? '' : ' invisible'}`} />
@@ -534,7 +540,7 @@ function Home({ jobs: originalJobs }) {
               </div>
               <div className="flex flex-col relative">
                 <Listbox value={selectedLocations} onChange={setSelectedLocations} multiple>
-                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white">
+                  <Listbox.Button className="h-12 rounded-3xl text-lg px-4 py-3 text-center bg-white dark:bg-dark-gray">
                     Locations
                   </Listbox.Button>
                   <Listbox.Options className="border-2 border-black absolute top-12">
@@ -543,7 +549,9 @@ function Home({ jobs: originalJobs }) {
                         {({ active, selected }) => (
                           <li
                             className={`flex min-w-max px-1 ${
-                              active ? 'bg-blue-500 text-white' : 'bg-white text-black'
+                              active
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white text-black dark:bg-dark-gray dark:text-white'
                             }`}
                           >
                             <CheckIcon className={`h-6 w-6${selected ? '' : ' invisible'}`} />
