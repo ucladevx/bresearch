@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
+import { Paths } from '@lib/globals';
 
 function AccountType() {
   const router = useRouter();
@@ -22,7 +23,7 @@ function AccountType() {
         const responseBody = await res.json();
         if (responseBody?.message?.startsWith('Student al')) {
           await getSession(); // calls jwt callback to update accountType
-          await router.push('/');
+          await router.push(Paths.PostsPage);
         }
       }
     } catch (e) {}
@@ -43,7 +44,7 @@ function AccountType() {
         const responseBody = await res.json();
         if (responseBody?.message?.startsWith('Researcher al')) {
           await getSession(); // calls jwt callback to update accountType
-          await router.push('/');
+          await router.push(Paths.PostsPage);
         }
       }
     } catch (e) {}

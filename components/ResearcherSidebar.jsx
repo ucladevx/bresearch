@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { Paths } from '@lib/globals';
 
 export default function ResearcherSidebar() {
   const router = useRouter();
@@ -7,7 +8,7 @@ export default function ResearcherSidebar() {
   return (
     <aside className="w-[15.5rem] fixed">
       <div className="flex flex-col h-screen items-center bg-white">
-        <Link href="/">
+        <Link href={Paths.PostsPage}>
           <svg
             width="199"
             height="44"
@@ -98,10 +99,10 @@ export default function ResearcherSidebar() {
           <span className="ml-2 font-medium text-lg">Dashboard</span>
         </Link>
         <Link
-          href="/posts"
+          href={Paths.ManagePostsPage}
           className={
             'flex items-center w-[12.25rem] h-14 rounded-lg' +
-            (pathname === '/posts' ? ' bg-light-blue/20' : '')
+            (pathname === Paths.ManagePostsPage ? ' bg-light-blue/20' : '')
           }
         >
           <svg
