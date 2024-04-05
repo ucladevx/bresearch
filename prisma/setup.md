@@ -15,7 +15,7 @@ The default admin user, postgres, needs a password assigned in order to connect 
 To set a password: ` sudo passwd postgres ` Memorize the password for the DB connection string.
 
 Starting `psql` on WSL 2 is done with `sudo service postgresql start`
-Then, connecting to the postgres service and opening the psql shell with ` sudo -u postgres psql `
+Then, connecting to the postgres service and opening the psql shell is done with ` sudo -u postgres psql `
 Once you have successfully entered the psql shell, you will see your command line change to look like this: `postgres=#`
 
 #### MacOS
