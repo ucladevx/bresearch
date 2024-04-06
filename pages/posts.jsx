@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { JobSearchValidator } from '@lib/validators';
 import Head from 'next/head';
-import { Departments, Majors } from '@lib/globals';
+import { Departments, Majors, Paths } from '@lib/globals';
 
 function ResearcherJobCard({
   id,
@@ -413,7 +413,7 @@ function Home({ jobs: originalJobs }) {
       <Head>
         <title>bResearch</title>
       </Head>
-      <NavBar pathname="/" />
+      <NavBar pathname={Paths.PostsPage} />
       <main className="min-h-screen bg-light-gray pt-9 pl-[3.75rem]">
         <div className="flex gap-9 flex-col">
           <div className="flex">
