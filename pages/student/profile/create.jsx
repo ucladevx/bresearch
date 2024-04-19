@@ -1,6 +1,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { ProfileCreationValidator } from '@lib/validators';
+import Head from 'next/head';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, Fragment } from 'react';
@@ -92,6 +93,9 @@ function CreateProfile() {
 
   return (
     <div className="flex flex-col items-center">
+      <Head>
+        <title>Create Profile</title>
+      </Head>
       {/* <main className="max-w-5xl min-w-[80%]"> */}
       <main className="w-[80%] max-w-6xl">
         {/* <main className="max-w-[100rem]"> */}

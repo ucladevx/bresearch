@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
@@ -38,6 +39,9 @@ function OnboardingPage() {
   };
   return (
     <div className="grid grid-cols-1 justify-items-center">
+      <Head>
+        <title>Create Profile</title>
+      </Head>
       <h1 className="flex gap-3 justify-center my-8 font-bold text-[2rem]">
         Welcome to
         <svg
