@@ -55,6 +55,37 @@ class ResearcherProfileEditingRoute extends ApiRoute {
       });
 
       // TODO: Revalidate every job that they've posted + home page? if we show name
+      //get all jobs they posted
+      //first get their id
+
+      const jobs = await prisma.job.findMany({
+        where: {
+          posterId: null,
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          departments: true,
+          duration: true,
+          location: true,
+          lab: { select: { name: true } },
+          created: true,
+          startDate: true,
+          closingDate: true,
+          credit: true,
+          weeklyHours: true,
+          paid: true,
+          externalLink: true,
+          _count: {
+            select: {
+              applicants: { where: { status: 'APPLIED' } },
+            },
+          },
+        },
+        take: 50,
+      });
+      res.revalidate('/');
 
       res.status(200).json(result);
     } catch (e) {
