@@ -86,7 +86,7 @@ class ResearcherProfileEditingRoute extends ApiRoute {
       await Promise.all(
         job_ids.map(async (job_id) => {
           try {
-            await res.revalidate(`/job/${job_id}`);
+            res.revalidate(`/job/${job_id}`);
           } catch (e) {
             console.log(e);
           }
