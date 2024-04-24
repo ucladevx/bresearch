@@ -17,7 +17,7 @@ async function main() {
   });
   if (!labA) {
     labA = await prisma.lab.create({
-      data: { name: 'Research Lab 1' },
+      data: { name: 'Research Lab 1' , contactEmail: 'contact@g.ucla.edu', department: "ENGINEERING"},
     });
   }
   const researcherA = await prisma.researcher.upsert({
@@ -70,6 +70,7 @@ async function main() {
   const job = await prisma.job.upsert({
     where: { id: 1 },
     create: {
+      startDate: new Date(),
       closingDate: new Date(),
       closed: false,
       title: 'test job',
@@ -77,8 +78,8 @@ async function main() {
       paid: true,
       duration: 'QUARTERLY',
       weeklyHours: 10,
-      credit: true,
       location: 'ON_CAMPUS',
+      //credit: true,
       poster: {
         connect: {
           id: researcherA.id,
