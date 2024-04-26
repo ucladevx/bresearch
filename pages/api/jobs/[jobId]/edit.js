@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
 import ApiRoute from '@lib/ApiRoute';
+import { Paths } from '@lib/globals';
 
 class EditJobRoute extends ApiRoute {
   /**
@@ -128,7 +129,7 @@ class EditJobRoute extends ApiRoute {
       });
 
       await res.revalidate(`/job/${updatedJob.id}`);
-      await res.revalidate('/');
+      await res.revalidate(Paths.PostsPage);
 
       res.status(200).json(updatedJob);
     } catch (e) {

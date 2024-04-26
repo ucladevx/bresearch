@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
 import { useEffect, useState } from 'react';
+import { Paths } from '@lib/globals';
 
 export default function NavBar({ pathname }) {
   const { data: session } = useSession();
@@ -31,7 +32,7 @@ export default function NavBar({ pathname }) {
 
   return (
     <nav className="h-24 flex px-12 py-6 justify-between items-center text-[1.375rem] leading-7 font-medium bg-white">
-      <Link href="/">
+      <Link href={Paths.PostsPage}>
         <svg
           width="201"
           height="49"
@@ -72,7 +73,10 @@ export default function NavBar({ pathname }) {
       <div className="flex gap-x-[3.75rem]">
         {/* Makes links pop in at same time */}
         {accountType !== null && (
-          <Link href="/" className={pathname === '/' ? 'text-dark-blue font-extrabold' : ''}>
+          <Link
+            href={Paths.PostsPage}
+            className={pathname === Paths.PostsPage ? 'text-dark-blue font-extrabold' : ''}
+          >
             Opportunities
           </Link>
         )}

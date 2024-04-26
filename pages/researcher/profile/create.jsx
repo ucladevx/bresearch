@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useForm, Controller } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
 import { ResearcherProfileCreationValidator } from '@lib/validators';
-import { Departments } from '@lib/globals';
+import { Departments, Paths } from '@lib/globals';
 
 function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +32,7 @@ function OnboardingPage() {
         },
       });
       if (res.status === 200) {
-        await router.push('/posts');
+        await router.push(Paths.ManagePostsPage);
       }
     } catch (e) {}
     setIsSubmitting(false);

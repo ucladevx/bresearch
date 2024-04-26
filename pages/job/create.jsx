@@ -9,7 +9,7 @@ import 'react-quill/dist/quill.snow.css';
 import ResearcherSidebar from '../../components/ResearcherSidebar';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Departments, Durations } from '@lib/globals';
+import { Departments, Durations, Paths } from '@lib/globals';
 
 // https://github.com/zenoamaro/react-quill/issues/718#issuecomment-873541445
 // https://github.com/zenoamaro/react-quill/issues/596#issuecomment-1207420071
@@ -129,7 +129,7 @@ function CreateJobPosting() {
         },
       });
       if (res.status === 200) {
-        await router.push('/posts');
+        await router.push(Paths.ManagePostsPage);
       }
     } catch (e) {}
     setIsSubmitting(false);

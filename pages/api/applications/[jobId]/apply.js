@@ -1,6 +1,7 @@
 import { Prisma } from 'prisma/prisma-client';
 
 import ApiRoute from '@lib/ApiRoute';
+import { Paths } from '@lib/globals';
 
 class ApplicationsApplyRoute extends ApiRoute {
   /**
@@ -59,7 +60,7 @@ class ApplicationsApplyRoute extends ApiRoute {
         },
       });
       await res.revalidate(`/job/${jobId}`);
-      await res.revalidate('/');
+      await res.revalidate(Paths.PostsPage);
 
       return res.json(result);
     } catch (e) {

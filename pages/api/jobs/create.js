@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
 import ApiRoute from '@lib/ApiRoute';
+import { Paths } from '@lib/globals';
 
 /* example POST request body
 {
@@ -123,7 +124,7 @@ class JobCreationRoute extends ApiRoute {
       });
 
       await res.revalidate(`/job/${result.id}`);
-      await res.revalidate('/');
+      await res.revalidate(Paths.PostsPage);
 
       res.status(200).json(result);
     } catch (e) {
