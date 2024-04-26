@@ -1,6 +1,6 @@
 // export { default } from 'next-auth/middleware'; // locks down whole site, only for JWT
 // https://github.com/nextauthjs/next-auth/discussions/4265
-// https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/next/middleware.ts#L99
+// https://github.com/nextauthjs/next-auth/blob/next-auth%404.22.1/packages/next-auth/src/next/middleware.ts
 
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
