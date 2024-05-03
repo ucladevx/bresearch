@@ -102,6 +102,9 @@ export default function ApplicantManager() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
+        <Head>
+          <title>Manage Applicants</title>
+        </Head>
         <div className="min-h-screen w-full flex flex-col ">
           <ResearcherSidebar />
           <div className="min-h-screen pl-64 bg-cover bg-neutral-100 pl-10 overflow-y-auto">
