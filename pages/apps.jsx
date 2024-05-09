@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
 import NavBar from '../components/NavBar';
-import { DragSource } from '@atlaskit/pragmatic-drag-and-drop';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop';
 import { dropTargetForExternal } from '@atlaskit/pragmatic-drag-and-drop/external/adapter';
 //TODO: Fix menu not overlapping
 //Should text or card resize for longer/shorter titles?
@@ -12,13 +12,13 @@ import { dropTargetForExternal } from '@atlaskit/pragmatic-drag-and-drop/externa
 //Card for each application
 const AppCard = (props) => {
   const { apps, markApplied, removeJob, type } = props;
-  const dragSource = DragSource(() => ({
-    type: 'RESEARCH_OPPORTUNITY', // Define a drag type identifier
-    getItemData: () => ({
-      id: props.apps.job.id, // Data associated with the dragged card
-    }),
-  }));
-  return dragSource(
+  // const dragSource = draggable(() => ({
+  //   type: 'RESEARCH_OPPORTUNITY', // Define a drag type identifier
+  //   getItemData: () => ({
+  //     id: props.apps.job.id, // Data associated with the dragged card
+  //   }),
+  // }));
+  return (
     // Wrap the entire card content here
     <ul
       className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
@@ -125,6 +125,37 @@ export default function Apps() {
     );
   };
 
+  // Hardcoded cards for Saved and Applied
+  const hardcodedSavedCards = [
+    {
+      job: {
+        id: 1,
+        title: 'Saved Job 1',
+      },
+    },
+    {
+      job: {
+        id: 2,
+        title: 'Saved Job 2',
+      },
+    },
+  ];
+
+  const hardcodedAppliedCards = [
+    {
+      job: {
+        id: 3,
+        title: 'Applied Job 1',
+      },
+    },
+    {
+      job: {
+        id: 4,
+        title: 'Applied Job 2',
+      },
+    },
+  ];
+
   return (
     <div className="fixed bg-neutral-100 h-screen w-screen">
       <Head>
@@ -140,12 +171,18 @@ export default function Apps() {
         {/*Display Saved and Applied tabs next to each other */}
         <div className="grid grid-cols-2 -mt-32 h-4/6 w-11/12 gap-x-42 relative justify-items-center">
           <AppWrapper
-            apps={savedApps}
+            // apps={savedApps}
+            apps={[...hardcodedSavedCards, ...savedApps]} // Combine hardcoded and fetched data
             type="Saved"
             markApplied={markApplied}
             removeJob={removeJob}
           />
-          <AppWrapper apps={appliedApps} type="Applied" removeJob={removeJob} />
+          <AppWrapper
+            // apps={appliedApps}
+            apps={[...hardcodedAppliedCards, ...appliedApps]} // Combine hardcoded and fetched data
+            type="Applied"
+            removeJob={removeJob}
+          />
         </div>
       </div>
     </div>
