@@ -4,33 +4,40 @@ import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
 import NavBar from '../components/NavBar';
+import { DragSource } from '@atlaskit/pragmatic-drag-and-drop';
+import { dropTargetForExternal } from '@atlaskit/pragmatic-drag-and-drop/external/adapter';
 //TODO: Fix menu not overlapping
 //Should text or card resize for longer/shorter titles?
 
 //Card for each application
 const AppCard = (props) => {
   const { apps, markApplied, removeJob, type } = props;
-  return (
-    <div>
-      <ul
-        className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
-        key={apps.job.id}
-      >
-        <li className="flex justify-end -mr-4 -mt-4">
-          <AppsDropdown
-            jobId={apps.job.id}
-            markApplied={markApplied}
-            removeJob={removeJob}
-            type={type}
-          />
-        </li>
-        <Link href={`/job/${apps.job.id}`}>
-          <li className="font-semibold">{apps.job.title}</li>
-        </Link>
-        {/*TODO: Change date info when updated in prisma */}
-        <li className="text-xs font-normal">{'Placeholder Date'}</li>
-      </ul>
-    </div>
+  const dragSource = DragSource(() => ({
+    type: 'RESEARCH_OPPORTUNITY', // Define a drag type identifier
+    getItemData: () => ({
+      id: props.apps.job.id, // Data associated with the dragged card
+    }),
+  }));
+  return dragSource(
+    // Wrap the entire card content here
+    <ul
+      className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
+      key={props.apps.job.id}
+    >
+      <li className="flex justify-end -mr-4 -mt-4">
+        <AppsDropdown
+          jobId={props.apps.job.id}
+          markApplied={markApplied}
+          removeJob={removeJob}
+          type={props.type}
+        />
+      </li>
+      <Link href={`/job/${props.apps.job.id}`}>
+        <li className="font-semibold">{props.apps.job.title}</li>
+      </Link>
+      {/*TODO: Change date info when updated in prisma */}
+      <li className="text-xs font-normal">{'Placeholder Date'}</li>
+    </ul>
   );
 };
 
@@ -38,7 +45,16 @@ const AppCard = (props) => {
 const AppWrapper = (props) => {
   const { apps, type, markApplied, removeJob } = props;
 
+  const onDrop = (data) => {
+    // Handle what happens when a card is dropped here
+    // const droppedItemId = data.id; // Access ID from dropped item data
+    // const currentSection = // Determine the drop target section ("Saved" or "Applied")
+    //   // Update application state based on ID and section (e.g., using Redux dispatch)
+    //   dispatch(updateApplicationStatus(droppedItemId, currentSection));
+  };
+
   return (
+    // <dropTargetForExternal onDrop={onDrop} accept="RESEARCH_OPPORTUNITY">
     <div className="overflow-y-auto bg-white w-11/12 h-full p-4 rounded-lg shadow-md items-center justify-center">
       {/*Changes icon depending on Saved or Applied */}
       <h1 className="flex flex-row font-bold ">
@@ -60,6 +76,7 @@ const AppWrapper = (props) => {
         />
       ))}
     </div>
+    // </dropTargetForExternal>
   );
 };
 
