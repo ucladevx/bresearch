@@ -54,45 +54,36 @@ class ResearcherProfileEditingRoute extends ApiRoute {
         },
       });
 
-      // TODO: Revalidate every job that they've posted + home page? if we show name
-      //get all jobs they posted
-      //first get their id
-
+      //revalidate all the jobs they've posted + home page
       const researcher_id = await prisma.researcher.findUnique({
         where: { email: req.session.user.email },
         select: {
           id: true,
         },
       });
-      // if (researcher_id === null) {
-      //   return res.status(403).json({
-      //     message: 'You have not created your profile',
-      //   });
-      // }
-
+      if (researcher_id === null) {
+        return res.status(403).json({
+          message: 'You have not created your profile',
+        });
+      }
       const job_ids = await prisma.job.findMany({
         where: {
-          posterId: researcher_id,
+          posterId: researcher_id.id,
         },
         select: {
           id: true,
         },
         take: 50,
       });
-
-      // for(const job_id of job_ids){
-      //   await res.revalidate(`/job/${job_id}`);
-      // }
       await Promise.all(
         job_ids.map(async (job_id) => {
           try {
-            res.revalidate(`/job/${job_id}`);
+            res.revalidate(`/job/${job_id.id}`);
           } catch (e) {
             console.log(e);
           }
         })
       );
-
       res.revalidate('/');
 
       res.status(200).json(result);
