@@ -1,4 +1,4 @@
-import { Prisma } from 'prisma/prisma-client';
+import { } from 'prisma/prisma-client';
 
 import { ResearcherProfileCreationValidator, isValidationError } from '@lib/validators';
 import ApiRoute from '@lib/ApiRoute';
