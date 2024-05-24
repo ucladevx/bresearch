@@ -4,60 +4,34 @@ import Link from 'next/link';
 import { CheckCircleIcon, BookmarkIcon } from '@heroicons/react/20/solid';
 import AppsDropdown from '../components/AppsDropdown';
 import NavBar from '../components/NavBar';
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop';
-import { dropTargetForExternal } from '@atlaskit/pragmatic-drag-and-drop/external/adapter';
-//TODO: Fix menu not overlapping
-//Should text or card resize for longer/shorter titles?
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 //Card for each application
-const AppCard = (props) => {
-  const { apps, markApplied, removeJob, type } = props;
-  // const dragSource = draggable(() => ({
-  //   type: 'RESEARCH_OPPORTUNITY', // Define a drag type identifier
-  //   getItemData: () => ({
-  //     id: props.apps.job.id, // Data associated with the dragged card
-  //   }),
-  // }));
+const AppCard = ({ app, index }) => {
   return (
-    // Wrap the entire card content here
-    <ul
-      className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4"
-      key={props.apps.job.id}
-    >
-      <li className="flex justify-end -mr-4 -mt-4">
-        <AppsDropdown
-          jobId={props.apps.job.id}
-          markApplied={markApplied}
-          removeJob={removeJob}
-          type={props.type}
-        />
-      </li>
-      <Link href={`/job/${props.apps.job.id}`}>
-        <li className="font-semibold">{props.apps.job.title}</li>
-      </Link>
-      {/*TODO: Change date info when updated in prisma */}
-      <li className="text-xs font-normal">{'Placeholder Date'}</li>
-    </ul>
+    <Draggable draggableId={app.job.id.toString()} index={index}>
+      {(provided) => (
+        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+          <ul className="w-11/12 h-1/3 mx-auto min-h-max p-6 rounded-lg shadow-sm border my-4">
+            <li className="flex justify-end -mr-4 -mt-4">
+              <AppsDropdown jobId={app.job.id} />
+            </li>
+            <Link href={`/job/${app.job.id}`}>
+              <li className="font-semibold">{app.job.title}</li>
+            </Link>
+            <li className="text-xs font-normal">{'Placeholder Date'}</li>
+          </ul>
+        </div>
+      )}
+    </Draggable>
   );
 };
 
 //Wrapper for Saved and Applied tabs
-const AppWrapper = (props) => {
-  const { apps, type, markApplied, removeJob } = props;
-
-  const onDrop = (data) => {
-    // Handle what happens when a card is dropped here
-    // const droppedItemId = data.id; // Access ID from dropped item data
-    // const currentSection = // Determine the drop target section ("Saved" or "Applied")
-    //   // Update application state based on ID and section (e.g., using Redux dispatch)
-    //   dispatch(updateApplicationStatus(droppedItemId, currentSection));
-  };
-
+const AppWrapper = ({ apps, type }) => {
   return (
-    // <dropTargetForExternal onDrop={onDrop} accept="RESEARCH_OPPORTUNITY">
     <div className="overflow-y-auto bg-white w-11/12 h-full p-4 rounded-lg shadow-md items-center justify-center">
-      {/*Changes icon depending on Saved or Applied */}
-      <h1 className="flex flex-row font-bold ">
+      <h1 className="flex flex-row font-bold">
         {type === 'Saved' ? (
           <BookmarkIcon className="ml-2 w-9 px-2 text-indigo-800" />
         ) : (
@@ -65,18 +39,17 @@ const AppWrapper = (props) => {
         )}
         {type}
       </h1>
-      {/*Maps applications to AppCards to display */}
-      {apps.map((apps) => (
-        <AppCard
-          key={apps.job.id}
-          apps={apps}
-          markApplied={markApplied}
-          removeJob={removeJob}
-          type={type}
-        />
-      ))}
+      <Droppable droppableId={type}>
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            {apps.map((app, index) => (
+              <AppCard key={app.job.id} app={app} index={index} />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
-    // </dropTargetForExternal>
   );
 };
 
@@ -111,6 +84,38 @@ export default function Apps() {
         }
         return { ...app, status: 'APPLIED' };
       })
+    );
+  };
+
+  const onDragEnd = (result) => {
+    console.log(result); // Add a console log to check the result
+    const { source, destination } = result;
+
+    // If dropped outside the list
+    if (!destination) {
+      return;
+    }
+    // If dropped in the same place
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
+    // Find the source and destination columns
+    const sourceColumn = source.droppableId === 'Saved' ? savedApps : appliedApps;
+    const destinationColumn = destination.droppableId === 'Saved' ? savedApps : appliedApps;
+
+    // Remove item from source column
+    const [movedApp] = sourceColumn.splice(source.index, 1);
+    movedApp.status = destination.droppableId === 'Saved' ? 'SAVED' : 'APPLIED';
+
+    // Add item to destination column
+    destinationColumn.splice(destination.index, 0, movedApp);
+
+    // Update state with new columns
+    setApps(
+      apps.map((app) =>
+        app.job.id === movedApp.job.id ? { ...app, status: movedApp.status } : app
+      )
     );
   };
 
@@ -168,22 +173,23 @@ export default function Apps() {
       <div
         style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
       >
-        {/*Display Saved and Applied tabs next to each other */}
-        <div className="grid grid-cols-2 -mt-32 h-4/6 w-11/12 gap-x-42 relative justify-items-center">
-          <AppWrapper
-            // apps={savedApps}
-            apps={[...hardcodedSavedCards, ...savedApps]} // Combine hardcoded and fetched data
-            type="Saved"
-            markApplied={markApplied}
-            removeJob={removeJob}
-          />
-          <AppWrapper
-            // apps={appliedApps}
-            apps={[...hardcodedAppliedCards, ...appliedApps]} // Combine hardcoded and fetched data
-            type="Applied"
-            removeJob={removeJob}
-          />
-        </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="grid grid-cols-2 -mt-32 h-4/6 w-11/12 gap-x-42 relative justify-items-center">
+            <AppWrapper
+              // apps={savedApps}
+              apps={[...hardcodedSavedCards, ...savedApps]} // Combine hardcoded and fetched data
+              type="Saved"
+              markApplied={markApplied}
+              removeJob={removeJob}
+            />
+            <AppWrapper
+              // apps={appliedApps}
+              apps={[...hardcodedAppliedCards, ...appliedApps]} // Combine hardcoded and fetched data
+              type="Applied"
+              removeJob={removeJob}
+            />
+          </div>
+        </DragDropContext>
       </div>
     </div>
   );
