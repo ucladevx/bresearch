@@ -1,6 +1,8 @@
 import * as trpcNext from '@trpc/server/adapters/next';
 import { publicProcedure, router } from '../../../trpc.js'
 import { z } from 'zod';
+import { Prisma } from 'prisma/prisma-client';
+
 
 const appRouter = router({
     jobs: publicProcedure
@@ -10,7 +12,8 @@ const appRouter = router({
             })
         )
         .query(({ input }) => {
-            let result = await prisma.job.findMany({
+            console.log(input)
+            let result = input.prisma.job.findMany({
                 where: {
                     closed: false,
                     closingDate: { gt: new Date() },
