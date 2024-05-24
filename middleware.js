@@ -5,6 +5,16 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
+import { PrismaClient } from '@prisma/client';
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_DATABASE_URL,
+  process.env.SUPABASE_DATABASE_KEY,
+  { auth: { persistSession: false } }
+);
+
 export async function middleware(req) {
   const signinPaths = [
     '/api/auth/signin',
@@ -26,16 +36,36 @@ export async function middleware(req) {
     return NextResponse.redirect(signInUrl);
   }
   const url = req.nextUrl.clone();
-  if (
-    url.pathname !== '/api/auth/signout' &&
-    url.pathname !== '/api/auth/session' &&
-    url.pathname !== '/api/student/create' &&
-    url.pathname !== '/api/researcher/create' &&
-    url.pathname !== '/account-type' &&
-    !token.accountType
-  ) {
+  if (url.pathname === '/api/auth/signout' || url.pathname === '/api/auth/session') {
+    return NextResponse.next();
+  }
+
+  if (!token.accountType) {
+    if (
+      url.pathname === '/account-type' ||
+      url.pathname === '/api/student/create' ||
+      url.pathname === '/api/researcher/create'
+    ) {
+      return NextResponse.next();
+    }
     url.pathname = '/account-type';
     return NextResponse.redirect(url);
   }
+
+  if (token.accountType === 'student') {
+    if (!token.accountStage) {
+    } else {
+    }
+  } else if (token.accountType === 'researcher') {
+  }
+  if (url.pathname === '/profile') {
+    if (token.accountType === 'researcher') {
+      return NextResponse.next();
+    }
+    // console.log('here');
+    url.pathname = `/student/profile/${token.studentProfileId.replaceAll('-', '')}`;
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
