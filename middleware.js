@@ -26,14 +26,10 @@ export async function middleware(req) {
   }
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
-    const signInPage = '/auth/signin';
+    const signInPage = '/login';
     const signInUrl = new URL(`${basePath}${signInPage}`, origin);
-    console.log(signInUrl);
     signInUrl.searchParams.append('callbackUrl', `${basePath}${pathname}${search}`);
-    console.log(signInUrl);
-    const url = req.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(signInUrl);
   }
   const url = req.nextUrl.clone();
   if (
